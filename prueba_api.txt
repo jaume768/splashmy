@@ -1,0 +1,141 @@
+http
+POST http://localhost:8000/api/v1/auth/register/
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "email": "tesf@example.com",
+  "password": "securepassword123",
+  "password_confirm": "securepassword123"
+}
+
+B) Login de usuario
+http
+POST http://localhost:8000/api/v1/auth/login/
+Content-Type: application/json
+
+{
+  "email": "tesf@example.com",
+  "password": "securepassword123"
+}
+⚠️ Guarda el token de la respuesta para las siguientes pruebas
+
+C) Ver perfil (requiere autenticación)
+http
+GET http://localhost:8000/api/v1/auth/profile/
+Authorization: Token YOUR_TOKEN_HERE
+📸 2. GESTIÓN DE IMÁGENES
+A) Subir imagen
+http
+POST http://localhost:8000/api/v1/images/upload/
+Authorization: Token YOUR_TOKEN_HERE
+Content-Type: multipart/form-data
+
+Adjuntar archivo de imagen en el campo "image"
++ descripción opcional en "description"
+B) Listar mis imágenes
+http
+GET http://localhost:8000/api/v1/images/
+Authorization: Token YOUR_TOKEN_HERE
+C) Ver imágenes públicas
+http
+GET http://localhost:8000/api/v1/images/public/
+D) Estadísticas de imágenes
+http
+GET http://localhost:8000/api/v1/images/stats/
+Authorization: Token YOUR_TOKEN_HERE
+🎨 3. ESTILOS ARTÍSTICOS
+A) Listar categorías de estilos
+http
+GET http://localhost:8000/api/v1/styles/categories/
+B) Listar todos los estilos
+http
+GET http://localhost:8000/api/v1/styles/
+C) Buscar estilos por categoría
+http
+GET http://localhost:8000/api/v1/styles/?category=1
+D) Buscar estilos por nombre
+http
+GET http://localhost:8000/api/v1/styles/?search=ghibli
+E) Estilos más populares
+http
+GET http://localhost:8000/api/v1/styles/popular/
+F) Marcar estilo como favorito
+http
+POST http://localhost:8000/api/v1/styles/1/favorite/
+Authorization: Token YOUR_TOKEN_HERE
+G) Calificar estilo
+http
+POST http://localhost:8000/api/v1/styles/1/rate/
+Authorization: Token YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "rating": 5,
+  "comment": "Excelente estilo artístico!"
+}
+⚡ 4. PROCESAMIENTO CON OPENAI
+A) Crear job de procesamiento
+http
+POST http://localhost:8000/api/v1/processing/jobs/
+Authorization: Token YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "job_type": "generation",
+  "style_id": 1,
+  "prompt": "Un hermoso paisaje al estilo Studio Ghibli",
+  "quality": "hd",
+  "size": "1024x1024",
+  "n": 1
+}
+B) Procesamiento con imagen existente (edición)
+http
+POST http://localhost:8000/api/v1/processing/jobs/
+Authorization: Token YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "job_type": "editing",
+  "input_image_id": 1,
+  "style_id": 2,
+  "prompt": "Convertir esta imagen al estilo de Los Simpsons",
+  "quality": "hd",
+  "size": "1024x1024"
+}
+C) Ver mis jobs de procesamiento
+http
+GET http://localhost:8000/api/v1/processing/jobs/list/
+Authorization: Token YOUR_TOKEN_HERE
+D) Ver detalles de un job específico
+http
+GET http://localhost:8000/api/v1/processing/jobs/JOB_ID/
+Authorization: Token YOUR_TOKEN_HERE
+E) Ver resultados de procesamiento
+http
+GET http://localhost:8000/api/v1/processing/results/
+Authorization: Token YOUR_TOKEN_HERE
+F) Cancelar job en progreso
+http
+POST http://localhost:8000/api/v1/processing/jobs/JOB_ID/cancel/
+Authorization: Token YOUR_TOKEN_HERE
+G) Ver mi cuota de usuario
+http
+GET http://localhost:8000/api/v1/processing/quota/
+Authorization: Token YOUR_TOKEN_HERE
+H) Estadísticas de procesamiento
+http
+GET http://localhost:8000/api/v1/processing/stats/
+Authorization: Token YOUR_TOKEN_HERE
+📊 5. ENDPOINTS DE INFORMACIÓN GENERAL
+A) Estadísticas generales de estilos
+http
+GET http://localhost:8000/api/v1/styles/stats/
+B) Actividad del usuario con estilos
+http
+GET http://localhost:8000/api/v1/styles/user-activity/
+Authorization: Token YOUR_TOKEN_HERE
+C) Plantillas de procesamiento
+http
+GET http://localhost:8000/api/v1/processing/templates/
+🔧 Pasos de prueba recomendados:

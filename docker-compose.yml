@@ -1,0 +1,71 @@
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: style_transfer_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: style_transfer_db
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: django_user
+      MYSQL_PASSWORD: django_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Django API Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: style_transfer_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - media_files:/app/media
+    env_file:
+      - ./backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      bash -c "python manage.py makemigrations &&
+               python manage.py migrate &&
+               python manage.py collectstatic --noinput &&
+               python manage.py runserver 0.0.0.0:8000"
+
+  # Next.js Frontend (commented out for backend testing)
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: style_transfer_frontend
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #     - /app/.next
+  #   environment:
+  #     - NODE_ENV=development
+  #     - NEXT_PUBLIC_API_URL=http://localhost:8000
+  #   depends_on:
+  #     - backend
+  #   command: npm run dev
+
+volumes:
+  mysql_data:
+  media_files:
+
+networks:
+  default:
+    name: style_transfer_network
