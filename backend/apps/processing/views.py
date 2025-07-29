@@ -76,7 +76,6 @@ class ProcessingJobCreateView(generics.CreateAPIView):
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
-            logger.error(f"Failed to create processing job: {e}")
             return Response({
                 'error': 'Failed to create processing job',
                 'details': str(e)
@@ -120,7 +119,6 @@ class ProcessingJobCreateView(generics.CreateAPIView):
             job.save()
             
         except Exception as e:
-            logger.error(f"Processing job {job.id} failed: {e}")
             job.status = 'failed'
             job.error_message = str(e)
             job.save()
@@ -143,7 +141,6 @@ class ProcessingJobCreateView(generics.CreateAPIView):
             return result
             
         except Exception as e:
-            logger.error(f"Generation failed for job {job.id}: {e}")
             return {"error": str(e)}
     
     def _process_edit(self, job: ProcessingJob) -> dict:
@@ -170,7 +167,6 @@ class ProcessingJobCreateView(generics.CreateAPIView):
             return {"error": "Image editing temporarily unavailable - S3 download not implemented"}
             
         except Exception as e:
-            logger.error(f"Edit failed for job {job.id}: {e}")
             return {"error": str(e)}
     
     def _process_style_transfer(self, job: ProcessingJob) -> dict:
@@ -193,8 +189,37 @@ class ProcessingJobCreateView(generics.CreateAPIView):
             if style_params.get('size') == 'auto':
                 style_params['size'] = job.style.default_size
             
-            # For now, treat as generation with style prompt
-            result = openai_service.generate_image(
+            # Get original image file for editing
+            original_image = job.original_image
+            if not original_image.s3_key:
+                return {"error": "Original image not found in storage"}
+            
+            # Load image file from storage
+            if hasattr(settings, 'USE_S3_STORAGE') and settings.USE_S3_STORAGE:
+                # TODO: Load from S3
+                return {"error": "S3 image loading not implemented yet"}
+            else:
+                # Load from local storage
+                import os
+                local_path = os.path.join(settings.MEDIA_ROOT, original_image.s3_key)
+                if not os.path.exists(local_path):
+                    return {"error": f"Original image file not found: {local_path}"}
+                
+                from django.core.files.uploadedfile import InMemoryUploadedFile
+                with open(local_path, 'rb') as f:
+                    image_data = f.read()
+                    image_file = InMemoryUploadedFile(
+                        io.BytesIO(image_data),
+                        'ImageField',
+                        original_image.original_filename,
+                        f'image/{original_image.format.lower()}',
+                        len(image_data),
+                        None
+                    )
+            
+            # Use edit_image for style transfer
+            result = openai_service.edit_image(
+                image_files=[image_file],
                 prompt=prompt,
                 style_params=style_params,
                 user_id=str(job.user.id)
@@ -203,7 +228,6 @@ class ProcessingJobCreateView(generics.CreateAPIView):
             return result
             
         except Exception as e:
-            logger.error(f"Style transfer failed for job {job.id}: {e}")
             return {"error": str(e)}
     
     def _save_processing_results(self, job: ProcessingJob, result: dict):
@@ -239,7 +263,7 @@ class ProcessingJobCreateView(generics.CreateAPIView):
                 )
                 
         except Exception as e:
-            logger.error(f"Failed to save results for job {job.id}: {e}")
+            return {"error": str(e)}
 
 
 class ProcessingJobListView(generics.ListAPIView):

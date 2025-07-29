@@ -1,13 +1,11 @@
 import boto3
 import logging
+import io
 from typing import Dict, List, Tuple, Optional
 from django.conf import settings
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from botocore.exceptions import ClientError
 from PIL import Image
-import io
-
-logger = logging.getLogger(__name__)
+from botocore.exceptions import ClientError
 
 
 class AWSImageService:
@@ -43,12 +41,10 @@ class AWSImageService:
             # Check file extension
             file_extension = image_file.name.split('.')[-1].lower()
             if file_extension not in settings.ALLOWED_IMAGE_EXTENSIONS:
-                logger.warning(f"Invalid file extension: {file_extension}")
                 return False
             
             # Check file size
             if image_file.size > settings.MAX_UPLOAD_SIZE:
-                logger.warning(f"File too large: {image_file.size} bytes")
                 return False
             
             # Validate image can be opened
@@ -60,7 +56,6 @@ class AWSImageService:
             return True
             
         except Exception as e:
-            logger.error(f"Image validation failed: {e}")
             return False
     
     def moderate_content(self, image_file: InMemoryUploadedFile) -> Tuple[bool, Dict]:
@@ -70,11 +65,9 @@ class AWSImageService:
         """
         # Skip moderation in development environment
         if not self.use_moderation:
-            logger.info("Content moderation disabled for development environment")
             return True, {"message": "Content moderation disabled in development mode"}
         
         if not self.rekognition_client:
-            logger.warning("Rekognition client not available, skipping moderation")
             return True, {"message": "Content moderation skipped - AWS not configured"}
         
         try:
@@ -113,15 +106,13 @@ class AWSImageService:
             }
             
             if not is_safe:
-                logger.warning(f"Content moderation failed: {unsafe_labels}")
+                return False, moderation_result
             
             return is_safe, moderation_result
             
         except ClientError as e:
-            logger.error(f"AWS Rekognition error: {e}")
             return False, {"error": str(e)}
         except Exception as e:
-            logger.error(f"Content moderation error: {e}")
             return False, {"error": str(e)}
     
     def upload_to_s3(self, image_file: InMemoryUploadedFile, s3_key: str) -> Optional[str]:
@@ -131,10 +122,14 @@ class AWSImageService:
         """
         # In development, save to local media folder
         if not self.use_s3:
-            return self._save_to_local_storage(image_file, s3_key)
+            result = self._save_to_local_storage(image_file, s3_key)
+            return result
+        
+        if not self.use_s3:
+            result = self._save_to_local_storage(image_file, s3_key)
+            return result
         
         if not self.s3_client:
-            logger.warning("S3 client not available, falling back to local storage")
             return self._save_to_local_storage(image_file, s3_key)
         
         try:
@@ -158,14 +153,11 @@ class AWSImageService:
             else:
                 s3_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{s3_key}"
             
-            logger.info(f"Successfully uploaded to S3: {s3_key}")
             return s3_url
             
         except ClientError as e:
-            logger.error(f"S3 upload failed: {e}")
             return None
         except Exception as e:
-            logger.error(f"Upload error: {e}")
             return None
     
     def _save_to_local_storage(self, image_file: InMemoryUploadedFile, s3_key: str) -> Optional[str]:
@@ -173,7 +165,6 @@ class AWSImageService:
         try:
             import os
             from django.conf import settings
-            
             # Create local path based on s3_key
             local_path = os.path.join(settings.MEDIA_ROOT, s3_key)
             local_dir = os.path.dirname(local_path)
@@ -183,19 +174,26 @@ class AWSImageService:
             
             # Save file
             image_file.seek(0)
+            
             with open(local_path, 'wb') as f:
-                f.write(image_file.read())
+                image_data = image_file.read()
+                f.write(image_data)
+            
             image_file.seek(0)
+            
+            # Check if file was actually created
+            if os.path.exists(local_path):
+                file_size = os.path.getsize(local_path)
+            else:
+                return None
             
             # Return local URL
             relative_path = s3_key
             local_url = f"{settings.MEDIA_URL}{relative_path}"
             
-            logger.info(f"Successfully saved to local storage: {local_path}")
             return local_url
             
         except Exception as e:
-            logger.error(f"Local storage save failed: {e}")
             return None
     
     def delete_from_s3(self, s3_key: str) -> bool:
@@ -212,14 +210,11 @@ class AWSImageService:
                 Bucket=settings.AWS_STORAGE_BUCKET_NAME,
                 Key=s3_key
             )
-            logger.info(f"Successfully deleted from S3: {s3_key}")
             return True
             
         except ClientError as e:
-            logger.error(f"S3 delete failed: {e}")
             return False
         except Exception as e:
-            logger.error(f"Delete error: {e}")
             return False
     
     def _delete_from_local_storage(self, s3_key: str) -> bool:
@@ -232,14 +227,11 @@ class AWSImageService:
             
             if os.path.exists(local_path):
                 os.remove(local_path)
-                logger.info(f"Successfully deleted from local storage: {local_path}")
                 return True
             else:
-                logger.warning(f"File not found in local storage: {local_path}")
                 return False
                 
         except Exception as e:
-            logger.error(f"Local storage delete failed: {e}")
             return False
     
     def generate_presigned_url(self, s3_key: str, expiration: int = 3600) -> Optional[str]:
@@ -263,7 +255,6 @@ class AWSImageService:
             return url
             
         except ClientError as e:
-            logger.error(f"Failed to generate presigned URL: {e}")
             return None
 
 
@@ -303,7 +294,6 @@ class ImageProcessingService:
                 return optimized_file
                 
         except Exception as e:
-            logger.error(f"Image optimization failed: {e}")
             return image_file
     
     @staticmethod
@@ -328,7 +318,6 @@ class ImageProcessingService:
                 return metadata
                 
         except Exception as e:
-            logger.error(f"Metadata extraction failed: {e}")
             return {}
 
 

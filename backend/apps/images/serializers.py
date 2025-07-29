@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.conf import settings
+from django.utils import timezone
 from .models import Image, ProcessedImage, ImageTag, ImageTagAssignment
 from .services import aws_image_service, image_processing_service
 
@@ -90,18 +91,32 @@ class ImageUploadSerializer(serializers.ModelSerializer):
             **validated_data
         )
         
-        # Upload to S3
+        # Upload to S3 or local storage
         s3_key = f"images/uploads/{user.id}/{image.id}.jpg"
+        
+        # 🔍 DEBUG WITH PRINTS
+        print(f"\n========== IMAGE UPLOAD DEBUG ==========")
+        print(f"User ID: {user.id}")
+        print(f"Image ID: {image.id}")
+        print(f"S3 Key: {s3_key}")
+        print(f"USE_S3_STORAGE: {getattr(settings, 'USE_S3_STORAGE', 'NOT_SET')}")
+        print(f"Optimized image type: {type(optimized_image)}")
+        print(f"Optimized image size: {optimized_image.size if hasattr(optimized_image, 'size') else 'NO_SIZE'}")
+        print(f"About to call aws_image_service.upload_to_s3()...")
+        
         s3_url = aws_image_service.upload_to_s3(optimized_image, s3_key)
+        
+        print(f"Upload result URL: {s3_url}")
+        print(f"======================================\n")
         
         if s3_url:
             image.s3_key = s3_key
             image.s3_url = s3_url
-            image.s3_bucket = settings.AWS_STORAGE_BUCKET_NAME
+            image.s3_bucket = getattr(settings, 'AWS_STORAGE_BUCKET_NAME', 'local-dev')
             image.status = 'uploaded'
         else:
             image.status = 'failed'
-            image.error_message = "Failed to upload to S3"
+            image.error_message = "Failed to upload to storage"
         
         image.save()
         

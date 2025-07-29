@@ -30,7 +30,7 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
-      - media_files:/app/media
+      - ./backend/media:/app/media
     env_file:
       - ./backend/.env
     depends_on:

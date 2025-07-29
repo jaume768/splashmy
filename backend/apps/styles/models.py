@@ -9,7 +9,7 @@ class StyleCategory(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField(blank=True)
-    icon = models.CharField(max_length=50, blank=True)  # For frontend icons
+    icon = models.CharField(max_length=50, blank=True)
     color = models.CharField(max_length=7, default='#3B82F6')  # Hex color
     is_active = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)

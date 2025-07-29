@@ -37,7 +37,6 @@ class ImageUploadView(generics.CreateAPIView):
             }, status=status.HTTP_201_CREATED)
             
         except Exception as e:
-            logger.error(f"Image upload failed: {e}")
             return Response({
                 'error': 'Failed to upload image',
                 'details': str(e)
