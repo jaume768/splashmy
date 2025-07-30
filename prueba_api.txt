@@ -96,13 +96,14 @@ Authorization: Token YOUR_TOKEN_HERE
 Content-Type: application/json
 
 {
-  "job_type": "editing",
-  "input_image_id": 1,
-  "style_id": 2,
-  "prompt": "Convertir esta imagen al estilo de Los Simpsons",
-  "quality": "hd",
+  "job_type": "style_transfer",
+  "original_image_id": "5538e2c3-5616-4e0d-b77e-b3cc684e6175",
+  "style_id": "2a91819f-fde3-404f-ac11-a28fcd63f4a2",
+  "prompt": "Convertir esta imagen al estilo de baki y el coche azul",
+  "quality": "medium",
   "size": "1024x1024"
 }
+
 C) Ver mis jobs de procesamiento
 http
 GET http://localhost:8000/api/v1/processing/jobs/list/

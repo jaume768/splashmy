@@ -149,7 +149,6 @@ def toggle_favorite_style(request, pk):
             'error': str(e)
         }, status=status.HTTP_400_BAD_REQUEST)
 
-
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def rate_style(request, pk):

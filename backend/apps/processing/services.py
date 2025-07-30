@@ -173,7 +173,7 @@ class OpenAIImageService:
                 "prompt": prompt,
                 "n": style_params.get("n", 1),
                 "size": style_params.get("size", "1024x1024"),
-                "quality": style_params.get("quality", "standard"),
+                #"quality": style_params.get("quality", "standard"),
             }
             
             if user_id:
