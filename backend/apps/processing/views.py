@@ -1,7 +1,9 @@
 import json
 import base64
+import io
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.conf import settings
 from django.db.models import Q, Avg, Count
 from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view, permission_classes
@@ -20,7 +22,6 @@ from apps.styles.models import Style
 import logging
 
 logger = logging.getLogger(__name__)
-
 
 class ProcessingJobCreateView(generics.CreateAPIView):
     """Create and start processing job with OpenAI gpt-image-1"""
