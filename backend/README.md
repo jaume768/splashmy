@@ -298,46 +298,6 @@ Selección Resultado → URL Firmada → Descarga → Incremento Contador
 
 ---
 
-## ⚙️ Configuración y Variables de Entorno
-
-### Archivo `.env` Requerido:
-
-```bash
-# Django
-SECRET_KEY=your-secret-key
-DEBUG=True
-ENVIRONMENT=development
-
-# Base de datos
-DATABASE_NAME=splashmy_db
-DATABASE_USER=splashmy_user
-DATABASE_PASSWORD=splashmy_password
-DATABASE_HOST=mysql
-DATABASE_PORT=3306
-
-# OpenAI
-OPENAI_API_KEY=sk-your-openai-api-key
-
-# AWS (Producción)
-USE_S3_STORAGE=False
-USE_CONTENT_MODERATION=False
-AWS_ACCESS_KEY_ID=your-aws-key
-AWS_SECRET_ACCESS_KEY=your-aws-secret
-AWS_STORAGE_BUCKET_NAME=splashmy-bucket
-AWS_S3_REGION_NAME=us-east-1
-AWS_REKOGNITION_REGION=us-east-1
-
-# Celery
-CELERY_BROKER_URL=redis://redis:6379
-CELERY_RESULT_BACKEND=redis://redis:6379
-
-# Límites
-MAX_UPLOAD_SIZE=10485760
-DAILY_UPLOAD_LIMIT_FREE=10
-DAILY_UPLOAD_LIMIT_PREMIUM=100
-ALLOWED_IMAGE_EXTENSIONS=jpg,jpeg,png,gif,webp
-```
-
 ### Configuración por Ambiente:
 
 #### Desarrollo:
