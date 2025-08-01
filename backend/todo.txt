@@ -1,7 +1,8 @@
-- Implementar Celery + Redis para jobs de procesamiento y cache
-- Optimizar las imagenes antes de enviarlas a open ai reduce el coste?
-- Sistema de versionado
+- Sistema de cahche para estilos populares?
+- Lógica de negocio mezclada y servicios demasiado grantes y monoíticos?
+- Análisis de costos por usuario/estilo
+- Rate limiting por IP/usuario
+- Monitoreo de jobs en tiempo real
 - Implementar open api
 - Implementar sistema de monitoreo
 - Optimización de consultas DB
-- 
