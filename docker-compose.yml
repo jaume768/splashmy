@@ -3,7 +3,6 @@ services:
   db:
     image: mysql:8.0
     container_name: style_transfer_db
-    restart: unless-stopped
     environment:
       MYSQL_DATABASE: style_transfer_db
       MYSQL_ROOT_PASSWORD: rootpassword
@@ -23,7 +22,6 @@ services:
   redis:
     image: redis:7-alpine
     container_name: style_transfer_redis
-    restart: unless-stopped
     ports:
       - "6380:6379"
     command: redis-server --appendonly yes
@@ -41,7 +39,6 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: style_transfer_backend
-    restart: unless-stopped
     ports:
       - "8000:8000"
     volumes:
@@ -66,7 +63,6 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: style_transfer_celery_worker
-    restart: unless-stopped
     volumes:
       - ./backend:/app
       - ./backend/media:/app/media
@@ -85,7 +81,6 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: style_transfer_celery_beat
-    restart: unless-stopped
     volumes:
       - ./backend:/app
       - ./backend/media:/app/media
@@ -104,7 +99,6 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: style_transfer_frontend
-    restart: unless-stopped
     ports:
       - "3000:3000"
     volumes:
