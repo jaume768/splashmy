@@ -19,6 +19,22 @@ services:
       timeout: 20s
       retries: 10
 
+  # Redis - Celery Broker
+  redis:
+    image: redis:7-alpine
+    container_name: style_transfer_redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   # Django API Backend
   backend:
     build:
@@ -36,11 +52,51 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     command: >
       bash -c "python manage.py makemigrations &&
                python manage.py migrate &&
                python manage.py collectstatic --noinput &&
                python manage.py runserver 0.0.0.0:8000"
+
+  # Celery Worker - Procesa las tareas de imagen
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: style_transfer_celery_worker
+    restart: unless-stopped
+    volumes:
+      - ./backend:/app
+      - ./backend/media:/app/media
+    env_file:
+      - ./backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A config worker --loglevel=info --concurrency=2
+
+  # Celery Beat - Tareas programadas (limpieza, stats)
+  celery_beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: style_transfer_celery_beat
+    restart: unless-stopped
+    volumes:
+      - ./backend:/app
+      - ./backend/media:/app/media
+    env_file:
+      - ./backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: celery -A config beat --loglevel=info
 
   # Next.js Frontend (commented out for backend testing)
   # frontend:
@@ -65,6 +121,7 @@ services:
 volumes:
   mysql_data:
   media_files:
+  redis_data:
 
 networks:
   default:

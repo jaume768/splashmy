@@ -53,6 +53,9 @@ class ProcessingJob(models.Model):
     completed_at = models.DateTimeField(null=True, blank=True)
     processing_time = models.FloatField(null=True, blank=True)  # in seconds
     
+    # Celery task tracking
+    celery_task_id = models.CharField(max_length=255, blank=True, help_text="Celery task ID for async processing")
+    
     # Error handling
     error_message = models.TextField(blank=True)
     error_details = models.JSONField(default=dict, blank=True)

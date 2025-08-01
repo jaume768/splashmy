@@ -35,6 +35,20 @@ class AWSImageService:
                 region_name=settings.AWS_REKOGNITION_REGION
             )
     
+    def upload_processed_image(self, image_file: InMemoryUploadedFile, user_id: str) -> Tuple[str, str]:
+        """
+        Guarda una imagen generada/editada.
+        Devuelve (s3_key, url)  — en dev la url será MEDIA_URL + ruta.
+        """
+        # Genera un nombre consistente
+        import uuid, os, datetime as dt
+        ext = (os.path.splitext(image_file.name)[1] or ".png").lstrip(".")
+        today = dt.datetime.utcnow().strftime("%Y/%m/%d")
+        s3_key = f"processed/{user_id}/{today}/{uuid.uuid4()}.{ext}"
+
+        url = self.upload_to_s3(image_file, s3_key)  # maneja dev/prod internamente
+        return s3_key, url
+
     def validate_image_format(self, image_file: InMemoryUploadedFile) -> bool:
         """Validate image format and size"""
         try:

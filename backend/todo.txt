@@ -1,0 +1,7 @@
+- Implementar Celery + Redis para jobs de procesamiento y cache
+- Optimizar las imagenes antes de enviarlas a open ai reduce el coste?
+- Sistema de versionado
+- Implementar open api
+- Implementar sistema de monitoreo
+- Optimización de consultas DB
+- 

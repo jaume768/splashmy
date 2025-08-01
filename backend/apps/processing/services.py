@@ -20,17 +20,13 @@ class OpenAIImageService:
             logger.warning("OpenAI API key not configured")
             self.client = None
         else:
-            # Modern OpenAI v1.x client initialization with explicit configuration
-            print(f"Initializing OpenAI client...")
             try:
                 self.client = OpenAI(
                     api_key=settings.OPENAI_API_KEY,
                     timeout=60.0,
                     max_retries=3
                 )
-                print(f"OpenAI client initialized successfully")
             except Exception as e:
-                print(f"OpenAI client initialization failed: {e}")
                 self.client = None
     
     def _validate_and_moderate_image(self, image_file: InMemoryUploadedFile) -> Tuple[bool, Dict]:
@@ -178,20 +174,12 @@ class OpenAIImageService:
             
             if user_id:
                 params["user"] = str(user_id)
-            
-            print(f"🎨 Editing image with OpenAI gpt-image-1: {list(params.keys())}")
-            print(f"📁 Image file type: {type(image_file)}")
-            
             start_time = time.time()
-            
-            print(f"🚀 About to call OpenAI images.edit()...")
             response = self.client.images.edit(**params)
             processing_time = time.time() - start_time
             return self._process_edit_response(response, processing_time)
                 
         except Exception as e:
-            # 🔍 DEBUG: Print detailed error information
-            print(f"\n🚨 OPENAI EDIT ERROR DEBUG 🚨")
             print(f"Error type: {type(e).__name__}")
             print(f"Error message: {str(e)}")
             print(f"Error details: {repr(e)}")
@@ -203,9 +191,7 @@ class OpenAIImageService:
             
             import traceback
             print(f"Full traceback: {traceback.format_exc()}")
-            print(f"🚨 END DEBUG 🚨\n")
             
-            logger.error(f"OpenAI image editing failed: {e}")
             return {
                 "error": "Image editing failed",
                 "details": str(e)

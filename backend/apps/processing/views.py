@@ -66,8 +66,15 @@ class ProcessingJobCreateView(generics.CreateAPIView):
                 }
             )
             
-            # Start processing asynchronously
-            self._start_processing_job(job)
+            # Start processing asynchronously with Celery
+            from .tasks import process_image_job_async
+            
+            # Queue the job for async processing
+            task = process_image_job_async.delay(str(job.id))
+            
+            # Store task ID for tracking
+            job.celery_task_id = task.id
+            job.save(update_fields=['celery_task_id'])
             
             return Response({
                 'job_id': job.id,
