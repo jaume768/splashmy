@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Link from 'next/link';
 import styles from '../../styles/components/home/Header.module.css';
 
 export default function Header() {
@@ -21,7 +22,7 @@ export default function Header() {
               <a href="#" className={styles.navLink}>Precios y prueba gratuita</a>
             </li>
             <li className={styles.navItem}>
-              <a href="#" className={styles.navLink}>Regístrate e inicia sesión</a>
+              <Link href="/login" className={styles.navLink}>Regístrate e inicia sesión</Link>
             </li>
             <li className={styles.navItem}>
               <a href="#" className={`${styles.navLink} ${styles.premium}`}>Prueba Premium</a>
