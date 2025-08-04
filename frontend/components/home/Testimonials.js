@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import styles from '../styles/components/Testimonials.module.css';
+import styles from '../../styles/components/home/Testimonials.module.css';
 
 const testimonials = [
   {

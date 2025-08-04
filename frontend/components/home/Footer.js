@@ -1,4 +1,4 @@
-import styles from '../styles/components/Footer.module.css';
+import styles from '../../styles/components/home/Footer.module.css';
 
 // Social Media Icons
 const TwitterIcon = () => (

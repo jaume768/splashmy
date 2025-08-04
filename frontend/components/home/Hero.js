@@ -1,4 +1,4 @@
-import styles from '../styles/components/Hero.module.css';
+import styles from '../../styles/components/home/Hero.module.css';
 
 // SVG Icons Components
 const UploadIcon = () => (

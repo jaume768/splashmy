@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import styles from '../styles/components/FAQ.module.css';
+import styles from '../../styles/components/home/FAQ.module.css';
 
 const faqData = [
   {

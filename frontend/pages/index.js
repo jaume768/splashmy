@@ -1,10 +1,10 @@
 import Head from "next/head";
-import Header from "../components/Header";
-import Hero from "../components/Hero";
-import GenerativeAI from "../components/GenerativeAI";
-import Testimonials from "../components/Testimonials";
-import FAQ from "../components/FAQ";
-import Footer from "../components/Footer";
+import Header from "../components/home/Header";
+import Hero from "../components/home/Hero";
+import GenerativeAI from "../components/home/GenerativeAI";
+import Testimonials from "../components/home/Testimonials";
+import FAQ from "../components/home/FAQ";
+import Footer from "../components/home/Footer";
 
 export default function Home() {
   return (

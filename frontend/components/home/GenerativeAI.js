@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import styles from '../styles/components/GenerativeAI.module.css';
+import styles from '../../styles/components/home/GenerativeAI.module.css';
 
 export default function GenerativeAI() {
   const [inputValue, setInputValue] = useState('Estilo anime');
