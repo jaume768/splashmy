@@ -51,8 +51,11 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    environment:
+      - DJANGO_WATCH_USE_POLLING=1    
     command: >
-      bash -c "python manage.py makemigrations &&
+      bash -c "pip install watchdog &&
+               python manage.py makemigrations &&
                python manage.py migrate &&
                python manage.py collectstatic --noinput &&
                python manage.py runserver 0.0.0.0:8000"
@@ -106,6 +109,8 @@ services:
       - /app/node_modules
       - /app/.next
     environment:
+      - CHOKIDAR_USEPOLLING=1
+      - WATCHPACK_POLLING=true
       - NODE_ENV=development
       - NEXT_PUBLIC_API_URL=http://localhost:8000
     depends_on:

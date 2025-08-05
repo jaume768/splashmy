@@ -1,5 +1,5 @@
 - hacer login y registro funcional
 - reducir el registro a lo minimo pero importante para no saturar al usuario, ahora mismo es un poco excesivo
-- hacer dashboard inicial (que no haga falta estar verificado), donde puedas ver las categorias de la plataforma, con ejemplos de imagenes creadas
+- mejorar estitica dashboard
 - hacer un ranking de fotos creadas y que los usuarios puedan elegir que este publica o privada? (estilo sora de chatgpt)
 - hacer un sistema de favoritos

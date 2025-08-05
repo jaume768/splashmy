@@ -25,7 +25,7 @@ export default function Header() {
               <Link href="/login" className={styles.navLink}>Regístrate e inicia sesión</Link>
             </li>
             <li className={styles.navItem}>
-              <a href="#" className={`${styles.navLink} ${styles.premium}`}>Prueba Premium</a>
+              <a href="/dashboard" className={`${styles.navLink} ${styles.premium}`}>Prueba diaria</a>
             </li>
           </ul>
         </nav>

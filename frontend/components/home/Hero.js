@@ -28,10 +28,6 @@ export default function Hero() {
           <p className={styles.subtitle}>
             Generador de imágenes IA y herramientas de diseño IA
           </p>
-          <p className={styles.description}>
-            Edita fotos, genera imágenes y diseña libremente con las poderosas herramientas de IA de SplashMy – 
-            directamente en tu navegador, en móvil o escritorio. Prueba 100% gratis.
-          </p>
           
           <div className={styles.buttons}>
             <button className={styles.primaryButton}>
