@@ -168,10 +168,6 @@
   }
 }
 
-.nav:not(.navOpen) {
-  transform: translateX(100%);
-}
-
 @media (max-width: 767px) {
   .nav {
     display: block;
