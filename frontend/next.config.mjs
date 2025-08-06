@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['localhost', 'media.tycsports.com'],
+    domains: ['localhost', 'media.tycsports.com', 'www.clarin.com', 'imagenes.20minutos.es'],
   },
 };
 

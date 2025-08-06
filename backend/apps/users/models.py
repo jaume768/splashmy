@@ -74,6 +74,7 @@ class User(AbstractUser):
         return self.email
 
 
+
 class UserProfile(models.Model):
     """Additional user profile information"""
     

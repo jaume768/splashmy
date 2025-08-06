@@ -1,29 +1,81 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/router";
 import styles from "../styles/components/auth/Login.module.css";
+import { loginUser } from "../utils/api";
+import { useAuth } from "../contexts/AuthContext";
+import { RequireGuest } from "../components/auth/ProtectedRoute";
 
-export default function Login() {
+function LoginPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const router = useRouter();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear previous errors when user starts typing
+    if (error) setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement login functionality
-    console.log('Login data:', formData);
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await loginUser(formData);
+      
+      // Update auth context with user data and token
+      const loginSuccess = login(response.user, response.token);
+      
+      if (loginSuccess) {
+        setSuccess('¡Inicio de sesión exitoso! Redirigiendo...');
+        
+        // Redirect to dashboard after successful login
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 1500);
+      } else {
+        setError('Error al procesar el inicio de sesión. Inténtalo de nuevo.');
+      }
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      
+      try {
+        const errorData = JSON.parse(error.message);
+        
+        // Handle specific error types
+        if (errorData.errors?.non_field_errors) {
+          setError(errorData.errors.non_field_errors[0]);
+        } else if (errorData.errors?.detail) {
+          setError(errorData.errors.detail);
+        } else if (errorData.status === 400) {
+          setError('Credenciales inválidas. Por favor verifica tu email y contraseña.');
+        } else {
+          setError('Error al iniciar sesión. Inténtalo de nuevo.');
+        }
+      } catch {
+        setError('Error al iniciar sesión. Inténtalo de nuevo.');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <>
+    <RequireGuest>
       <Head>
         <title>Iniciar Sesión - SplashMy</title>
         <meta name="description" content="Inicia sesión en SplashMy para acceder a tus herramientas de IA" />
@@ -50,6 +102,26 @@ export default function Login() {
 
           {/* Form */}
           <form className={styles.form} onSubmit={handleSubmit}>
+            {/* Error Message */}
+            {error && (
+              <div className={styles.errorMessage}>
+                <svg className={styles.errorIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {error}
+              </div>
+            )}
+            
+            {/* Success Message */}
+            {success && (
+              <div className={styles.successMessage}>
+                <svg className={styles.successIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {success}
+              </div>
+            )}
+
             <div className={styles.inputGroup}>
               <label htmlFor="email" className={styles.label}>
                 Correo electrónico
@@ -59,10 +131,11 @@ export default function Login() {
                 name="email"
                 type="email"
                 required
-                className={styles.input}
+                className={`${styles.input} ${error && formData.email === '' ? styles.inputError : ''}`}
                 placeholder="tu@email.com"
                 value={formData.email}
                 onChange={handleChange}
+                disabled={loading}
               />
             </div>
 
@@ -75,10 +148,11 @@ export default function Login() {
                 name="password"
                 type="password"
                 required
-                className={styles.input}
+                className={`${styles.input} ${error && formData.password === '' ? styles.inputError : ''}`}
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
+                disabled={loading}
               />
             </div>
 
@@ -92,8 +166,22 @@ export default function Login() {
               </Link>
             </div>
 
-            <button type="submit" className={styles.submitButton}>
-              Iniciar Sesión
+            <button 
+              type="submit" 
+              className={`${styles.submitButton} ${loading ? styles.loading : ''}`}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <svg className={styles.spinner} viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.25"/>
+                    <path fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" opacity="0.75"/>
+                  </svg>
+                  Iniciando sesión...
+                </>
+              ) : (
+                'Iniciar Sesión'
+              )}
             </button>
           </form>
 
@@ -127,6 +215,10 @@ export default function Login() {
         {/* Background */}
         <div className={styles.background}></div>
       </div>
-    </>
+    </RequireGuest>
   );
+}
+
+export default function Login() {
+  return <LoginPage />;
 }

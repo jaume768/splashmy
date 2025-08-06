@@ -464,6 +464,8 @@ docker-compose -f docker-compose.prod.yml up -d
 # Crear superusuario
 python manage.py createsuperuser
 
+docker-compose exec backend python manage.py createsuperuser
+
 # Cargar datos iniciales (estilos, categorías)
 python manage.py loaddata initial_styles.json
 

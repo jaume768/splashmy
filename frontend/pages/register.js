@@ -1,9 +1,13 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/router";
 import styles from "../styles/components/auth/Register.module.css";
+import { registerUser } from "../utils/api";
+import { useAuth } from "../contexts/AuthContext";
+import { RequireGuest } from "../components/auth/ProtectedRoute";
 
-export default function Register() {
+function RegisterPage() {
   const [formData, setFormData] = useState({
     email: '',
     username: '',
@@ -12,22 +16,134 @@ export default function Register() {
     password: '',
     confirmPassword: ''
   });
+  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [success, setSuccess] = useState('');
+  const router = useRouter();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear field-specific error when user starts typing
+    if (errors[e.target.name]) {
+      setErrors(prev => ({ ...prev, [e.target.name]: '' }));
+    }
   };
 
-  const handleSubmit = (e) => {
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.email.trim()) {
+      newErrors.email = 'El correo electrónico es requerido';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'El formato del correo electrónico no es válido';
+    }
+    
+    if (!formData.username.trim()) {
+      newErrors.username = 'El nombre de usuario es requerido';
+    } else if (formData.username.length < 3) {
+      newErrors.username = 'El nombre de usuario debe tener al menos 3 caracteres';
+    }
+    
+    if (!formData.password) {
+      newErrors.password = 'La contraseña es requerida';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
+    }
+    
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Confirma tu contraseña';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Las contraseñas no coinciden';
+    }
+    
+    return newErrors;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Implement registration functionality
-    console.log('Registration data:', formData);
+    setLoading(true);
+    setErrors({});
+    setSuccess('');
+
+    // Client-side validation
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await registerUser(formData);
+      
+      // Update auth context with user data and token
+      const loginSuccess = login(response.user, response.token);
+      
+      if (loginSuccess) {
+        setSuccess('¡Cuenta creada exitosamente! Redirigiendo al dashboard...');
+        
+        // Redirect to dashboard after successful registration
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 1500);
+      } else {
+        setErrors({ general: 'Error al procesar el registro. Inténtalo de nuevo.' });
+      }
+      
+    } catch (error) {
+      console.error('Registration error:', error);
+      
+      try {
+        const errorData = JSON.parse(error.message);
+        
+        if (errorData.errors) {
+          const backendErrors = {};
+          
+          // Map backend field errors to frontend field names
+          if (errorData.errors.email) {
+            backendErrors.email = Array.isArray(errorData.errors.email) 
+              ? errorData.errors.email[0] 
+              : errorData.errors.email;
+          }
+          if (errorData.errors.username) {
+            backendErrors.username = Array.isArray(errorData.errors.username) 
+              ? errorData.errors.username[0] 
+              : errorData.errors.username;
+          }
+          if (errorData.errors.password) {
+            backendErrors.password = Array.isArray(errorData.errors.password) 
+              ? errorData.errors.password[0] 
+              : errorData.errors.password;
+          }
+          if (errorData.errors.password_confirm) {
+            backendErrors.confirmPassword = Array.isArray(errorData.errors.password_confirm) 
+              ? errorData.errors.password_confirm[0] 
+              : errorData.errors.password_confirm;
+          }
+          if (errorData.errors.non_field_errors) {
+            backendErrors.general = Array.isArray(errorData.errors.non_field_errors) 
+              ? errorData.errors.non_field_errors[0] 
+              : errorData.errors.non_field_errors;
+          }
+          
+          setErrors(backendErrors);
+        } else {
+          setErrors({ general: 'Error al crear la cuenta. Inténtalo de nuevo.' });
+        }
+      } catch {
+        setErrors({ general: 'Error al crear la cuenta. Inténtalo de nuevo.' });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <>
+    <RequireGuest>
       <Head>
         <title>Registrarse - SplashMy</title>
         <meta name="description" content="Crea tu cuenta en SplashMy y accede a las herramientas de IA" />
@@ -54,6 +170,25 @@ export default function Register() {
 
           {/* Form */}
           <form className={styles.form} onSubmit={handleSubmit}>
+            {/* General Error Message */}
+            {errors.general && (
+              <div className={styles.errorMessage}>
+                <svg className={styles.errorIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {errors.general}
+              </div>
+            )}
+            
+            {/* Success Message */}
+            {success && (
+              <div className={styles.successMessage}>
+                <svg className={styles.successIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                {success}
+              </div>
+            )}
             <div className={styles.nameRow}>
               <div className={styles.inputGroup}>
                 <label htmlFor="firstName" className={styles.label}>
@@ -63,11 +198,13 @@ export default function Register() {
                   id="firstName"
                   name="firstName"
                   type="text"
-                  className={styles.input}
+                  className={`${styles.input} ${errors.firstName ? styles.inputError : ''}`}
                   placeholder="Tu nombre"
                   value={formData.firstName}
                   onChange={handleChange}
+                  disabled={loading}
                 />
+                {errors.firstName && <span className={styles.errorText}>{errors.firstName}</span>}
               </div>
               <div className={styles.inputGroup}>
                 <label htmlFor="lastName" className={styles.label}>
@@ -77,79 +214,91 @@ export default function Register() {
                   id="lastName"
                   name="lastName"
                   type="text"
-                  className={styles.input}
+                  className={`${styles.input} ${errors.lastName ? styles.inputError : ''}`}
                   placeholder="Tus apellidos"
                   value={formData.lastName}
                   onChange={handleChange}
+                  disabled={loading}
                 />
+                {errors.lastName && <span className={styles.errorText}>{errors.lastName}</span>}
               </div>
             </div>
 
             <div className={styles.inputGroup}>
               <label htmlFor="username" className={styles.label}>
-                Nombre de usuario
+                Nombre de usuario *
               </label>
               <input
                 id="username"
                 name="username"
                 type="text"
                 required
-                className={styles.input}
+                className={`${styles.input} ${errors.username ? styles.inputError : ''}`}
                 placeholder="nombreusuario"
                 value={formData.username}
                 onChange={handleChange}
+                disabled={loading}
               />
+              {errors.username && <span className={styles.errorText}>{errors.username}</span>}
             </div>
 
             <div className={styles.inputGroup}>
               <label htmlFor="email" className={styles.label}>
-                Correo electrónico
+                Correo electrónico *
               </label>
               <input
                 id="email"
                 name="email"
                 type="email"
                 required
-                className={styles.input}
+                className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
                 placeholder="tu@email.com"
                 value={formData.email}
                 onChange={handleChange}
+                disabled={loading}
               />
+              {errors.email && <span className={styles.errorText}>{errors.email}</span>}
             </div>
 
             <div className={styles.inputGroup}>
               <label htmlFor="password" className={styles.label}>
-                Contraseña
+                Contraseña *
               </label>
               <input
                 id="password"
                 name="password"
                 type="password"
                 required
-                className={styles.input}
+                className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
+                disabled={loading}
               />
-              <small className={styles.passwordHint}>
-                Mínimo 8 caracteres con al menos una mayúscula, minúscula y número
-              </small>
+              {!errors.password && (
+                <small className={styles.passwordHint}>
+                  Mínimo 8 caracteres
+                </small>
+              )}
+              {errors.password && <span className={styles.errorText}>{errors.password}</span>}
             </div>
 
             <div className={styles.inputGroup}>
               <label htmlFor="confirmPassword" className={styles.label}>
-                Confirmar contraseña
+                Confirmar contraseña *
               </label>
               <input
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
                 required
-                className={styles.input}
+                className={`${styles.input} ${errors.confirmPassword ? styles.inputError : ''}`}
                 placeholder="••••••••"
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                disabled={loading}
               />
+              {errors.confirmPassword && <span className={styles.errorText}>{errors.confirmPassword}</span>}
             </div>
 
             <div className={styles.terms}>
@@ -163,8 +312,22 @@ export default function Register() {
               </label>
             </div>
 
-            <button type="submit" className={styles.submitButton}>
-              Crear Cuenta
+            <button 
+              type="submit" 
+              className={`${styles.submitButton} ${loading ? styles.loading : ''}`}
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <svg className={styles.spinner} viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" opacity="0.25"/>
+                    <path fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" opacity="0.75"/>
+                  </svg>
+                  Creando cuenta...
+                </>
+              ) : (
+                'Crear Cuenta'
+              )}
             </button>
           </form>
 
@@ -198,6 +361,10 @@ export default function Register() {
         {/* Background */}
         <div className={styles.background}></div>
       </div>
-    </>
+    </RequireGuest>
   );
+}
+
+export default function Register() {
+  return <RegisterPage />;
 }

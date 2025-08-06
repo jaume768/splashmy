@@ -1,4 +1,5 @@
 - hacer login y registro funcional
+- en el registro hacer verificación de mail si no es por google
 - reducir el registro a lo minimo pero importante para no saturar al usuario, ahora mismo es un poco excesivo
 - mejorar estitica dashboard
 - hacer un ranking de fotos creadas y que los usuarios puedan elegir que este publica o privada? (estilo sora de chatgpt)
