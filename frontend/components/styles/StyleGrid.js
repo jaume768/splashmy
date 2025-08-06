@@ -3,7 +3,7 @@ import StyleCard from './StyleCard';
 import { fetchStyles, fetchStyleCategories } from '../../utils/api';
 import styles from './StyleGrid.module.css';
 
-const StyleGrid = ({ searchTerm = '', selectedCategory = null }) => {
+const StyleGrid = ({ searchTerm = '', selectedCategory = null, onStyleClick }) => {
   const [stylesData, setStylesData] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -123,7 +123,11 @@ const StyleGrid = ({ searchTerm = '', selectedCategory = null }) => {
       {/* Styles grid */}
       <div className={styles.grid}>
         {filteredStyles.map((style) => (
-          <StyleCard key={style.id} style={style} />
+          <StyleCard 
+            key={style.id} 
+            style={style} 
+            onStyleClick={onStyleClick}
+          />
         ))}
       </div>
     </div>

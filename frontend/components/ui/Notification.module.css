@@ -1,0 +1,183 @@
+/* Mobile-first notification styles */
+.notification {
+  position: fixed;
+  top: 20px;
+  left: 16px;
+  right: 16px;
+  z-index: 9999;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  animation: slideInDown 0.3s ease-out;
+  max-width: calc(100vw - 32px);
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  gap: 12px;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.message {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.closeButton {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.closeButton:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.closeButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Success variant */
+.success {
+  background: linear-gradient(135deg, #10b981, #059669);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: white;
+}
+
+.success .closeButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Error variant */
+.error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: white;
+}
+
+.error .closeButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Info variant */
+.info {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: white;
+}
+
+.info .closeButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Tablet adjustments */
+@media (min-width: 768px) {
+  .notification {
+    left: auto;
+    right: 20px;
+    max-width: 400px;
+    top: 20px;
+  }
+  
+  .content {
+    padding: 18px;
+    gap: 14px;
+  }
+  
+  .message {
+    font-size: 15px;
+  }
+  
+  .icon {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .closeButton {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .closeButton svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Desktop adjustments */
+@media (min-width: 1024px) {
+  .notification {
+    max-width: 450px;
+  }
+  
+  .content {
+    padding: 20px;
+    gap: 16px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .notification {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .notification {
+    animation: none;
+  }
+  
+  @keyframes slideInDown {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* Safe area adjustments for mobile with notch */
+@supports (padding: max(0px)) {
+  @media (max-width: 767px) {
+    .notification {
+      top: max(20px, env(safe-area-inset-top, 20px));
+      left: max(16px, env(safe-area-inset-left, 16px));
+      right: max(16px, env(safe-area-inset-right, 16px));
+    }
+  }
+}

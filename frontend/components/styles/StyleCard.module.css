@@ -4,7 +4,6 @@
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-sm);
   transition: var(--transition-base);
-  cursor: pointer;
   overflow: hidden;
   height: 100%;
   display: flex;
@@ -14,6 +13,31 @@
 .card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
+}
+
+/* Clickable variant for authenticated users */
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.clickable:active {
+  transform: translateY(-2px);
+  transition: transform 0.1s ease;
+}
+
+/* Focus styles for accessibility */
+.clickable:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.clickable:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .imageContainer {
@@ -150,4 +174,81 @@
   .card:hover {
     transform: translateY(-4px);
   }
+}
+
+/* Call to Action styles */
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 8px;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.3s ease;
+}
+
+.clickable:hover .cta {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.ctaText {
+  flex: 1;
+}
+
+.ctaIcon {
+  width: 16px;
+  height: 16px;
+  margin-left: 8px;
+  transition: transform 0.2s ease;
+}
+
+.clickable:hover .ctaIcon {
+  transform: translateX(2px);
+}
+
+/* Mobile-specific CTA adjustments */
+@media (max-width: 768px) {
+  .cta {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+  
+  .ctaIcon {
+    width: 14px;
+    height: 14px;
+  }
+  
+  /* Always show CTA on mobile for touch devices */
+  .clickable .cta {
+    opacity: 0.8;
+    transform: translateY(0);
+  }
+  
+  .clickable:hover .cta,
+  .clickable:active .cta {
+    opacity: 1;
+  }
+}
+
+/* Tablet CTA adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .cta {
+    font-size: 13px;
+  }
+}
+
+/* Animation for smooth interactions */
+.clickable .content {
+  transition: all 0.3s ease;
+}
+
+.clickable:hover .content {
+  transform: translateY(-2px);
 }

@@ -37,6 +37,27 @@ export const API_ENDPOINTS = {
     PROFILE_DETAILS: '/api/v1/auth/profile/details/',
     CHANGE_PASSWORD: '/api/v1/auth/change-password/',
   },
+  
+  // Images endpoints
+  IMAGES: {
+    UPLOAD: '/api/v1/images/upload/',
+    LIST: '/api/v1/images/',
+    DETAIL: (id) => `/api/v1/images/${id}/`,
+    DOWNLOAD: (id) => `/api/v1/images/${id}/download/`,
+    STATS: '/api/v1/images/stats/',
+  },
+  
+  // Processing endpoints
+  PROCESSING: {
+    JOBS: '/api/v1/processing/jobs/',
+    JOB_DETAIL: (id) => `/api/v1/processing/jobs/${id}/`,
+    JOB_LIST: '/api/v1/processing/jobs/list/',
+    CANCEL_JOB: (id) => `/api/v1/processing/jobs/${id}/cancel/`,
+    RESULTS: '/api/v1/processing/results/',
+    DOWNLOAD_RESULT: (id) => `/api/v1/processing/results/${id}/download/`,
+    QUOTA: '/api/v1/processing/quota/',
+    STATS: '/api/v1/processing/stats/',
+  },
 };
 
 // Generic fetch wrapper with error handling
@@ -218,4 +239,204 @@ export const getCurrentUser = () => {
 export const getAuthToken = () => {
   if (typeof window === 'undefined') return null;
   return localStorage.getItem('authToken');
+};
+
+// ============================================================================
+// IMAGE UPLOAD API FUNCTIONS
+// ============================================================================
+
+// Upload image with file
+export const uploadImage = async (imageFile, metadata = {}) => {
+  const formData = new FormData();
+  formData.append('original_image', imageFile);
+  
+  if (metadata.title) formData.append('title', metadata.title);
+  if (metadata.description) formData.append('description', metadata.description);
+  if (metadata.tags && Array.isArray(metadata.tags)) {
+    metadata.tags.forEach(tag => formData.append('tags', tag));
+  }
+  
+  // Get auth token
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+  
+  const url = buildApiUrl(API_ENDPOINTS.IMAGES.UPLOAD);
+  
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Token ${token}`,
+        // Don't set Content-Type for FormData - let browser set it with boundary
+      },
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.details || errorData.error || `Upload failed: ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Image upload error:', error);
+    throw error;
+  }
+};
+
+// ============================================================================
+// STYLE TRANSFER API FUNCTIONS
+// ============================================================================
+
+// Create style transfer job
+export const createStyleTransferJob = async (jobData) => {
+  const { original_image_id, style_id, prompt, quality = 'medium', size = '1024x1024', ...options } = jobData;
+  
+  if (!original_image_id || !style_id) {
+    throw new Error('original_image_id and style_id are required');
+  }
+  
+  try {
+    const response = await apiFetch(API_ENDPOINTS.PROCESSING.JOBS, {
+      method: 'POST',
+      body: JSON.stringify({
+        job_type: 'style_transfer',
+        original_image_id,
+        style_id,
+        prompt: prompt || '',
+        quality,
+        size,
+        ...options
+      }),
+    });
+    
+    return response;
+  } catch (error) {
+    console.error('Style transfer job creation error:', error);
+    throw error;
+  }
+};
+
+// Get job status
+export const getJobStatus = async (jobId) => {
+  try {
+    const response = await apiFetch(API_ENDPOINTS.PROCESSING.JOB_DETAIL(jobId));
+    return response;
+  } catch (error) {
+    console.error('Job status fetch error:', error);
+    throw error;
+  }
+};
+
+// Cancel processing job
+export const cancelJob = async (jobId) => {
+  try {
+    const response = await apiFetch(API_ENDPOINTS.PROCESSING.CANCEL_JOB(jobId), {
+      method: 'POST',
+    });
+    return response;
+  } catch (error) {
+    console.error('Job cancellation error:', error);
+    throw error;
+  }
+};
+
+// Get user's processing quota
+export const getProcessingQuota = async () => {
+  try {
+    const response = await apiFetch(API_ENDPOINTS.PROCESSING.QUOTA);
+    return response;
+  } catch (error) {
+    console.error('Quota fetch error:', error);
+    throw error;
+  }
+};
+
+// Get processing results
+export const getProcessingResults = async (params = {}) => {
+  const searchParams = new URLSearchParams(params);
+  const endpoint = `${API_ENDPOINTS.PROCESSING.RESULTS}?${searchParams}`;
+  
+  try {
+    const response = await apiFetch(endpoint);
+    return response;
+  } catch (error) {
+    console.error('Processing results fetch error:', error);
+    throw error;
+  }
+};
+
+// Download processing result
+export const downloadProcessingResult = async (resultId) => {
+  try {
+    const response = await apiFetch(API_ENDPOINTS.PROCESSING.DOWNLOAD_RESULT(resultId));
+    return response;
+  } catch (error) {
+    console.error('Result download error:', error);
+    throw error;
+  }
+};
+
+// Get processing stats
+export const getProcessingStats = async () => {
+  try {
+    const response = await apiFetch(API_ENDPOINTS.PROCESSING.STATS);
+    return response;
+  } catch (error) {
+    console.error('Processing stats fetch error:', error);
+    throw error;
+  }
+};
+
+// ============================================================================
+// IMAGE API FUNCTIONS
+// ============================================================================
+
+// Get user's images
+export const getUserImages = async (params = {}) => {
+  const searchParams = new URLSearchParams(params);
+  const endpoint = `${API_ENDPOINTS.IMAGES.LIST}?${searchParams}`;
+  
+  try {
+    const response = await apiFetch(endpoint);
+    return response;
+  } catch (error) {
+    console.error('User images fetch error:', error);
+    throw error;
+  }
+};
+
+// Get image details
+export const getImageDetails = async (imageId) => {
+  try {
+    const response = await apiFetch(API_ENDPOINTS.IMAGES.DETAIL(imageId));
+    return response;
+  } catch (error) {
+    console.error('Image details fetch error:', error);
+    throw error;
+  }
+};
+
+// Download image
+export const downloadImage = async (imageId) => {
+  try {
+    const response = await apiFetch(API_ENDPOINTS.IMAGES.DOWNLOAD(imageId));
+    return response;
+  } catch (error) {
+    console.error('Image download error:', error);
+    throw error;
+  }
+};
+
+// Get image stats
+export const getImageStats = async () => {
+  try {
+    const response = await apiFetch(API_ENDPOINTS.IMAGES.STATS);
+    return response;
+  } catch (error) {
+    console.error('Image stats fetch error:', error);
+    throw error;
+  }
 };

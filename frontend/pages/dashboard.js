@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import StyleGrid from '../components/styles/StyleGrid';
+import StyleTransferModal from '../components/styles/StyleTransferModal';
+import Notification from '../components/ui/Notification';
 import { fetchStyleCategories } from '../utils/api';
 import styles from '../styles/Dashboard.module.css';
 import { useAuth } from '../contexts/AuthContext';
@@ -81,6 +84,20 @@ const DashboardPage = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  
+  // Style Transfer Modal state
+  const [showStyleTransferModal, setShowStyleTransferModal] = useState(false);
+  const [selectedStyle, setSelectedStyle] = useState(null);
+  
+  // Notification state
+  const [notification, setNotification] = useState({
+    isVisible: false,
+    message: '',
+    type: 'success'
+  });
+  
+  const router = useRouter();
+  const { user, authenticated } = useAuth();
 
   // Obtener categorías para el filtro
   useEffect(() => {
@@ -114,8 +131,61 @@ const DashboardPage = () => {
     setSearchTerm('');
     setSelectedCategory('');
   };
-
-  const { user, authenticated } = useAuth();
+  
+  // Handle style click for authenticated users
+  const handleStyleClick = (style) => {
+    if (!authenticated) {
+      // Redirect to login if not authenticated
+      router.push('/login');
+      return;
+    }
+    
+    setSelectedStyle(style);
+    setShowStyleTransferModal(true);
+  };
+  
+  // Handle style transfer completion
+  const handleStyleTransferComplete = (jobResult) => {
+    console.log('Style transfer completed:', jobResult);
+    
+    // Close modal
+    setShowStyleTransferModal(false);
+    setSelectedStyle(null);
+    
+    // Show success notification
+    showNotification(
+      '¡Estilo aplicado exitosamente! Tu imagen está siendo procesada.',
+      'success'
+    );
+    
+    // Optionally redirect to results page or gallery after a delay
+    // setTimeout(() => {
+    //   router.push('/gallery');
+    // }, 2000);
+  };
+  
+  // Show notification helper
+  const showNotification = (message, type = 'success') => {
+    setNotification({
+      isVisible: true,
+      message,
+      type
+    });
+  };
+  
+  // Hide notification
+  const hideNotification = () => {
+    setNotification(prev => ({
+      ...prev,
+      isVisible: false
+    }));
+  };
+  
+  // Handle modal close
+  const handleModalClose = () => {
+    setShowStyleTransferModal(false);
+    setSelectedStyle(null);
+  };
 
   return (
     <>
@@ -219,9 +289,27 @@ const DashboardPage = () => {
             <StyleGrid 
               searchTerm={searchTerm}
               selectedCategory={selectedCategory}
+              onStyleClick={handleStyleClick}
             />
           </div>
         </main>
+        
+        {/* Style Transfer Modal */}
+        <StyleTransferModal
+          isOpen={showStyleTransferModal}
+          onClose={handleModalClose}
+          selectedStyle={selectedStyle}
+          onComplete={handleStyleTransferComplete}
+        />
+        
+        {/* Notification */}
+        <Notification
+          isVisible={notification.isVisible}
+          message={notification.message}
+          type={notification.type}
+          onClose={hideNotification}
+          duration={5000}
+        />
 
         {/* Pie de página minimalista */}
         <footer className={styles.footer}>
