@@ -1,6 +1,10 @@
-- hacer login y registro funcional
+- hacer login y registro funcional (falta con google)
+prompt:perfecto, ahora quiero que investigues todo lo necesario para hacer funcional el registro y login con google, investiga el backend para hacer las modificaciones necesarias en el usuario (modelo, serializers, views y demas) y en el frontend, también reivsa el .evn.example para poner lo necesario para que sea funcional, revisalo y dime la mejor estrategia y te digo si implementarlo o no (piensa en las rutas del backend y el frontend también)
+
+
+
+
 - en el registro hacer verificación de mail si no es por google
-- reducir el registro a lo minimo pero importante para no saturar al usuario, ahora mismo es un poco excesivo
-- hacer que cuando pulses un estilo te redirija a una página para subir la imagen y procesar el cambio de estilo
 - hacer un ranking de fotos creadas y que los usuarios puedan elegir que este publica o privada? (estilo sora de chatgpt)
 - hacer un sistema de favoritos
+- hacer un cerrar sesión, perfil del usaurio, mejoras esteticas dashboard

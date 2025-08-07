@@ -11,8 +11,6 @@ function RegisterPage() {
   const [formData, setFormData] = useState({
     email: '',
     username: '',
-    firstName: '',
-    lastName: '',
     password: '',
     confirmPassword: ''
   });
@@ -189,40 +187,7 @@ function RegisterPage() {
                 {success}
               </div>
             )}
-            <div className={styles.nameRow}>
-              <div className={styles.inputGroup}>
-                <label htmlFor="firstName" className={styles.label}>
-                  Nombre
-                </label>
-                <input
-                  id="firstName"
-                  name="firstName"
-                  type="text"
-                  className={`${styles.input} ${errors.firstName ? styles.inputError : ''}`}
-                  placeholder="Tu nombre"
-                  value={formData.firstName}
-                  onChange={handleChange}
-                  disabled={loading}
-                />
-                {errors.firstName && <span className={styles.errorText}>{errors.firstName}</span>}
-              </div>
-              <div className={styles.inputGroup}>
-                <label htmlFor="lastName" className={styles.label}>
-                  Apellidos
-                </label>
-                <input
-                  id="lastName"
-                  name="lastName"
-                  type="text"
-                  className={`${styles.input} ${errors.lastName ? styles.inputError : ''}`}
-                  placeholder="Tus apellidos"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  disabled={loading}
-                />
-                {errors.lastName && <span className={styles.errorText}>{errors.lastName}</span>}
-              </div>
-            </div>
+
 
             <div className={styles.inputGroup}>
               <label htmlFor="username" className={styles.label}>

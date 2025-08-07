@@ -84,7 +84,7 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    """Serializer for user registration with password confirmation"""
+    """Serializer for minimal user registration with password confirmation"""
     
     password = serializers.CharField(write_only=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True)
@@ -92,8 +92,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'email', 'username', 'first_name', 'last_name',
-            'password', 'password_confirm'
+            'email', 'username', 'password', 'password_confirm'
         ]
     
     def validate(self, attrs):
@@ -118,9 +117,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(
             email=validated_data['email'],
             username=validated_data['username'],
-            password=password,
-            first_name=validated_data.get('first_name', ''),
-            last_name=validated_data.get('last_name', '')
+            password=password
         )
         
         # Create associated profile  

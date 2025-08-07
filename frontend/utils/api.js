@@ -133,8 +133,6 @@ export const registerUser = async (userData) => {
       body: JSON.stringify({
         email: userData.email,
         username: userData.username,
-        first_name: userData.firstName,
-        last_name: userData.lastName,
         password: userData.password,
         password_confirm: userData.confirmPassword,
       }),

@@ -179,7 +179,7 @@
   position: absolute;
   bottom: 0;
   left: 50%;
-  transform: translate(-50%, 20%); /* “flota” fuera del borde */
+  transform: translate(-40%, 20%); /* “flota” fuera del borde */
   width: 90%;
 }
 
