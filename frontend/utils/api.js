@@ -355,6 +355,17 @@ export const getJobResults = async (jobId) => {
   }
 };
 
+// Get user's processing results (for gallery)
+export const getUserProcessingResults = async (page = 1, pageSize = 50) => {
+  try {
+    const response = await apiFetch(`${API_ENDPOINTS.PROCESSING.RESULTS}?page=${page}&page_size=${pageSize}&ordering=-created_at`);
+    return response;
+  } catch (error) {
+    console.error('User processing results fetch error:', error);
+    throw error;
+  }
+};
+
 // Get user's processing quota
 export const getProcessingQuota = async () => {
   try {

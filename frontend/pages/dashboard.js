@@ -205,9 +205,17 @@ const DashboardPage = () => {
                   <span className={styles.badge}>AI Styles</span>
                   <h1 className={styles.title}>Panel de estilos</h1>
                   {authenticated && user && (
-                    <p className={styles.welcomeText}>
-                      ¡Bienvenido, {user.first_name || user.username}!
-                    </p>
+                    <div className={styles.userWelcome}>
+                      <p className={styles.welcomeText}>
+                        ¡Bienvenido, {user.first_name || user.username}!
+                      </p>
+                      <button 
+                        onClick={() => router.push('/my-creations')}
+                        className={styles.galleryButton}
+                      >
+                        🎨 Mis Creaciones
+                      </button>
+                    </div>
                   )}
                   {!authenticated && (
                     <p className={styles.guestText}>

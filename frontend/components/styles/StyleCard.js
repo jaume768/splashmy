@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import { useRouter } from 'next/router';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from './StyleCard.module.css';
 
@@ -19,8 +20,15 @@ const StyleCard = ({ style, onStyleClick }) => {
   const imageUrl = thumbnail || preview_image;
 
   const { authenticated } = useAuth();
+  const router = useRouter();
   
   const handleClick = () => {
+    if (!authenticated) {
+      // Redirect to login if not authenticated
+      router.push('/login?redirect=dashboard');
+      return;
+    }
+    
     if (onStyleClick) {
       onStyleClick(style);
     }
@@ -28,17 +36,17 @@ const StyleCard = ({ style, onStyleClick }) => {
 
   return (
     <div 
-      className={`${styles.card} ${authenticated ? styles.clickable : ''}`}
-      onClick={authenticated ? handleClick : undefined}
-      role={authenticated ? "button" : undefined}
-      tabIndex={authenticated ? 0 : undefined}
-      onKeyDown={authenticated ? (e) => {
+      className={`${styles.card} ${styles.clickable}`}
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           handleClick();
         }
-      } : undefined}
-      aria-label={authenticated ? `Aplicar estilo ${name}` : undefined}
+      }}
+      aria-label={`Aplicar estilo ${name}`}
     >
       <div className={styles.imageContainer}>
         {imageUrl ? (
