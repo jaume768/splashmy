@@ -53,6 +53,7 @@ export const API_ENDPOINTS = {
     JOB_DETAIL: (id) => `/api/v1/processing/jobs/${id}/`,
     JOB_LIST: '/api/v1/processing/jobs/list/',
     CANCEL_JOB: (id) => `/api/v1/processing/jobs/${id}/cancel/`,
+    JOB_RESULTS: (id) => `/api/v1/processing/jobs/${id}/results/`,
     RESULTS: '/api/v1/processing/results/',
     DOWNLOAD_RESULT: (id) => `/api/v1/processing/results/${id}/download/`,
     QUOTA: '/api/v1/processing/quota/',
@@ -339,6 +340,17 @@ export const cancelJob = async (jobId) => {
     return response;
   } catch (error) {
     console.error('Job cancellation error:', error);
+    throw error;
+  }
+};
+
+// Get complete job results with processing data
+export const getJobResults = async (jobId) => {
+  try {
+    const response = await apiFetch(API_ENDPOINTS.PROCESSING.JOB_RESULTS(jobId));
+    return response;
+  } catch (error) {
+    console.error('Job results fetch error:', error);
     throw error;
   }
 };

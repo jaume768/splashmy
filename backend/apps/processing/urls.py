@@ -9,6 +9,7 @@ urlpatterns = [
     path('jobs/list/', views.ProcessingJobListView.as_view(), name='job-list'),
     path('jobs/<uuid:pk>/', views.ProcessingJobDetailView.as_view(), name='job-detail'),
     path('jobs/<uuid:job_id>/cancel/', views.cancel_processing_job, name='cancel-job'),
+    path('jobs/<uuid:job_id>/results/', views.get_job_results, name='job-results'),
     
     # Processing results
     path('results/', views.ProcessingResultListView.as_view(), name='results'),

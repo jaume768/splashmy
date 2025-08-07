@@ -420,6 +420,39 @@ def rate_result(request, result_id):
 def download_result(request, result_id):
     """Generate download URL for processing result"""
     
+    def build_download_url(s3_url):
+        """Build absolute URL for download in development, S3 URL in production"""
+        from django.conf import settings
+        
+        if not s3_url:
+            return ''
+            
+        # If it's already an absolute URL (S3), return as is
+        if s3_url.startswith(('http://', 'https://')):
+            return s3_url
+            
+        # For development, build absolute URL pointing to backend
+        if settings.DEBUG and not getattr(settings, 'USE_S3_STORAGE', False):
+            backend_host = getattr(settings, 'BACKEND_HOST', 'localhost:8000')
+            scheme = 'https' if request.is_secure() else 'http'
+            
+            # Clean path if it starts with /media/
+            clean_path = s3_url
+            if clean_path.startswith(settings.MEDIA_URL):
+                clean_path = clean_path[len(settings.MEDIA_URL):]
+                
+            return f"{scheme}://{backend_host}{settings.MEDIA_URL}{clean_path}"
+        else:
+            # Production: try to generate presigned URL
+            try:
+                download_url = aws_image_service.generate_presigned_url(
+                    s3_url, 
+                    expiration=3600
+                )
+                return download_url
+            except:
+                return s3_url
+    
     try:
         result = get_object_or_404(
             ProcessingResult, 
@@ -427,21 +460,13 @@ def download_result(request, result_id):
             job__user=request.user
         )
         
-        if not result.s3_key:
-            return Response({
-                'error': 'Result not found in storage'
-            }, status=status.HTTP_404_NOT_FOUND)
-        
-        # Generate signed URL for download
-        download_url = aws_image_service.generate_presigned_url(
-            result.s3_key, 
-            expiration=3600  # 1 hour
-        )
+        # Use s3_url (which contains the file path) for building download URL
+        download_url = build_download_url(result.s3_url)
         
         if not download_url:
             return Response({
-                'error': 'Failed to generate download URL'
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                'error': 'Result not found in storage'
+            }, status=status.HTTP_404_NOT_FOUND)
         
         # Increment download count
         result.download_count += 1
@@ -538,3 +563,107 @@ class ProcessingTemplateListView(generics.ListCreateAPIView):
     
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
+def get_job_results(request, job_id):
+    """Get complete job results with all processing data"""
+    
+    def build_media_url(file_path):
+        """Build absolute URL for media files in development, relative in production"""
+        from django.conf import settings
+        
+        if not file_path:
+            return ''
+            
+        # If it's already an absolute URL (S3), return as is
+        if file_path.startswith(('http://', 'https://')):
+            return file_path
+            
+        # For development, build absolute URL pointing to backend
+        if settings.DEBUG and not getattr(settings, 'USE_S3_STORAGE', False):
+            # En desarrollo local, siempre usar el puerto del backend (8000)
+            # En Docker, usar el host configurado en settings
+            backend_host = getattr(settings, 'BACKEND_HOST', 'localhost:8000')
+            scheme = 'https' if request.is_secure() else 'http'
+            
+            # Remover prefijo /media/ si ya existe en file_path
+            clean_path = file_path
+            if clean_path.startswith(settings.MEDIA_URL):
+                clean_path = clean_path[len(settings.MEDIA_URL):]
+                
+            return f"{scheme}://{backend_host}{settings.MEDIA_URL}{clean_path}"
+        else:
+            # For production with S3 or when file_path already has MEDIA_URL
+            if file_path.startswith(settings.MEDIA_URL):
+                return file_path
+            return f"{settings.MEDIA_URL}{file_path}"
+    
+    try:
+        # Get the job and ensure it belongs to the user
+        job = get_object_or_404(
+            ProcessingJob, 
+            id=job_id, 
+            user=request.user
+        )
+        
+        # Get all results for this job
+        results = job.results.all().order_by('-created_at')
+        
+        # Return complete job and results data
+        response_data = {
+            'job': {
+                'id': job.id,
+                'job_type': job.job_type,
+                'status': job.status,
+                'prompt': job.prompt,
+                'created_at': job.created_at,
+                'started_at': job.started_at,
+                'completed_at': job.completed_at,
+                'processing_time': job.processing_time,
+                'openai_parameters': job.openai_parameters,
+                'error_message': job.error_message,
+                'original_image': {
+                    'id': job.original_image.id,
+                    'title': job.original_image.title or job.original_image.original_filename,
+                    'url': build_media_url(job.original_image.s3_url or str(job.original_image.original_image)),
+                    'width': job.original_image.width,
+                    'height': job.original_image.height,
+                } if job.original_image else None,
+                'style': {
+                    'id': job.style.id,
+                    'name': job.style.name,
+                    'description': job.style.description,
+                    'preview_image': job.style.preview_image,
+                    'thumbnail': job.style.thumbnail,
+                    'category_name': job.style.category.name,
+                } if job.style else None,
+            },
+            'results': [
+                {
+                    'id': result.id,
+                    'result_format': result.result_format,
+                    'result_size': result.result_size,
+                    'result_quality': result.result_quality,
+                    'result_background': result.result_background,
+                    's3_url': build_media_url(result.s3_url),
+                    'user_rating': result.user_rating,
+                    'is_favorite': result.is_favorite,
+                    'download_count': result.download_count,
+                    'created_at': result.created_at,
+                    'token_usage': result.token_usage,
+                }
+                for result in results
+            ],
+            'total_results': results.count(),
+            'has_results': results.exists(),
+        }
+        
+        return Response(response_data)
+        
+    except Exception as e:
+        return Response({
+            'error': 'Failed to get job results',
+            'details': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)

@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { useAuth } from '../../contexts/AuthContext';
-import { uploadImage, createStyleTransferJob, getJobStatus } from '../../utils/api';
+import { uploadImage, createStyleTransferJob, getJobStatus, getJobResults, downloadProcessingResult } from '../../utils/api';
 import styles from './StyleTransferModal.module.css';
 
 const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
@@ -16,6 +16,11 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
   const [processingStep, setProcessingStep] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState(null);
+  
+  // Estados para mostrar resultados
+  const [processingComplete, setProcessingComplete] = useState(false);
+  const [processingResult, setProcessingResult] = useState(null);
+  const [downloadingResult, setDownloadingResult] = useState(false);
   
   // Opciones de configuración
   const [quality, setQuality] = useState('medium');
@@ -32,6 +37,9 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
     setUploadProgress(0);
     setError(null);
     setJobId(null);
+    setProcessingComplete(false);
+    setProcessingResult(null);
+    setDownloadingResult(false);
   }, []);
 
   // Manejar cierre del modal
@@ -108,9 +116,20 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
         const jobStatus = await getJobStatus(jobId);
         
         if (jobStatus.status === 'completed') {
-          setProcessingStep('¡Completado!');
-          setIsProcessing(false);
-          onComplete(jobStatus);
+          setProcessingStep('Obteniendo resultados...');
+          try {
+            // Obtener los resultados completos del job
+            const resultData = await getJobResults(jobId);
+            setProcessingResult(resultData);
+            setProcessingComplete(true);
+            setIsProcessing(false);
+            setProcessingStep('¡Completado!');
+            // No llamamos onComplete aquí para mantener el modal abierto
+          } catch (err) {
+            console.error('Error getting job results:', err);
+            setError('Error al obtener los resultados');
+            setIsProcessing(false);
+          }
           return;
         }
         
@@ -141,6 +160,33 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
     };
 
     poll();
+  };
+
+  // Manejar descarga del resultado
+  const handleDownloadResult = async (resultId) => {
+    try {
+      setDownloadingResult(true);
+      const downloadData = await downloadProcessingResult(resultId);
+      
+      // Abrir URL de descarga en nueva pestaña
+      if (downloadData.download_url) {
+        window.open(downloadData.download_url, '_blank');
+      }
+    } catch (err) {
+      console.error('Error downloading result:', err);
+      setError('Error al descargar la imagen');
+    } finally {
+      setDownloadingResult(false);
+    }
+  };
+
+  // Manejar cierre con resultado completo
+  const handleCloseWithResult = () => {
+    if (processingResult && onComplete) {
+      onComplete(processingResult);
+    }
+    resetModal();
+    onClose();
   };
 
   // Procesar style transfer
@@ -349,6 +395,94 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
                 <div className={styles.processingBar}>
                   <div className={styles.processingProgress}></div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Sección de resultados */}
+          {processingComplete && processingResult && processingResult.results && processingResult.results.length > 0 && (
+            <div className={styles.resultSection}>
+              <h3 className={styles.sectionTitle}>¡Resultado listo!</h3>
+              
+              {/* Comparación antes/después */}
+              <div className={styles.beforeAfter}>
+                <div className={styles.imageComparison}>
+                  <div className={styles.imageContainer}>
+                    <p className={styles.imageLabel}>Original</p>
+                    <div className={styles.imageWrapper}>
+                      {imagePreview && (
+                        <img 
+                          src={imagePreview} 
+                          alt="Original" 
+                          className={styles.comparisonImage}
+                        />
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className={styles.arrowContainer}>
+                    <svg className={styles.arrowIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </div>
+                  
+                  <div className={styles.imageContainer}>
+                    <p className={styles.imageLabel}>Con estilo {selectedStyle.name}</p>
+                    <div className={styles.imageWrapper}>
+                      {processingResult.results[0].s3_url && (
+                        <img 
+                          src={processingResult.results[0].s3_url} 
+                          alt="Resultado estilizado" 
+                          className={styles.comparisonImage}
+                        />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Información del resultado */}
+              <div className={styles.resultInfo}>
+                <div className={styles.resultStats}>
+                  <span className={styles.statItem}>
+                    <strong>Calidad:</strong> {processingResult.results[0].result_quality}
+                  </span>
+                  <span className={styles.statItem}>
+                    <strong>Tamaño:</strong> {processingResult.results[0].result_size}
+                  </span>
+                  <span className={styles.statItem}>
+                    <strong>Formato:</strong> {processingResult.results[0].result_format.toUpperCase()}
+                  </span>
+                  {processingResult.job.processing_time && (
+                    <span className={styles.statItem}>
+                      <strong>Tiempo:</strong> {Math.round(processingResult.job.processing_time)}s
+                    </span>
+                  )}
+                </div>
+              </div>
+              
+              {/* Acciones del resultado */}
+              <div className={styles.resultActions}>
+                <button
+                  onClick={() => handleDownloadResult(processingResult.results[0].id)}
+                  className={styles.downloadButton}
+                  disabled={downloadingResult}
+                >
+                  <svg className={styles.buttonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  {downloadingResult ? 'Descargando...' : 'Descargar'}
+                </button>
+                
+                <button
+                  onClick={handleCloseWithResult}
+                  className={styles.completeButton}
+                >
+                  <svg className={styles.buttonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Completar
+                </button>
               </div>
             </div>
           )}
