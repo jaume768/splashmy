@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from '../../styles/components/dashboard/MobileBottomMenu.module.css';
 
-export default function MobileBottomMenu() {
+export default function MobileBottomMenu({ activeView = 'explore', onNavigate }) {
   const router = useRouter();
   const { authenticated } = useAuth();
 
@@ -13,10 +13,10 @@ export default function MobileBottomMenu() {
     { key: 'top', label: 'Top', icon: (
       <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
     )},
-    { key: 'upload', label: 'Subidas', icon: (
+    { key: 'uploads', label: 'Subidas', icon: (
       <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7z"/></svg>
     )},
-    { key: 'library', label: 'Biblioteca', icon: (
+    { key: 'my-gallery', label: 'Biblioteca', icon: (
       <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M4 4h16v12H5.17L4 17.17V4zm0 14h16v2H4v-2z"/></svg>
     )},
     { key: 'profile', label: authenticated ? 'Perfil' : 'Login', icon: (
@@ -24,10 +24,31 @@ export default function MobileBottomMenu() {
     )},
   ];
 
+  const handleClick = (key) => {
+    if (key === 'profile') {
+      if (!authenticated) router.push('/login');
+      // else: could open profile modal; no-op for now
+      return;
+    }
+    if (key === 'my-gallery' || key === 'uploads') {
+      if (!authenticated) {
+        router.push('/login');
+        return;
+      }
+    }
+    if (typeof onNavigate === 'function') onNavigate(key);
+  };
+
   return (
     <nav className={styles.bottomNav} aria-label="Mobile navigation">
       {items.map((it) => (
-        <button key={it.key} className={styles.navItem} aria-label={it.label}>
+        <button
+          key={it.key}
+          className={styles.navItem}
+          aria-label={it.label}
+          aria-current={activeView === it.key ? 'page' : undefined}
+          onClick={() => handleClick(it.key)}
+        >
           <span className={styles.icon}>{it.icon}</span>
           <span className={styles.label}>{it.label}</span>
         </button>
