@@ -88,11 +88,16 @@ export const apiFetch = async (endpoint, options = {}) => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(JSON.stringify({
+      const errorPayload = {
         status: response.status,
         statusText: response.statusText,
         errors: errorData
-      }));
+      };
+      const err = new Error(JSON.stringify(errorPayload));
+      // Attach useful properties for programmatic handling
+      err.status = response.status;
+      err.response = errorPayload;
+      throw err;
     }
 
     return await response.json();

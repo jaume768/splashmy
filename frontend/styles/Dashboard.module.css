@@ -13,7 +13,6 @@
 
 .container {
   width: 100%;
-  max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--spacing-md);
 }
@@ -459,8 +458,19 @@
    ========================================================================== */
 .mainContent {
   flex: 1;
-  padding: var(--spacing-2xl) 0;
+  padding: var(--spacing-2xl) 0 calc(var(--spacing-2xl) + 72px);
   background: var(--color-white);
+}
+
+/* Layout con sidebar */
+.contentLayout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+}
+
+.content {
+  min-width: 0; /* evita overflow en grid */
 }
 
 /* ==========================================================================
@@ -469,7 +479,7 @@
 .footer {
   background: linear-gradient(135deg, var(--color-dark) 0%, var(--color-darkest) 100%);
   color: var(--color-white);
-  padding: var(--spacing-xl) 0;
+  padding: var(--spacing-xl) 0 calc(var(--spacing-xl) + 72px);
 }
 
 .footerContent {
@@ -550,6 +560,14 @@
     padding: var(--spacing-2xl) 0;
   }
   
+  .mainContent {
+    padding: var(--spacing-2xl) 0; /* sin espacio extra, no hay bottom nav */
+  }
+  
+  .footer {
+    padding: var(--spacing-xl) 0; /* restablece padding normal */
+  }
+  
   .title {
     font-size: var(--font-size-4xl);
   }
@@ -583,6 +601,18 @@
   
   .controlsGrid {
     grid-template-columns: 1fr 300px auto;
+    max-width: 1200px;
+    margin: auto;
+  }
+  
+  .contentLayout {
+    grid-template-columns: 260px 1fr;
+  }
+
+  .activeFilters {
+    max-width: 1200px;
+    margin: auto;
+    margin-top: 10px;
   }
   
 }

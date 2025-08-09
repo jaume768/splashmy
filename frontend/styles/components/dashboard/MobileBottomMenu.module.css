@@ -1,0 +1,35 @@
+.bottomNav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px env(safe-area-inset-right) calc(8px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+  height: 64px;
+  background: linear-gradient(180deg, var(--color-darkest), var(--color-dark));
+  border-top: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.25);
+}
+
+.navItem {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: rgba(255,255,255,0.9);
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  padding: 6px 10px;
+}
+
+.icon { width: 20px; height: 20px; }
+.label { font-size: 11px; opacity: 0.9; }
+
+@media (min-width: 768px) {
+  .bottomNav { display: none; }
+}

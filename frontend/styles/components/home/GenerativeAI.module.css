@@ -152,8 +152,6 @@
   position: absolute;
   inset: 0;                     /* llena todo el .imageStack */
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
-  transition: transform var(--transition-base);
 }
 
 .image {

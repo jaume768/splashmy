@@ -7,77 +7,14 @@ import Notification from '../components/ui/Notification';
 import { fetchStyleCategories } from '../utils/api';
 import styles from '../styles/Dashboard.module.css';
 import { useAuth } from '../contexts/AuthContext';
+import DashboardHeader from '../components/dashboard/DashboardHeader';
+import DashboardSidebar from '../components/dashboard/DashboardSidebar';
+import SearchInput from '../components/dashboard/SearchInput';
+import CategoryFilter from '../components/dashboard/CategoryFilter';
+import StatsCard from '../components/dashboard/StatsCard';
+import MobileBottomMenu from '../components/dashboard/MobileBottomMenu';
 
-// Componente de búsqueda modular
-const SearchInput = ({ searchTerm, onSearchChange, onClear }) => (
-  <div className={styles.searchCard}>
-    <div className={styles.searchInputWrapper}>
-      <svg className={styles.searchIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-      </svg>
-      <input
-        type="text"
-        placeholder="Buscar estilos..."
-        value={searchTerm}
-        onChange={onSearchChange}
-        className={styles.searchInput}
-      />
-      {searchTerm && (
-        <button onClick={onClear} className={styles.clearButton} aria-label="Borrar búsqueda">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      )}
-    </div>
-  </div>
-);
-
-// Componente de filtro de categorías modular
-const CategoryFilter = ({ selectedCategory, categories, onCategoryChange, loadingCategories }) => (
-  <div className={styles.filterCard}>
-    <label className={styles.filterLabel}>Categoría</label>
-    <div className={styles.selectWrapper}>
-      <select
-        value={selectedCategory}
-        onChange={onCategoryChange}
-        className={styles.categorySelect}
-        disabled={loadingCategories}
-      >
-        <option value="">Todas las categorías</option>
-        {Array.isArray(categories) && categories.map(category => (
-          <option key={category.id} value={category.name}>
-            {category.name} ({category.styles_count})
-          </option>
-        ))}
-      </select>
-      <svg className={styles.selectIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-      </svg>
-    </div>
-  </div>
-);
-
-// Componente de estadísticas modular
-const StatsCard = ({ categories }) => {
-  const totalStyles = Array.isArray(categories) 
-    ? categories.reduce((sum, cat) => sum + (cat.styles_count || 0), 0)
-    : 0;
-  
-  return (
-    <div className={styles.statsCard}>
-      <div className={styles.statItem}>
-        <span className={styles.statNumber}>{categories.length}</span>
-        <span className={styles.statLabel}>Categorías</span>
-      </div>
-      <div className={styles.statDivider}></div>
-      <div className={styles.statItem}>
-        <span className={styles.statNumber}>{totalStyles}</span>
-        <span className={styles.statLabel}>Estilos</span>
-      </div>
-    </div>
-  );
-};
+// (Inline UI subcomponents moved to components/dashboard/*)
 
 const DashboardPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -97,7 +34,7 @@ const DashboardPage = () => {
   });
   
   const router = useRouter();
-  const { user, authenticated } = useAuth();
+  const { authenticated } = useAuth();
 
   // Obtener categorías para el filtro
   useEffect(() => {
@@ -110,6 +47,18 @@ const DashboardPage = () => {
         setCategories(data);
       } catch (error) {
         console.error('Error al obtener categorías:', error);
+        // Si el token es inválido o la API devuelve 401, redirigir a login
+        if (
+          error?.status === 401 ||
+          (typeof error?.message === 'string' && (error.message.includes('"status":401') || error.message.includes('Invalid token')))
+        ) {
+          try {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+          } catch (e) {}
+          router.replace('/login');
+          return;
+        }
         setCategories([]);
       } finally {
         setLoadingCategories(false);
@@ -196,45 +145,8 @@ const DashboardPage = () => {
       </Head>
 
       <div className={styles.dashboard}>
-        {/* Encabezado moderno */}
-        <header className={styles.header}>
-          <div className={styles.container}>
-            <div className={styles.headerContent}>
-              <div className={styles.titleSection}>
-                <div className={styles.titleWrapper}>
-                  <span className={styles.badge}>AI Styles</span>
-                  <h1 className={styles.title}>Panel de estilos</h1>
-                  {authenticated && user && (
-                    <div className={styles.userWelcome}>
-                      <p className={styles.welcomeText}>
-                        ¡Bienvenido, {user.first_name || user.username}!
-                      </p>
-                      <button 
-                        onClick={() => router.push('/my-creations')}
-                        className={styles.galleryButton}
-                      >
-                        🎨 Mis Creaciones
-                      </button>
-                    </div>
-                  )}
-                  {!authenticated && (
-                    <p className={styles.guestText}>
-                      <span>Explora nuestros estilos. </span>
-                      <a href="/login" className={styles.loginLink}>Inicia sesión</a>
-                      <span> o </span>
-                      <a href="/register" className={styles.registerLink}>regístrate</a>
-                      <span> para más funciones.</span>
-                    </p>
-                  )}
-                </div>
-                <p className={styles.subtitle}>
-                  Descubre y explora todos los estilos de transformación de imágenes AI disponibles
-                </p>
-              </div>
-              <StatsCard categories={categories} />
-            </div>
-          </div>
-        </header>
+        {/* Header minimal con perfil/modal (solo UI) */}
+        <DashboardHeader />
 
         {/* Panel de control */}
         <section className={styles.controlPanel}>
@@ -253,16 +165,6 @@ const DashboardPage = () => {
                 loadingCategories={loadingCategories}
               />
               
-              {(searchTerm || selectedCategory) && (
-                <div className={styles.actionCard}>
-                  <button onClick={clearFilters} className={styles.clearFiltersButton}>
-                    <svg className={styles.clearIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    Limpiar filtros
-                  </button>
-                </div>
-              )}
             </div>
             
             {(searchTerm || selectedCategory) && (
@@ -294,11 +196,16 @@ const DashboardPage = () => {
         {/* Contenido principal */}
         <main className={styles.mainContent}>
           <div className={styles.container}>
-            <StyleGrid 
-              searchTerm={searchTerm}
-              selectedCategory={selectedCategory}
-              onStyleClick={handleStyleClick}
-            />
+            <div className={styles.contentLayout}>
+              <DashboardSidebar />
+              <div className={styles.content}>
+                <StyleGrid 
+                  searchTerm={searchTerm}
+                  selectedCategory={selectedCategory}
+                  onStyleClick={handleStyleClick}
+                />
+              </div>
+            </div>
           </div>
         </main>
         
@@ -318,6 +225,9 @@ const DashboardPage = () => {
           onClose={hideNotification}
           duration={5000}
         />
+
+        {/* Menú inferior para móvil */}
+        <MobileBottomMenu />
 
         {/* Pie de página minimalista */}
         <footer className={styles.footer}>

@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import StyleCard from './StyleCard';
 import { fetchStyles, fetchStyleCategories } from '../../utils/api';
 import styles from './StyleGrid.module.css';
+import { useRouter } from 'next/router';
 
 const StyleGrid = ({ searchTerm = '', selectedCategory = null, onStyleClick }) => {
   const [stylesData, setStylesData] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const router = useRouter();
 
   // Fetch styles and categories
   useEffect(() => {
@@ -43,8 +45,20 @@ const StyleGrid = ({ searchTerm = '', selectedCategory = null, onStyleClick }) =
         setStylesData(stylesData);
         setCategories(categoriesData);
       } catch (err) {
-        setError(err.message);
         console.error('Error fetching styles data:', err);
+        // Redirect to login on unauthorized/token invalid
+        if (
+          err?.status === 401 ||
+          (typeof err?.message === 'string' && (err.message.includes('"status":401') || err.message.includes('Invalid token')))
+        ) {
+          try {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+          } catch (e) {}
+          router.replace('/login');
+          return;
+        }
+        setError(err.message);
       } finally {
         setLoading(false);
       }
