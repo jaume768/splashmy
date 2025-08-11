@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import styles from '../../../styles/ImagesView.module.css';
-import { getPublicProcessingResults } from '../../../utils/api';
+import { getPublicProcessingResults, getProcessingResultDetail, toggleProcessingResultLike } from '../../../utils/api';
+import { useAuth } from '../../../contexts/AuthContext';
 
 export default function ImagesView() {
   const [items, setItems] = useState([]);
@@ -12,6 +13,10 @@ export default function ImagesView() {
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
   const PAGE_SIZE = 30;
+  const { authenticated } = useAuth();
+  const [likeLoadingId, setLikeLoadingId] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const loadPage = useCallback(async (nextPage) => {
     if (loading || !hasMore) return;
@@ -93,6 +98,50 @@ export default function ImagesView() {
     return () => observerRef.current && observerRef.current.disconnect();
   }, [page, hasMore, nextPage, loading, loadPage]);
 
+  // Handlers for likes
+  const handleToggleLike = useCallback(async (item) => {
+    try {
+      if (!authenticated) {
+        alert('Debes iniciar sesión para dar like.');
+        return;
+      }
+      setLikeLoadingId(item.id);
+      const res = await toggleProcessingResultLike(item.id);
+
+      // Update items list
+      setItems((prev) => prev.map((it) => (
+        it.id === item.id ? { ...it, user_has_liked: res.liked, like_count: res.like_count } : it
+      )));
+
+      // Update selected item if open
+      setSelectedItem((prev) => prev && prev.id === item.id ? { ...prev, user_has_liked: res.liked, like_count: res.like_count } : prev);
+    } catch (err) {
+      console.error('Error toggling like:', err);
+      setError('No se pudo actualizar el like.');
+    } finally {
+      setLikeLoadingId(null);
+    }
+  }, [authenticated]);
+
+  // Modal handlers
+  const openModal = useCallback(async (item) => {
+    try {
+      setSelectedItem(item);
+      setIsModalOpen(true);
+      // Refresh details for accuracy (like count, signed url)
+      const detail = await getProcessingResultDetail(item.id);
+      setSelectedItem((prev) => ({ ...prev, ...detail }));
+    } catch (err) {
+      // If detail fails, keep basic info
+      console.warn('No se pudo cargar el detalle de la imagen:', err);
+    }
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setIsModalOpen(false);
+    setSelectedItem(null);
+  }, []);
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -106,8 +155,20 @@ export default function ImagesView() {
 
       <section className={styles.masonry}>
         {items.map((item) => (
-          <article key={item.id} className={styles.card}>
+          <article key={item.id} className={styles.card} onClick={() => openModal(item)}>
             <div className={styles.imageWrap}>
+              <button
+                className={`${styles.likeButton} ${item.user_has_liked ? styles.liked : ''}`}
+                disabled={likeLoadingId === item.id}
+                onClick={(e) => { e.stopPropagation(); handleToggleLike(item); }}
+                aria-label={item.user_has_liked ? 'Quitar me gusta' : 'Dar me gusta'}
+                title={item.user_has_liked ? 'Quitar me gusta' : 'Dar me gusta'}
+              >
+                <svg className={styles.likeIcon} viewBox="0 0 24 24" fill={item.user_has_liked ? '#dc2626' : 'none'} stroke="#dc2626" strokeWidth="2">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+                <span className={styles.likeCount}>{item.like_count || 0}</span>
+              </button>
               <img
                 src={item.s3_url || item.signed_url}
                 alt={item.job_prompt ? `Imagen generada: ${item.job_prompt}` : 'Imagen generada'}
@@ -118,6 +179,44 @@ export default function ImagesView() {
           </article>
         ))}
       </section>
+
+      {isModalOpen && selectedItem && (
+        <div className={styles.modalBackdrop} onClick={closeModal}>
+          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalTitle}>Detalle de imagen</div>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <button
+                  className={`${styles.likeButton} ${selectedItem.user_has_liked ? styles.liked : ''}`}
+                  disabled={likeLoadingId === selectedItem.id}
+                  onClick={() => handleToggleLike(selectedItem)}
+                  aria-label={selectedItem.user_has_liked ? 'Quitar me gusta' : 'Dar me gusta'}
+                >
+                  <svg className={styles.likeIcon} viewBox="0 0 24 24" fill={selectedItem.user_has_liked ? '#dc2626' : 'none'} stroke="#dc2626" strokeWidth="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                  <span className={styles.likeCount}>{selectedItem.like_count || 0}</span>
+                </button>
+                <button className={styles.modalClose} onClick={closeModal} aria-label="Cerrar">✕</button>
+              </div>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.modalImageWrap}>
+                <img
+                  src={selectedItem.s3_url || selectedItem.signed_url}
+                  alt={selectedItem.job_prompt ? `Imagen generada: ${selectedItem.job_prompt}` : 'Imagen generada'}
+                  className={styles.modalImage}
+                />
+              </div>
+            </div>
+            <div className={styles.modalFooter}>
+              <div className={styles.prompt}>
+                {selectedItem.job_prompt || ''}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Loader and sentinel */}
       <div className={styles.loaderWrap}>

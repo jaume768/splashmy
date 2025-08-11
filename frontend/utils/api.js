@@ -56,6 +56,8 @@ export const API_ENDPOINTS = {
     JOB_RESULTS: (id) => `/api/v1/processing/jobs/${id}/results/`,
     RESULTS: '/api/v1/processing/results/',
     PUBLIC_RESULTS: '/api/v1/processing/results/public/',
+    RESULT_DETAIL: (id) => `/api/v1/processing/results/${id}/`,
+    TOGGLE_LIKE: (id) => `/api/v1/processing/results/${id}/like/`,
     DOWNLOAD_RESULT: (id) => `/api/v1/processing/results/${id}/download/`,
     QUOTA: '/api/v1/processing/quota/',
     STATS: '/api/v1/processing/stats/',
@@ -377,6 +379,30 @@ export const getPublicProcessingResults = async (page = 1, pageSize = 30) => {
     return response;
   } catch (error) {
     console.error('Public processing results fetch error:', error);
+    throw error;
+  }
+};
+
+// Get single processing result detail
+export const getProcessingResultDetail = async (resultId) => {
+  try {
+    const response = await apiFetch(API_ENDPOINTS.PROCESSING.RESULT_DETAIL(resultId));
+    return response;
+  } catch (error) {
+    console.error('Processing result detail fetch error:', error);
+    throw error;
+  }
+};
+
+// Toggle like for a processing result (requires auth)
+export const toggleProcessingResultLike = async (resultId) => {
+  try {
+    const response = await apiFetch(API_ENDPOINTS.PROCESSING.TOGGLE_LIKE(resultId), {
+      method: 'POST',
+    });
+    return response;
+  } catch (error) {
+    console.error('Toggle like error:', error);
     throw error;
   }
 };

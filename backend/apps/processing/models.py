@@ -118,6 +118,27 @@ class ProcessingResult(models.Model):
         return f"Result {self.id} for job {self.job.id}"
 
 
+class ProcessingResultLike(models.Model):
+    """User likes for public processing results"""
+    
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='processing_result_likes')
+    result = models.ForeignKey(ProcessingResult, on_delete=models.CASCADE, related_name='likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'processing_result_likes'
+        verbose_name = 'Processing Result Like'
+        verbose_name_plural = 'Processing Result Likes'
+        unique_together = ('user', 'result')
+        indexes = [
+            models.Index(fields=['result']),
+            models.Index(fields=['user']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user_id} ➜ {self.result_id}"
+
+
 class StreamingEvent(models.Model):
     """Store streaming events from OpenAI for real-time processing"""
     

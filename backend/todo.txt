@@ -4,5 +4,4 @@
 - Rate limiting por IP/usuario
 - Monitoreo de jobs en tiempo real
 - Implementar open api
-- Implementar sistema de monitoreo
 - Optimización de consultas DB

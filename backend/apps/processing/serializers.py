@@ -158,6 +158,8 @@ class ProcessingResultSerializer(serializers.ModelSerializer):
     job_type = serializers.CharField(source='job.job_type', read_only=True)
     job_prompt = serializers.CharField(source='job.prompt', read_only=True)
     signed_url = serializers.SerializerMethodField()
+    like_count = serializers.SerializerMethodField()
+    user_has_liked = serializers.SerializerMethodField()
     
     class Meta:
         model = ProcessingResult
@@ -165,7 +167,7 @@ class ProcessingResultSerializer(serializers.ModelSerializer):
             'id', 'job', 'job_type', 'job_prompt',
             'result_format', 'result_size', 'result_quality', 'result_background',
             's3_url', 'signed_url', 'openai_created_at', 'token_usage',
-            'user_rating', 'is_favorite', 'is_public', 'download_count',
+            'user_rating', 'is_favorite', 'is_public', 'like_count', 'user_has_liked', 'download_count',
             'created_at', 'updated_at'
         ]
         read_only_fields = [
@@ -181,6 +183,27 @@ class ProcessingResultSerializer(serializers.ModelSerializer):
             from apps.images.services import aws_image_service
             return aws_image_service.generate_presigned_url(obj.s3_key)
         return None
+
+    def get_like_count(self, obj):
+        """Return annotated like_count if present or compute from relation"""
+        # If annotated by queryset
+        if hasattr(obj, 'like_count') and obj.like_count is not None:
+            return obj.like_count
+        # Fallback to count relation
+        try:
+            return obj.likes.count()
+        except Exception:
+            return 0
+
+    def get_user_has_liked(self, obj):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        if user is not None and getattr(user, 'is_authenticated', False):
+            try:
+                return obj.likes.filter(user=user).exists()
+            except Exception:
+                return False
+        return False
 
 
 class StreamingEventSerializer(serializers.ModelSerializer):
