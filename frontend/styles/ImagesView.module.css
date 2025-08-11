@@ -1,0 +1,103 @@
+/* Public Images View styles: Masonry layout with responsive columns */
+
+.container {
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0 16px;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.subtitle {
+  color: var(--text-muted, #6b7280);
+  font-size: 0.95rem;
+}
+
+.error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+
+/* Masonry using CSS columns for broad browser support */
+.masonry {
+  column-count: 2;
+  column-gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .masonry { column-count: 3; }
+}
+
+@media (min-width: 1024px) {
+  .masonry { column-count: 4; }
+}
+
+.card {
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 16px;
+  background: var(--card-bg, #fff);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.06);
+  break-inside: avoid;
+}
+
+.imageWrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: #f8fafc;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.loaderWrap {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.loader {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid #e5e7eb;
+  border-top-color: #6366f1;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.sentinel {
+  width: 100%;
+  height: 1px;
+}
+
+.empty {
+  text-align: center;
+  color: var(--text-muted, #6b7280);
+  padding: 24px 0 40px;
+}

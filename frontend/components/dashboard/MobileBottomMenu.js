@@ -30,7 +30,7 @@ export default function MobileBottomMenu({ activeView = 'explore', onNavigate })
       // else: could open profile modal; no-op for now
       return;
     }
-    if (key === 'my-gallery' || key === 'images') {
+    if (key === 'my-gallery') {
       if (!authenticated) {
         router.push('/login');
         return;

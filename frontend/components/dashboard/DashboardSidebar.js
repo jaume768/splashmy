@@ -21,9 +21,6 @@ const itemsLibrary = [
   { key: 'my-gallery', label: 'Mi galería', icon: (
     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M4 4h16v12H5.17L4 17.17V4zm0 14h16v2H4v-2z"/></svg>
   )},
-  { key: 'uploads', label: 'Subidas', icon: (
-    <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7z"/></svg>
-  )},
   { key: 'trash', label: 'Reciclaje', icon: (
     <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
   )},
@@ -34,7 +31,7 @@ export default function DashboardSidebar({ activeView = 'explore', onNavigate })
   const { authenticated } = useAuth();
 
   const handleItemClick = (key) => {
-    if (key === 'my-gallery' || key === 'uploads' || key === 'likes' || key === 'images') {
+    if (key === 'my-gallery' || key === 'uploads' || key === 'likes') {
       if (!authenticated) {
         router.push('/login');
         return;

@@ -55,6 +55,7 @@ export const API_ENDPOINTS = {
     CANCEL_JOB: (id) => `/api/v1/processing/jobs/${id}/cancel/`,
     JOB_RESULTS: (id) => `/api/v1/processing/jobs/${id}/results/`,
     RESULTS: '/api/v1/processing/results/',
+    PUBLIC_RESULTS: '/api/v1/processing/results/public/',
     DOWNLOAD_RESULT: (id) => `/api/v1/processing/results/${id}/download/`,
     QUOTA: '/api/v1/processing/quota/',
     STATS: '/api/v1/processing/stats/',
@@ -365,6 +366,17 @@ export const getUserProcessingResults = async (page = 1, pageSize = 50) => {
     return response;
   } catch (error) {
     console.error('User processing results fetch error:', error);
+    throw error;
+  }
+};
+
+// Get public processing results (for public images view)
+export const getPublicProcessingResults = async (page = 1, pageSize = 30) => {
+  try {
+    const response = await apiFetch(`${API_ENDPOINTS.PROCESSING.PUBLIC_RESULTS}?page=${page}&page_size=${pageSize}`);
+    return response;
+  } catch (error) {
+    console.error('Public processing results fetch error:', error);
     throw error;
   }
 };

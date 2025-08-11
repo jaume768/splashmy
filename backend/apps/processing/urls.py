@@ -13,6 +13,7 @@ urlpatterns = [
     
     # Processing results
     path('results/', views.ProcessingResultListView.as_view(), name='results'),
+    path('results/public/', views.PublicProcessingResultListView.as_view(), name='public-results'),
     path('results/<uuid:result_id>/favorite/', views.toggle_result_favorite, name='toggle-favorite'),
     path('results/<uuid:result_id>/rate/', views.rate_result, name='rate-result'),
     path('results/<uuid:result_id>/download/', views.download_result, name='download-result'),

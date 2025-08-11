@@ -293,6 +293,7 @@ def _save_processing_results(job: ProcessingJob, result: Dict[str, Any]):
                 result_size=result.get('size', '1024x1024'),
                 result_quality=result.get('quality', 'auto'),
                 result_background=result.get('background', 'auto'),
+                is_public=job.is_public,
                 s3_key=s3_key,
                 s3_url=s3_url,
                 openai_created_at=created_dt,
