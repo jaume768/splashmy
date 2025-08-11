@@ -120,17 +120,6 @@ export default function MyGalleryView({ onExploreClick }) {
                 <div className={styles.cardInfo}>
                   <div className={styles.cardMeta}>
                     <span className={styles.creationDate}>{formatDate(creation.created_at)}</span>
-                    <span className={styles.creationFormat}>{creation.result_format?.toUpperCase() || 'PNG'}</span>
-                  </div>
-
-                  <div className={styles.cardStats}>
-                    <span className={styles.stat}>📏 {creation.result_size || '1024x1024'}</span>
-                    {creation.download_count > 0 && (
-                      <span className={styles.stat}>💾 {creation.download_count}</span>
-                    )}
-                    {creation.user_rating && (
-                      <span className={styles.stat}>⭐ {creation.user_rating}/5</span>
-                    )}
                   </div>
                 </div>
               </div>
@@ -161,10 +150,7 @@ export default function MyGalleryView({ onExploreClick }) {
                 </button>
               </div>
               <div className={styles.modalDetails}>
-                <span>📅 {formatDate(selectedImage.created_at)}</span>
-                <span>📏 {selectedImage.result_size}</span>
-                <span>🎨 {selectedImage.result_format?.toUpperCase()}</span>
-                <span>⚡ {selectedImage.result_quality || 'Standard'}</span>
+                <span>{formatDate(selectedImage.created_at)}</span>
               </div>
             </div>
           </div>

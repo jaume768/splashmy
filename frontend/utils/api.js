@@ -373,9 +373,9 @@ export const getUserProcessingResults = async (page = 1, pageSize = 50) => {
 };
 
 // Get public processing results (for public images view)
-export const getPublicProcessingResults = async (page = 1, pageSize = 30) => {
+export const getPublicProcessingResults = async (page = 1, pageSize = 30, ordering = '-created_at') => {
   try {
-    const response = await apiFetch(`${API_ENDPOINTS.PROCESSING.PUBLIC_RESULTS}?page=${page}&page_size=${pageSize}`);
+    const response = await apiFetch(`${API_ENDPOINTS.PROCESSING.PUBLIC_RESULTS}?page=${page}&page_size=${pageSize}&ordering=${encodeURIComponent(ordering)}`);
     return response;
   } catch (error) {
     console.error('Public processing results fetch error:', error);

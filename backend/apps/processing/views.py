@@ -457,7 +457,12 @@ class PublicProcessingResultListView(generics.ListAPIView):
         queryset = ProcessingResult.objects.filter(is_public=True).annotate(
             like_count=Count('likes')
         )
-        # Only show most recent first
+        # Support ordering by like_count or created_at
+        ordering = self.request.query_params.get('ordering')
+        allowed = {'created_at', '-created_at', 'like_count', '-like_count'}
+        if ordering in allowed:
+            return queryset.order_by(ordering)
+        # Default: most recent first
         return queryset.order_by('-created_at')
     
     def list(self, request, *args, **kwargs):

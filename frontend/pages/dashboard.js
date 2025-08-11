@@ -14,6 +14,7 @@ import MobileBottomMenu from '../components/dashboard/MobileBottomMenu';
 import ExploreView from '../components/dashboard/views/ExploreView';
 import MyGalleryView from '../components/dashboard/views/MyGalleryView';
 import ImagesView from '../components/dashboard/views/ImagesView';
+import TopView from '../components/dashboard/views/TopView';
 
 // (Inline UI subcomponents moved to components/dashboard/*)
 
@@ -232,7 +233,10 @@ const DashboardPage = () => {
                 {activeView === 'images' && (
                   <ImagesView />
                 )}
-                {activeView !== 'explore' && activeView !== 'my-gallery' && activeView !== 'images' && (
+                {activeView === 'top' && (
+                  <TopView />
+                )}
+                {activeView !== 'explore' && activeView !== 'my-gallery' && activeView !== 'images' && activeView !== 'top' && (
                   <div>Vista "{activeView}" aún no implementada.</div>
                 )}
               </div>

@@ -1,5 +1,4 @@
 - hacer login y registro funcional (falta con google)
-- Mejorar modal de style transfer
 - en el registro hacer verificación de mail si no es por google
 - hacer un sistema de tops de fotos
 - mejorar el modal de fotos en imagenes, poder ir al estilo utilizado para esa foto y ver fotos del autor que tenga en publico,
