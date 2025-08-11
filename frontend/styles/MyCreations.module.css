@@ -7,7 +7,7 @@
     var(--color-secondary) 25%, 
     var(--color-tertiary) 75%, 
     var(--color-dark) 100%);
-  color: var(--color-white);
+  color: black;
 }
 
 .container {
@@ -30,7 +30,7 @@
   gap: var(--spacing-xs);
   padding: var(--spacing-sm) var(--spacing-md);
   background: rgba(255, 255, 255, 0.1);
-  color: var(--color-white);
+  color: black;
   border-radius: var(--border-radius);
   font-size: var(--font-size-sm);
   font-weight: 500;
@@ -53,15 +53,12 @@
   font-size: var(--font-size-3xl);
   font-weight: 700;
   margin-bottom: var(--spacing-sm);
-  background: linear-gradient(135deg, var(--color-white), rgba(255, 255, 255, 0.8));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--color-darkest);
 }
 
 .subtitle {
   font-size: var(--font-size-lg);
-  color: rgba(255, 255, 255, 0.8);
+  color: black;
   font-weight: 300;
 }
 
@@ -79,12 +76,12 @@
 .userName {
   font-size: var(--font-size-lg);
   font-weight: 600;
-  color: var(--color-white);
+  color: black;
 }
 
 .creationsCount {
   font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.7);
+  color: black;
   font-weight: 400;
 }
 
@@ -135,14 +132,14 @@
 
 .errorMessage {
   font-size: var(--font-size-lg);
-  color: rgba(255, 255, 255, 0.9);
+  color: black;
   margin-bottom: var(--spacing-xl);
 }
 
 .retryButton {
   padding: var(--spacing-md) var(--spacing-xl);
   background: var(--color-white);
-  color: var(--color-primary);
+  color: black;
   border-radius: var(--border-radius);
   font-size: var(--font-size-base);
   font-weight: 600;
@@ -174,19 +171,19 @@
   font-size: var(--font-size-2xl);
   font-weight: 600;
   margin-bottom: var(--spacing-md);
-  color: var(--color-white);
+  color: black;
 }
 
 .emptyMessage {
   font-size: var(--font-size-lg);
-  color: rgba(255, 255, 255, 0.8);
+  color: black;
   margin-bottom: var(--spacing-xl);
 }
 
 .createButton {
   padding: var(--spacing-md) var(--spacing-xl);
   background: linear-gradient(135deg, var(--color-white), var(--color-gray-light));
-  color: var(--color-primary);
+  color: black;
   border-radius: var(--border-radius);
   font-size: var(--font-size-base);
   font-weight: 600;
@@ -207,108 +204,89 @@
 }
 
 .creationCard {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-white);
   border-radius: var(--border-radius-xl);
   overflow: hidden;
   transition: var(--transition-base);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
 }
 
 .creationCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary);
 }
 
 .imageContainer {
   position: relative;
   aspect-ratio: 1;
   overflow: hidden;
-  background: var(--color-gray);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: var(--spacing-md);
 }
 
 .creationImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: var(--transition-base);
   cursor: pointer;
-  transition: var(--transition-base);
 }
 
-.imageOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-md);
-  opacity: 0;
-  transition: var(--transition-base);
+.creationImage:hover {
+  transform: scale(1.02);
 }
 
-.creationCard:hover .imageOverlay {
-  opacity: 1;
-}
-
-.viewButton,
-.downloadButton {
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--color-dark);
-  border-radius: var(--border-radius);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  transition: var(--transition-fast);
-}
-
-.viewButton:hover,
-.downloadButton:hover {
-  background: var(--color-white);
-  transform: scale(1.05);
-}
+/* Remove overlay buttons - direct click on image now opens modal */
 
 .cardInfo {
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg);
 }
 
 .cardMeta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
 }
 
 .creationDate {
   font-size: var(--font-size-sm);
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--color-gray);
+  font-weight: 500;
 }
 
 .creationFormat {
   padding: var(--spacing-xs) var(--spacing-sm);
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--color-primary);
   color: var(--color-white);
-  border-radius: var(--border-radius-sm);
+  border-radius: var(--border-radius-full);
   font-size: var(--font-size-xs);
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .cardStats {
   display: flex;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
   flex-wrap: wrap;
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .stat {
   font-size: var(--font-size-xs);
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-gray);
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--color-gray-light);
+  border-radius: var(--border-radius);
+  font-weight: 500;
 }
 
 /* Modal */
@@ -318,98 +296,118 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.95);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: var(--spacing-md);
+  padding: var(--spacing-lg);
 }
 
 .modalContent {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-white);
   border-radius: var(--border-radius-xl);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  max-width: 90vw;
-  max-height: 90vh;
+  box-shadow: var(--shadow-lg);
+  max-width: 95vw;
+  max-height: 95vh;
   overflow: hidden;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .closeButton {
   position: absolute;
   top: var(--spacing-md);
   right: var(--spacing-md);
-  width: 40px;
-  height: 40px;
-  background: rgba(0, 0, 0, 0.5);
-  color: var(--color-white);
+  width: 44px;
+  height: 44px;
+  background: var(--color-white);
+  color: var(--color-dark);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1001;
   transition: var(--transition-fast);
+  box-shadow: var(--shadow-md);
 }
 
 .closeButton:hover {
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--color-danger);
+  color: var(--color-white);
+  transform: scale(1.1);
 }
 
 .modalImage {
-  max-height: 70vh;
-  overflow: hidden;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg);
+  min-height: 0;
 }
 
 .fullImage {
-  width: 100%;
-  height: auto;
-  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
 }
 
 .modalInfo {
   padding: var(--spacing-lg);
-  color: var(--color-white);
+  background: var(--color-gray-light);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.modalMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-md);
 }
 
 .modalMeta h3 {
   font-size: var(--font-size-xl);
-  margin-bottom: var(--spacing-md);
+  color: var(--color-darkest);
   font-weight: 600;
+  margin: 0;
 }
 
 .modalDetails {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
+  gap: var(--spacing-sm);
 }
 
 .modalDetails span {
   padding: var(--spacing-xs) var(--spacing-sm);
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--color-white);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: var(--border-radius);
   font-size: var(--font-size-sm);
-}
-
-.modalActions {
-  display: flex;
-  justify-content: center;
+  color: var(--color-dark);
+  font-weight: 500;
 }
 
 .modalDownloadButton {
   padding: var(--spacing-md) var(--spacing-xl);
-  background: linear-gradient(135deg, var(--color-white), var(--color-gray-light));
-  color: var(--color-primary);
-  border-radius: var(--border-radius);
+  background: var(--color-primary);
+  color: var(--color-white);
+  border-radius: var(--border-radius-full);
   font-size: var(--font-size-base);
   font-weight: 600;
   transition: var(--transition-base);
   box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .modalDownloadButton:hover {
+  background: var(--color-secondary);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }

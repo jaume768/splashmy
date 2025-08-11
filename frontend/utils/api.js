@@ -161,7 +161,7 @@ export const loginUser = async (credentials) => {
     const response = await apiFetch(API_ENDPOINTS.AUTH.LOGIN, {
       method: 'POST',
       body: JSON.stringify({
-        email: credentials.email,
+        identifier: credentials.identifier || credentials.email,
         password: credentials.password,
       }),
     });

@@ -9,7 +9,7 @@ import { RequireGuest } from "../components/auth/ProtectedRoute";
 
 function LoginPage() {
   const [formData, setFormData] = useState({
-    email: '',
+    identifier: '',
     password: ''
   });
   const [loading, setLoading] = useState(false);
@@ -62,7 +62,7 @@ function LoginPage() {
         } else if (errorData.errors?.detail) {
           setError(errorData.errors.detail);
         } else if (errorData.status === 400) {
-          setError('Credenciales inválidas. Por favor verifica tu email y contraseña.');
+          setError('Credenciales inválidas. Verifica tu email/usuario y contraseña.');
         } else {
           setError('Error al iniciar sesión. Inténtalo de nuevo.');
         }
@@ -123,17 +123,17 @@ function LoginPage() {
             )}
 
             <div className={styles.inputGroup}>
-              <label htmlFor="email" className={styles.label}>
-                Correo electrónico
+              <label htmlFor="identifier" className={styles.label}>
+                Email o Usuario
               </label>
               <input
-                id="email"
-                name="email"
-                type="email"
+                id="identifier"
+                name="identifier"
+                type="text"
                 required
-                className={`${styles.input} ${error && formData.email === '' ? styles.inputError : ''}`}
-                placeholder="tu@email.com"
-                value={formData.email}
+                className={`${styles.input} ${error && formData.identifier === '' ? styles.inputError : ''}`}
+                placeholder="tu@email.com o tu_usuario"
+                value={formData.identifier}
                 onChange={handleChange}
                 disabled={loading}
               />

@@ -5,7 +5,6 @@ y login con google, investiga el backend para hacer las modificaciones necesaria
 para poner lo necesario para que sea funcional, revisalo y dime la mejor estrategia y 
 te digo si implementarlo o no (piensa en las rutas del backend y el frontend también)
 
-- Separar el dashboard en componentes, y cambiar el header como el de sora y en movil hacer un menu debajo como el de sora
 - Mejorar modal de style transfer
 - en el registro hacer verificación de mail si no es por google
 - hacer un ranking de fotos creadas y que los usuarios puedan elegir que este publica o privada? (estilo sora de chatgpt)

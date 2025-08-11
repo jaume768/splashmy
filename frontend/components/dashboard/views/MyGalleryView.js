@@ -109,17 +109,12 @@ export default function MyGalleryView({ onExploreClick }) {
           <div className={styles.gallery}>
             {creations.map((creation) => (
               <div key={creation.id} className={styles.creationCard}>
-                <div className={styles.imageContainer}>
+                <div className={styles.imageContainer} onClick={() => handleImageClick(creation)}>
                   <img
                     src={creation.s3_url}
                     alt={`Creación ${creation.id}`}
                     className={styles.creationImage}
-                    onClick={() => handleImageClick(creation)}
                   />
-                  <div className={styles.imageOverlay}>
-                    <button onClick={() => handleImageClick(creation)} className={styles.viewButton}>👁️ Ver</button>
-                    <button onClick={() => handleDownload(creation)} className={styles.downloadButton}>💾 Descargar</button>
-                  </div>
                 </div>
 
                 <div className={styles.cardInfo}>
@@ -161,16 +156,15 @@ export default function MyGalleryView({ onExploreClick }) {
             <div className={styles.modalInfo}>
               <div className={styles.modalMeta}>
                 <h3>Detalles de la creación</h3>
-                <div className={styles.modalDetails}>
-                  <span>📅 {formatDate(selectedImage.created_at)}</span>
-                  <span>📏 {selectedImage.result_size}</span>
-                  <span>🎨 {selectedImage.result_format?.toUpperCase()}</span>
-                  <span>⚡ {selectedImage.result_quality || 'Standard'}</span>
-                </div>
+                <button onClick={() => handleDownload(selectedImage)} className={styles.modalDownloadButton}>
+                  💾 Descargar
+                </button>
               </div>
-
-              <div className={styles.modalActions}>
-                <button onClick={() => handleDownload(selectedImage)} className={styles.modalDownloadButton}>💾 Descargar</button>
+              <div className={styles.modalDetails}>
+                <span>📅 {formatDate(selectedImage.created_at)}</span>
+                <span>📏 {selectedImage.result_size}</span>
+                <span>🎨 {selectedImage.result_format?.toUpperCase()}</span>
+                <span>⚡ {selectedImage.result_quality || 'Standard'}</span>
               </div>
             </div>
           </div>

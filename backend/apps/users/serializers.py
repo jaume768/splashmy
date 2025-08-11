@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 from django.contrib.auth import authenticate
 from .models import User, UserProfile
 
@@ -49,17 +50,29 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    """Serializer for user login"""
+    """Serializer for user login (email or username)"""
     
-    email = serializers.EmailField()
+    identifier = serializers.CharField()
+    # Backward compatibility: allow old clients posting 'email'
+    email = serializers.EmailField(required=False)
     password = serializers.CharField(write_only=True)
     
     def validate(self, attrs):
-        email = attrs.get('email')
+        identifier = attrs.get('identifier') or attrs.get('email')
         password = attrs.get('password')
         
-        if email and password:
-            user = authenticate(username=email, password=password)
+        if identifier and password:
+            # Determine if identifier is email or username
+            if '@' in identifier:
+                user_obj = User.objects.filter(email__iexact=identifier).first()
+            else:
+                user_obj = User.objects.filter(username__iexact=identifier).first()
+            
+            user = None
+            if user_obj:
+                # Our AUTH uses email as USERNAME_FIELD, so authenticate with email
+                user = authenticate(username=user_obj.email, password=password)
+            
             if not user:
                 raise serializers.ValidationError('Invalid credentials')
             if not user.is_active:
@@ -67,7 +80,7 @@ class LoginSerializer(serializers.Serializer):
             attrs['user'] = user
             return attrs
         else:
-            raise serializers.ValidationError('Must include email and password')
+            raise serializers.ValidationError('Must include identifier and password')
 
 
 class ChangePasswordSerializer(serializers.Serializer):
@@ -88,6 +101,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     
     password = serializers.CharField(write_only=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True)
+    email = serializers.EmailField(
+        validators=[UniqueValidator(queryset=User.objects.all(), message='Email already registered')]
+    )
+    username = serializers.CharField(
+        validators=[UniqueValidator(queryset=User.objects.all(), message='Username already taken')]
+    )
     
     class Meta:
         model = User
