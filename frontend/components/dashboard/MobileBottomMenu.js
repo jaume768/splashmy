@@ -13,8 +13,8 @@ export default function MobileBottomMenu({ activeView = 'explore', onNavigate })
     { key: 'top', label: 'Top', icon: (
       <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg>
     )},
-    { key: 'uploads', label: 'Subidas', icon: (
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M5 20h14v-2H5m14-9h-4V3H9v6H5l7 7 7-7z"/></svg>
+    { key: 'images', label: 'Imágenes', icon: (
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3 3.5-4.5L19 19H5l3.5-5.5zM8 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg>
     )},
     { key: 'my-gallery', label: 'Biblioteca', icon: (
       <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M4 4h16v12H5.17L4 17.17V4zm0 14h16v2H4v-2z"/></svg>
@@ -30,7 +30,7 @@ export default function MobileBottomMenu({ activeView = 'explore', onNavigate })
       // else: could open profile modal; no-op for now
       return;
     }
-    if (key === 'my-gallery' || key === 'uploads') {
+    if (key === 'my-gallery' || key === 'images') {
       if (!authenticated) {
         router.push('/login');
         return;

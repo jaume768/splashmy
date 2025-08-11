@@ -26,6 +26,7 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
   const [quality, setQuality] = useState('medium');
   const [size, setSize] = useState('1024x1024');
   const [jobId, setJobId] = useState(null);
+  const [isPublic, setIsPublic] = useState(false);
 
   // Limpiar estado cuando se cierra el modal
   const resetModal = useCallback(() => {
@@ -40,6 +41,7 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
     setProcessingComplete(false);
     setProcessingResult(null);
     setDownloadingResult(false);
+    setIsPublic(false);
   }, []);
 
   // Manejar cierre del modal
@@ -212,7 +214,8 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
         style_id: selectedStyle.id,
         prompt: customPrompt || `Convertir al estilo ${selectedStyle.name}`,
         quality,
-        size
+        size,
+        is_public: isPublic
       });
 
       setJobId(jobResult.job_id);
@@ -336,9 +339,23 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
             />
           </div>
 
+          {/* Visibilidad de la imagen generada */}
+          <div className={styles.visibilitySection}>
+            <label className={styles.switchLabel}>
+              <input
+                type="checkbox"
+                checked={isPublic}
+                onChange={(e) => setIsPublic(e.target.checked)}
+                disabled={isProcessing}
+              />
+              <span>Hacer pública la imagen generada</span>
+            </label>
+            <p className={styles.switchHint}>Si está desactivado, la imagen será privada (solo tú podrás verla).</p>
+          </div>
+
           {/* Configuración avanzada */}
           {uploadedImage && (
-            <div className={styles.optionsSection}>
+            <div className={`${styles.optionsSection} ${styles.hiddenSection}`}>
               <h3 className={styles.sectionTitle}>Configuración</h3>
               
               {/* Prompt personalizado */}

@@ -71,6 +71,7 @@ class ProcessingJobCreateSerializer(serializers.Serializer):
         default=0,
         required=False
     )
+    is_public = serializers.BooleanField(default=False, required=False)
     
     def validate_original_image_id(self, value):
         """Validate original image exists for edit jobs"""
@@ -136,7 +137,7 @@ class ProcessingJobSerializer(serializers.ModelSerializer):
             'openai_parameters', 'openai_request_id',
             'moderation_passed', 'moderation_checked_at',
             'started_at', 'completed_at', 'processing_time',
-            'error_message', 'retry_count', 'results_count',
+            'error_message', 'retry_count', 'results_count', 'is_public',
             'created_at', 'updated_at'
         ]
         read_only_fields = [
@@ -164,7 +165,7 @@ class ProcessingResultSerializer(serializers.ModelSerializer):
             'id', 'job', 'job_type', 'job_prompt',
             'result_format', 'result_size', 'result_quality', 'result_background',
             's3_url', 'signed_url', 'openai_created_at', 'token_usage',
-            'user_rating', 'is_favorite', 'download_count',
+            'user_rating', 'is_favorite', 'is_public', 'download_count',
             'created_at', 'updated_at'
         ]
         read_only_fields = [

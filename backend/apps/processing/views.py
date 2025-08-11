@@ -52,6 +52,7 @@ class ProcessingJobCreateView(generics.CreateAPIView):
                 prompt=job_data['prompt'],
                 original_image_id=job_data.get('original_image_id'),
                 style_id=job_data.get('style_id'),
+                is_public=job_data.get('is_public', False),
                 openai_parameters={
                     'quality': job_data.get('quality', 'auto'),
                     'background': job_data.get('background', 'auto'),
@@ -264,6 +265,7 @@ class ProcessingJobCreateView(generics.CreateAPIView):
                     result_size=result.get('size', '1024x1024'),
                     result_quality=result.get('quality', 'auto'),
                     result_background=result.get('background', 'auto'),
+                    is_public=job.is_public,
                     s3_key=s3_key,
                     s3_url=s3_url,
                     openai_created_at=timezone.fromtimestamp(result.get('created', timezone.now().timestamp())),

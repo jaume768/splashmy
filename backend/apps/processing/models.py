@@ -39,6 +39,9 @@ class ProcessingJob(models.Model):
     # OpenAI gpt-image-1 parameters used
     openai_parameters = models.JSONField(default=dict)
     
+    # Visibility
+    is_public = models.BooleanField(default=False, help_text="Whether results from this job are publicly visible")
+    
     # Processing results
     openai_request_id = models.CharField(max_length=255, blank=True)
     openai_response = models.JSONField(default=dict, blank=True)
@@ -99,6 +102,7 @@ class ProcessingResult(models.Model):
     # User interactions
     user_rating = models.PositiveIntegerField(null=True, blank=True)  # 1-5 stars
     is_favorite = models.BooleanField(default=False)
+    is_public = models.BooleanField(default=False)
     download_count = models.PositiveIntegerField(default=0)
     
     created_at = models.DateTimeField(auto_now_add=True)
