@@ -167,52 +167,7 @@ const DashboardPage = () => {
         {/* Header minimal con perfil/modal (solo UI) */}
         <DashboardHeader />
 
-        {/* Panel de control (solo en Estilos) */}
-        {activeView === 'explore' && (
-          <section className={styles.controlPanel}>
-            <div className={styles.container}>
-              <div className={styles.controlsGrid}>
-                <SearchInput 
-                  searchTerm={searchTerm}
-                  onSearchChange={handleSearchChange}
-                  onClear={() => setSearchTerm('')}
-                />
-                
-                <CategoryFilter 
-                  selectedCategory={selectedCategory}
-                  categories={categories}
-                  onCategoryChange={handleCategoryChange}
-                  loadingCategories={loadingCategories}
-                />
-                
-              </div>
-              
-              {(searchTerm || selectedCategory) && (
-                <div className={styles.activeFilters}>
-                  <span className={styles.filtersLabel}>Filtros activos:</span>
-                  <div className={styles.filterTags}>
-                    {searchTerm && (
-                      <span className={styles.filterTag}>
-                        Búsqueda: "{searchTerm}"
-                        <button onClick={() => setSearchTerm('')} className={styles.removeTag}>
-                          ×
-                        </button>
-                      </span>
-                    )}
-                    {selectedCategory && (
-                      <span className={styles.filterTag}>
-                        Categoría: {selectedCategory}
-                        <button onClick={() => setSelectedCategory('')} className={styles.removeTag}>
-                          ×
-                        </button>
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </section>
-        )}
+        {/* Panel de control se renderiza dentro del contenido (explore) */}
 
         {/* Contenido principal */}
         <main className={styles.mainContent}>
@@ -221,11 +176,54 @@ const DashboardPage = () => {
               <DashboardSidebar activeView={activeView} onNavigate={onNavigate} />
               <div className={styles.content}>
                 {activeView === 'explore' && (
-                  <ExploreView 
-                    searchTerm={searchTerm}
-                    selectedCategory={selectedCategory}
-                    onStyleClick={handleStyleClick}
-                  />
+                  <>
+                    <section className={styles.controlPanel}>
+                      <div className={styles.controlsGrid}>
+                        <SearchInput 
+                          searchTerm={searchTerm}
+                          onSearchChange={handleSearchChange}
+                          onClear={() => setSearchTerm('')}
+                        />
+                        
+                        <CategoryFilter 
+                          selectedCategory={selectedCategory}
+                          categories={categories}
+                          onCategoryChange={handleCategoryChange}
+                          loadingCategories={loadingCategories}
+                        />
+                      </div>
+                      
+                      {(searchTerm || selectedCategory) && (
+                        <div className={styles.activeFilters}>
+                          <span className={styles.filtersLabel}>Filtros activos:</span>
+                          <div className={styles.filterTags}>
+                            {searchTerm && (
+                              <span className={styles.filterTag}>
+                                Búsqueda: "{searchTerm}"
+                                <button onClick={() => setSearchTerm('')} className={styles.removeTag}>
+                                  ×
+                                </button>
+                              </span>
+                            )}
+                            {selectedCategory && (
+                              <span className={styles.filterTag}>
+                                Categoría: {selectedCategory}
+                                <button onClick={() => setSelectedCategory('')} className={styles.removeTag}>
+                                  ×
+                                </button>
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </section>
+
+                    <ExploreView 
+                      searchTerm={searchTerm}
+                      selectedCategory={selectedCategory}
+                      onStyleClick={handleStyleClick}
+                    />
+                  </>
                 )}
                 {activeView === 'my-gallery' && (
                   <MyGalleryView onExploreClick={() => onNavigate('explore')} />
