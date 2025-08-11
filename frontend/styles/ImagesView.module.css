@@ -32,44 +32,60 @@
   margin-bottom: 12px;
 }
 
-/* Masonry using CSS columns for broad browser support */
+/* Grid layout (no masonry). Mobile: 2 cols, no horizontal gap, 2px vertical gap. */
 .masonry {
-  column-count: 2;
-  column-gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 0;
+  row-gap: 2px;
 }
 
 @media (min-width: 768px) {
-  .masonry { column-count: 3; }
+  .masonry {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px; /* 2px both directions on tablet/desktop */
+  }
 }
 
 @media (min-width: 1024px) {
-  .masonry { column-count: 4; }
+  .masonry {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .masonry {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+  }
 }
 
 .card {
-  display: inline-block;
+  display: block;
   width: 100%;
-  margin: 0 0 16px;
-  background: var(--card-bg, #fff);
-  border-radius: 12px;
+  margin: 0; /* no outer spacing between items */
+  background: transparent; /* no card background */
+  border-radius: 0; /* flush edges */
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  border: 1px solid rgba(0,0,0,0.06);
-  break-inside: avoid;
+  box-shadow: none;
+  border: 0;
 }
 
 .imageWrap {
   position: relative;
   width: 100%;
   overflow: hidden;
-  background: #f8fafc;
+  /* Uniform tile ratio to align rows; adjust if you prefer 4/5 or 3/4 */
+  aspect-ratio: 1 / 1;
+  background: transparent;
 }
 
 .image {
   display: block;
   width: 100%;
-  height: auto;
-  object-fit: contain;
+  height: 100%;
+  object-fit: cover;
 }
 
 .loaderWrap {
