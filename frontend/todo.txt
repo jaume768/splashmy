@@ -3,3 +3,4 @@
 - refactorizar codigo y modularizar todo lo posible
 - hacer que el usuario pueda subir una foto de perfil
 - hacer reset de contraseña olvidad
+- cambiar estetica de modelo de verificacion de mail y si probar bien el de login
