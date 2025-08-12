@@ -56,6 +56,7 @@ export const API_ENDPOINTS = {
     JOB_RESULTS: (id) => `/api/v1/processing/jobs/${id}/results/`,
     RESULTS: '/api/v1/processing/results/',
     PUBLIC_RESULTS: '/api/v1/processing/results/public/',
+    LIKED_RESULTS: '/api/v1/processing/results/liked/',
     RESULT_DETAIL: (id) => `/api/v1/processing/results/${id}/`,
     TOGGLE_LIKE: (id) => `/api/v1/processing/results/${id}/like/`,
     DOWNLOAD_RESULT: (id) => `/api/v1/processing/results/${id}/download/`,
@@ -379,6 +380,17 @@ export const getPublicProcessingResults = async (page = 1, pageSize = 30, orderi
     return response;
   } catch (error) {
     console.error('Public processing results fetch error:', error);
+    throw error;
+  }
+};
+
+// Get liked processing results for authenticated user
+export const getLikedProcessingResults = async (page = 1, pageSize = 30, ordering = '-created_at') => {
+  try {
+    const response = await apiFetch(`${API_ENDPOINTS.PROCESSING.LIKED_RESULTS}?page=${page}&page_size=${pageSize}&ordering=${encodeURIComponent(ordering)}`);
+    return response;
+  } catch (error) {
+    console.error('Liked processing results fetch error:', error);
     throw error;
   }
 };

@@ -14,6 +14,7 @@ urlpatterns = [
     # Processing results
     path('results/', views.ProcessingResultListView.as_view(), name='results'),
     path('results/public/', views.PublicProcessingResultListView.as_view(), name='public-results'),
+    path('results/liked/', views.LikedProcessingResultListView.as_view(), name='liked-results'),
     path('results/<uuid:result_id>/', views.ProcessingResultDetailView.as_view(), name='result-detail'),
     path('results/<uuid:result_id>/favorite/', views.toggle_result_favorite, name='toggle-favorite'),
     path('results/<uuid:result_id>/like/', views.toggle_result_like, name='toggle-like'),
