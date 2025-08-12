@@ -164,8 +164,14 @@ const DashboardPage = () => {
       </Head>
 
       <div className={styles.dashboard}>
-        {/* Header minimal con perfil/modal (solo UI) */}
-        <DashboardHeader />
+        <DashboardHeader title={{
+          explore: 'Estilos',
+          images: 'Imágenes',
+          top: 'Top',
+          'my-gallery': 'Mi galería',
+          likes: 'Me gusta',
+          trash: 'Reciclaje',
+        }[activeView] || 'Estilos'} />
 
         {/* Panel de control se renderiza dentro del contenido (explore) */}
 

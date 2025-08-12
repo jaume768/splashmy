@@ -1,9 +1,6 @@
 - hacer login y registro funcional (falta con google)
 - en el registro hacer verificación de mail si no es por google
-- hacer un sistema de tops de fotos
 - mejorar el modal de fotos en imagenes, poder ir al estilo utilizado para esa foto y ver fotos del autor que tenga en publico,
-- en la foto de mi galeria ver si esta publica o privada, numero de likes, fecha y boton de descargar, nada mas  
+- en la foto de mi galeria ver si esta publica o privada, numero de likes, fecha, boton de descargar y poder modificar el estado de publico o privado
 - hacer un cerrar sesión, perfil del usaurio, mejoras esteticas dashboard
 - refactorizar codigo y modularizar todo lo posible
-- hacer un sistema de monitoreo de jobs
-- hacer un sistema de rate limiting por IP/usuario

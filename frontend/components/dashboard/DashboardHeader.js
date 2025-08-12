@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useAuth } from '../../contexts/AuthContext';
 import styles from '../../styles/components/dashboard/DashboardHeader.module.css';
 
-export default function DashboardHeader() {
+export default function DashboardHeader({ title = 'Explore' }) {
   const router = useRouter();
   const { user, authenticated } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -18,25 +18,14 @@ export default function DashboardHeader() {
     <header className={styles.header}>
       <div className={`container ${styles.inner}`}>
         <div className={styles.brand} onClick={() => router.push('/dashboard')}>
-          <span className={styles.logoMark}>◆</span>
           <span className={styles.brandText}>SplashMy</span>
         </div>
 
         <div className={styles.center}>
-          <span className={styles.title}>Explore</span>
+          <span className={styles.title}>{title}</span>
         </div>
 
         <div className={styles.actions}>
-          <button className={styles.iconButton} aria-label="Filtros">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-              <path d="M3 5h18v2H3V5zm4 6h10v2H7v-2zm-2 6h14v2H5v-2z" />
-            </svg>
-          </button>
-          <button className={styles.iconButton} aria-label="Notificaciones">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-              <path d="M12 22a2 2 0 0 0 2-2H10a2 2 0 0 0 2 2zm6-6V11a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2z" />
-            </svg>
-          </button>
 
           <button
             className={styles.avatarBtn}

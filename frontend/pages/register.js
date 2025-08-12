@@ -199,7 +199,7 @@ function RegisterPage() {
                 type="text"
                 required
                 className={`${styles.input} ${errors.username ? styles.inputError : ''}`}
-                placeholder="nombreusuario"
+                placeholder="usuario_123"
                 value={formData.username}
                 onChange={handleChange}
                 disabled={loading}
