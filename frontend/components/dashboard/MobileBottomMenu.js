@@ -26,8 +26,11 @@ export default function MobileBottomMenu({ activeView = 'explore', onNavigate })
 
   const handleClick = (key) => {
     if (key === 'profile') {
-      if (!authenticated) router.push('/login');
-      // else: could open profile modal; no-op for now
+      if (!authenticated) {
+        router.push('/login');
+        return;
+      }
+      if (typeof onNavigate === 'function') onNavigate('profile');
       return;
     }
     if (key === 'my-gallery') {
@@ -44,7 +47,7 @@ export default function MobileBottomMenu({ activeView = 'explore', onNavigate })
       {items.map((it) => (
         <button
           key={it.key}
-          className={styles.navItem}
+          className={`${styles.navItem} ${activeView === it.key ? styles.active : ''}`}
           aria-label={it.label}
           aria-current={activeView === it.key ? 'page' : undefined}
           onClick={() => handleClick(it.key)}

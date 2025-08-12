@@ -16,6 +16,7 @@ import MyGalleryView from '../components/dashboard/views/MyGalleryView';
 import ImagesView from '../components/dashboard/views/ImagesView';
 import TopView from '../components/dashboard/views/TopView';
 import LikedView from '../components/dashboard/views/LikedView';
+import ProfileView from '../components/dashboard/views/ProfileView';
 
 // (Inline UI subcomponents moved to components/dashboard/*)
 
@@ -172,6 +173,7 @@ const DashboardPage = () => {
           'my-gallery': 'Mi galería',
           likes: 'Me gusta',
           trash: 'Reciclaje',
+          profile: 'Perfil',
         }[activeView] || 'Estilos'} />
 
         {/* Panel de control se renderiza dentro del contenido (explore) */}
@@ -244,7 +246,10 @@ const DashboardPage = () => {
                 {activeView === 'likes' && (
                   <LikedView />
                 )}
-                {activeView !== 'explore' && activeView !== 'my-gallery' && activeView !== 'images' && activeView !== 'top' && activeView !== 'likes' && (
+                {activeView === 'profile' && (
+                  <ProfileView />
+                )}
+                {activeView !== 'explore' && activeView !== 'my-gallery' && activeView !== 'images' && activeView !== 'top' && activeView !== 'likes' && activeView !== 'profile' && (
                   <div>Vista "{activeView}" aún no implementada.</div>
                 )}
               </div>
