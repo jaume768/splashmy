@@ -1,0 +1,129 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #ffffff;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  padding: 20px 20px 24px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.closeButton {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #555;
+}
+
+.description {
+  margin: 8px 0 16px;
+  color: #444;
+  font-size: 0.95rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 0.9rem;
+  color: #2b2b2b;
+}
+
+.input {
+  padding: 12px 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.input:focus {
+  border-color: #6366f1;
+}
+
+.hint {
+  color: #6b7280;
+  font-size: 0.8rem;
+}
+
+.errorMessage, .successMessage {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.errorMessage {
+  background: #FEF2F2;
+  color: #991B1B;
+}
+
+.successMessage {
+  background: #F0FDF4;
+  color: #166534;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+}
+
+.actions {
+  margin-top: 4px;
+  display: flex;
+  gap: 10px;
+}
+
+.verifyButton {
+  flex: 1;
+  background: #4F46E5;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+}
+
+.resendButton {
+  flex: 1;
+  background: #EEF2FF;
+  color: #3730A3;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+}

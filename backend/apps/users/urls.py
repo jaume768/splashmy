@@ -10,4 +10,6 @@ urlpatterns = [
     path('profile/', views.ProfileView.as_view(), name='profile'),
     path('profile/details/', views.UserProfileView.as_view(), name='profile-details'),
     path('change-password/', views.change_password_view, name='change-password'),
+    path('verify-email/', views.verify_email_view, name='verify-email'),
+    path('resend-verification/', views.resend_verification_view, name='resend-verification'),
 ]

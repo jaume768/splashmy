@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth import authenticate
 from .models import User, UserProfile
+from . import services
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -75,6 +76,9 @@ class LoginSerializer(serializers.Serializer):
             
             if not user:
                 raise serializers.ValidationError('Invalid credentials')
+            # Enforce email verification prior to allowing login
+            if not user.is_email_verified:
+                raise serializers.ValidationError('Email no verificado. Revisa tu bandeja o reenvía el código.')
             if not user.is_active:
                 raise serializers.ValidationError('User account is disabled')
             attrs['user'] = user
@@ -142,3 +146,50 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         # Create associated profile  
         UserProfile.objects.create(user=user)
         return user
+
+
+class VerifyEmailSerializer(serializers.Serializer):
+    """Serializer to verify user's email using an OTP code"""
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=6)
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        code = attrs.get('code')
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError({'email': 'Usuario no encontrado'})
+
+        if user.is_email_verified:
+            raise serializers.ValidationError({'email': 'El email ya está verificado'})
+
+        is_valid = services.verify_code_for_user(user, code)
+        if not is_valid:
+            raise serializers.ValidationError({'code': 'Código inválido o expirado'})
+
+        attrs['user'] = user
+        return attrs
+
+
+class ResendVerificationSerializer(serializers.Serializer):
+    """Serializer to resend verification code to user's email"""
+    email = serializers.EmailField()
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        try:
+            user = User.objects.get(email__iexact=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError({'email': 'Usuario no encontrado'})
+
+        if user.is_email_verified:
+            raise serializers.ValidationError({'email': 'El email ya está verificado'})
+
+        allowed, seconds_remaining = services.can_resend_verification(user)
+        if not allowed:
+            raise serializers.ValidationError({'detail': f'Espera {seconds_remaining} segundos para reenviar'})
+
+        attrs['user'] = user
+        attrs['seconds_remaining'] = seconds_remaining
+        return attrs

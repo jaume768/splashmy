@@ -6,6 +6,7 @@ import styles from "../styles/components/auth/Login.module.css";
 import { loginUser } from "../utils/api";
 import { useAuth } from "../contexts/AuthContext";
 import { RequireGuest } from "../components/auth/ProtectedRoute";
+import EmailVerificationModal from "../components/auth/EmailVerificationModal";
 
 function LoginPage() {
   const [formData, setFormData] = useState({
@@ -17,6 +18,8 @@ function LoginPage() {
   const [success, setSuccess] = useState('');
   const router = useRouter();
   const { login } = useAuth();
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [verifyEmailPrefill, setVerifyEmailPrefill] = useState('');
 
   const handleChange = (e) => {
     setFormData({
@@ -65,6 +68,15 @@ function LoginPage() {
           setError('Credenciales inválidas. Verifica tu email/usuario y contraseña.');
         } else {
           setError('Error al iniciar sesión. Inténtalo de nuevo.');
+        }
+
+        // If the error indicates email not verified, open verification modal
+        const combinedMsg = JSON.stringify(errorData.errors || errorData);
+        if (combinedMsg && combinedMsg.toLowerCase().includes('no verificado')) {
+          const id = formData.identifier?.trim();
+          const isEmail = id && id.includes('@');
+          setVerifyEmailPrefill(isEmail ? id : '');
+          setShowVerifyModal(true);
         }
       } catch {
         setError('Error al iniciar sesión. Inténtalo de nuevo.');
@@ -214,6 +226,13 @@ function LoginPage() {
 
         {/* Background */}
         <div className={styles.background}></div>
+        {showVerifyModal && (
+          <EmailVerificationModal
+            initialEmail={verifyEmailPrefill}
+            onClose={() => setShowVerifyModal(false)}
+            afterVerifyRedirect="/dashboard"
+          />
+        )}
       </div>
     </RequireGuest>
   );

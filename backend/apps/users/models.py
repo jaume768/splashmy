@@ -40,6 +40,8 @@ class User(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True)
     is_premium = models.BooleanField(default=False)
     processing_count = models.PositiveIntegerField(default=0)
+    # Email verification status
+    is_email_verified = models.BooleanField(default=False)
     
     # Fix reverse accessor conflicts
     groups = models.ManyToManyField(
@@ -93,3 +95,26 @@ class UserProfile(models.Model):
     
     def __str__(self):
         return f"{self.user.email}'s Profile"
+
+
+class EmailVerification(models.Model):
+    """Stores hashed email verification codes for users (OTP)."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='email_verifications')
+    code_hash = models.CharField(max_length=128)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveIntegerField(default=0)
+    last_sent_at = models.DateTimeField(null=True, blank=True)
+    resend_count = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        db_table = 'email_verifications'
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['expires_at']),
+        ]
+        verbose_name = 'Email Verification'
+        verbose_name_plural = 'Email Verifications'
+
+    def __str__(self):
+        return f"EmailVerification(user={self.user_id}, expires_at={self.expires_at})"

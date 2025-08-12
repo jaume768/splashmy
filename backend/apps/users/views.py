@@ -6,8 +6,10 @@ from django.contrib.auth import login, logout
 from .models import User, UserProfile
 from .serializers import (
     UserSerializer, UserRegistrationSerializer, LoginSerializer, 
-    ChangePasswordSerializer, UserProfileSerializer
+    ChangePasswordSerializer, UserProfileSerializer,
+    VerifyEmailSerializer, ResendVerificationSerializer,
 )
+from . import services
 
 
 class RegisterView(generics.CreateAPIView):
@@ -21,18 +23,16 @@ class RegisterView(generics.CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        
-        # Debug: print what we got
-        print(f"DEBUG: user type: {type(user)}")
-        print(f"DEBUG: user value: {user}")
-        print(f"DEBUG: is User instance: {isinstance(user, User)}")
-        
-        token, created = Token.objects.get_or_create(user=user)
-        
+        # Generate and send verification code via email
+        try:
+            services.generate_and_send_verification(user)
+        except Exception as e:
+            # Do not expose internal error; allow client to retry resend
+            print(f"[RegisterView] Error sending verification: {e}")
         return Response({
-            'user': UserSerializer(user).data,
-            'token': token.key,
-            'message': 'User created successfully'
+            'message': 'Registro exitoso. Hemos enviado un código de verificación a tu correo.',
+            'email': user.email,
+            'verification_sent': True,
         }, status=status.HTTP_201_CREATED)
 
 
@@ -130,3 +130,34 @@ def change_password_view(request):
         serializer.errors, 
         status=status.HTTP_400_BAD_REQUEST
     )
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def verify_email_view(request):
+    """Verify email with OTP code and return auth token."""
+    serializer = VerifyEmailSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.validated_data['user']
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({
+            'user': UserSerializer(user).data,
+            'token': token.key,
+            'message': 'Email verificado correctamente'
+        }, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def resend_verification_view(request):
+    """Resend verification code subject to cooldown."""
+    serializer = ResendVerificationSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.validated_data['user']
+        try:
+            services.generate_and_send_verification(user)
+        except Exception as e:
+            print(f"[ResendVerification] Error: {e}")
+        return Response({'message': 'Código reenviado'}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

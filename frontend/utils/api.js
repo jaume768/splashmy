@@ -36,6 +36,8 @@ export const API_ENDPOINTS = {
     PROFILE: '/api/v1/auth/profile/',
     PROFILE_DETAILS: '/api/v1/auth/profile/details/',
     CHANGE_PASSWORD: '/api/v1/auth/change-password/',
+    VERIFY_EMAIL: '/api/v1/auth/verify-email/',
+    RESEND_VERIFICATION: '/api/v1/auth/resend-verification/',
   },
   
   // Images endpoints
@@ -147,8 +149,8 @@ export const registerUser = async (userData) => {
         password_confirm: userData.confirmPassword,
       }),
     });
-    
-    // Store token in localStorage if registration successful
+    // Note: Registration with email verification does not return token.
+    // If backend returns a token for some reason, keep backward compatibility.
     if (response.token) {
       localStorage.setItem('authToken', response.token);
       localStorage.setItem('user', JSON.stringify(response.user));
@@ -484,6 +486,34 @@ export const getProcessingStats = async () => {
     return response;
   } catch (error) {
     console.error('Processing stats fetch error:', error);
+    throw error;
+  }
+};
+
+// ============================================================================
+// EMAIL VERIFICATION API FUNCTIONS
+// ============================================================================
+
+export const verifyEmail = async ({ email, code }) => {
+  try {
+    const response = await apiFetch(API_ENDPOINTS.AUTH.VERIFY_EMAIL, {
+      method: 'POST',
+      body: JSON.stringify({ email, code }),
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const resendVerification = async (email) => {
+  try {
+    const response = await apiFetch(API_ENDPOINTS.AUTH.RESEND_VERIFICATION, {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    });
+    return response;
+  } catch (error) {
     throw error;
   }
 };

@@ -6,6 +6,7 @@ import styles from "../styles/components/auth/Register.module.css";
 import { registerUser } from "../utils/api";
 import { useAuth } from "../contexts/AuthContext";
 import { RequireGuest } from "../components/auth/ProtectedRoute";
+import EmailVerificationModal from "../components/auth/EmailVerificationModal";
 
 function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -19,6 +20,7 @@ function RegisterPage() {
   const [success, setSuccess] = useState('');
   const router = useRouter();
   const { login } = useAuth();
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
@@ -77,19 +79,22 @@ function RegisterPage() {
 
     try {
       const response = await registerUser(formData);
-      
-      // Update auth context with user data and token
-      const loginSuccess = login(response.user, response.token);
-      
-      if (loginSuccess) {
-        setSuccess('¡Cuenta creada exitosamente! Redirigiendo al dashboard...');
-        
-        // Redirect to dashboard after successful registration
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 1500);
+
+      // If backend still returns token + user (legacy), proceed to login
+      if (response?.token && response?.user) {
+        const loginSuccess = login(response.user, response.token);
+        if (loginSuccess) {
+          setSuccess('¡Cuenta creada exitosamente! Redirigiendo al dashboard...');
+          setTimeout(() => {
+            router.push('/dashboard');
+          }, 1500);
+        } else {
+          setErrors({ general: 'Error al procesar el registro. Inténtalo de nuevo.' });
+        }
       } else {
-        setErrors({ general: 'Error al procesar el registro. Inténtalo de nuevo.' });
+        // New flow: email verification required
+        setSuccess('¡Cuenta creada! Te enviamos un código de verificación por correo.');
+        setShowVerifyModal(true);
       }
       
     } catch (error) {
@@ -325,6 +330,13 @@ function RegisterPage() {
 
         {/* Background */}
         <div className={styles.background}></div>
+        {showVerifyModal && (
+          <EmailVerificationModal
+            initialEmail={formData.email}
+            onClose={() => setShowVerifyModal(false)}
+            afterVerifyRedirect="/dashboard"
+          />
+        )}
       </div>
     </RequireGuest>
   );
