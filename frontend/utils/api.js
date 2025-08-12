@@ -59,6 +59,7 @@ export const API_ENDPOINTS = {
     LIKED_RESULTS: '/api/v1/processing/results/liked/',
     RESULT_DETAIL: (id) => `/api/v1/processing/results/${id}/`,
     TOGGLE_LIKE: (id) => `/api/v1/processing/results/${id}/like/`,
+    TOGGLE_VISIBILITY: (id) => `/api/v1/processing/results/${id}/visibility/`,
     DOWNLOAD_RESULT: (id) => `/api/v1/processing/results/${id}/download/`,
     QUOTA: '/api/v1/processing/quota/',
     STATS: '/api/v1/processing/stats/',
@@ -415,6 +416,27 @@ export const toggleProcessingResultLike = async (resultId) => {
     return response;
   } catch (error) {
     console.error('Toggle like error:', error);
+    throw error;
+  }
+};
+
+// Toggle or set visibility (is_public) for a processing result (requires auth)
+// If isPublic is provided (boolean), uses PATCH to set explicit value.
+// If omitted, uses POST to toggle current value.
+export const toggleProcessingResultVisibility = async (resultId, isPublic) => {
+  try {
+    const endpoint = API_ENDPOINTS.PROCESSING.TOGGLE_VISIBILITY(resultId);
+    const options = {};
+    if (typeof isPublic === 'boolean') {
+      options.method = 'PATCH';
+      options.body = JSON.stringify({ is_public: isPublic });
+    } else {
+      options.method = 'POST';
+    }
+    const response = await apiFetch(endpoint, options);
+    return response;
+  } catch (error) {
+    console.error('Toggle visibility error:', error);
     throw error;
   }
 };

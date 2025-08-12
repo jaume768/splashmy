@@ -615,6 +615,40 @@ def toggle_result_like(request, result_id):
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['POST', 'PATCH'])
+@permission_classes([permissions.IsAuthenticated])
+def toggle_result_visibility(request, result_id):
+    """Toggle or set the visibility (is_public) of a processing result.
+
+    Only the owner of the result (job user) can change visibility.
+
+    Request body (optional): { "is_public": true|false }
+    If omitted, the endpoint toggles the current value.
+    """
+    try:
+        result = get_object_or_404(
+            ProcessingResult,
+            id=result_id,
+            job__user=request.user,
+        )
+
+        # Determine desired state: explicit value or toggle
+        if isinstance(request.data, dict) and 'is_public' in request.data:
+            desired = bool(request.data.get('is_public'))
+        else:
+            desired = not bool(result.is_public)
+
+        result.is_public = desired
+        result.save()
+
+        return Response({
+            'is_public': result.is_public,
+            'message': f"Visibility set to {'public' if result.is_public else 'private'}"
+        })
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def rate_result(request, result_id):

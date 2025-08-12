@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import styles from '../../../styles/ImagesView.module.css';
-import { getPublicProcessingResults, getProcessingResultDetail, toggleProcessingResultLike } from '../../../utils/api';
+import { getPublicProcessingResults, getProcessingResultDetail, toggleProcessingResultLike, downloadProcessingResult, toggleProcessingResultVisibility } from '../../../utils/api';
 import { useAuth } from '../../../contexts/AuthContext';
 
 export default function ImagesView() {
@@ -17,6 +17,8 @@ export default function ImagesView() {
   const [likeLoadingId, setLikeLoadingId] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [downloadLoading, setDownloadLoading] = useState(false);
+  const [visibilityLoading, setVisibilityLoading] = useState(false);
 
   const loadPage = useCallback(async (nextPage) => {
     if (loading || !hasMore) return;
@@ -142,6 +144,61 @@ export default function ImagesView() {
     setSelectedItem(null);
   }, []);
 
+  const formatDate = useCallback((dateString) => {
+    if (!dateString) return '';
+    try {
+      return new Date(dateString).toLocaleString('es-ES', {
+        year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit'
+      });
+    } catch {
+      return '';
+    }
+  }, []);
+
+  const handleDownload = useCallback(async (item) => {
+    try {
+      setDownloadLoading(true);
+      const res = await downloadProcessingResult(item.id);
+      const url = res.download_url || res.url || item.s3_url || item.signed_url;
+      if (url) {
+        window.open(url, '_blank');
+      } else {
+        alert('No se pudo obtener el enlace de descarga.');
+      }
+    } catch (err) {
+      console.error('Error al descargar:', err);
+      alert('No se pudo descargar la imagen.');
+    } finally {
+      setDownloadLoading(false);
+    }
+  }, []);
+
+  const handleToggleVisibility = useCallback(async (item) => {
+    try {
+      if (!authenticated) {
+        alert('Debes iniciar sesión para cambiar la visibilidad.');
+        return;
+      }
+      if (!item?.is_owner) {
+        alert('Solo el propietario puede cambiar la visibilidad.');
+        return;
+      }
+      setVisibilityLoading(true);
+      const res = await toggleProcessingResultVisibility(item.id);
+      const newPublic = !!res.is_public;
+      // Update selected item and list item
+      setSelectedItem((prev) => prev && prev.id === item.id ? { ...prev, is_public: newPublic } : prev);
+      setItems((prev) => prev.map((it) => (
+        it.id === item.id ? { ...it, is_public: newPublic } : it
+      )));
+    } catch (err) {
+      console.error('Error al cambiar visibilidad:', err);
+      alert(err?.message || 'No se pudo cambiar la visibilidad.');
+    } finally {
+      setVisibilityLoading(false);
+    }
+  }, [authenticated]);
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -210,8 +267,32 @@ export default function ImagesView() {
               </div>
             </div>
             <div className={styles.modalFooter}>
-              <div className={styles.prompt}>
-                {selectedItem.job_prompt || ''}
+              <div className={styles.metaLeft}>
+                <span className={`${styles.badge} ${selectedItem.is_public ? styles.badgePublic : styles.badgePrivate}`}>
+                  {selectedItem.is_public ? 'Pública' : 'Privada'}
+                </span>
+                {selectedItem.created_at && (
+                  <span className={styles.dateText}>{formatDate(selectedItem.created_at)}</span>
+                )}
+              </div>
+              <div className={styles.metaRight}>
+                <button
+                  className={styles.actionButton}
+                  onClick={() => handleDownload(selectedItem)}
+                  disabled={downloadLoading}
+                >
+                  {downloadLoading ? 'Descargando…' : 'Descargar'}
+                </button>
+                {selectedItem.is_owner && (
+                  <button
+                    className={styles.actionButton}
+                    onClick={() => handleToggleVisibility(selectedItem)}
+                    disabled={visibilityLoading}
+                    title={selectedItem.is_public ? 'Hacer privada' : 'Hacer pública'}
+                  >
+                    {visibilityLoading ? 'Guardando…' : (selectedItem.is_public ? 'Hacer privada' : 'Hacer pública')}
+                  </button>
+                )}
               </div>
             </div>
           </div>

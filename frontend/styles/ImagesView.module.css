@@ -230,3 +230,66 @@
   color: var(--text-muted, #6b7280);
   font-size: 0.9rem;
 }
+
+/* Modal meta and actions */
+.metaLeft {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.metaRight {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  font-size: 0.75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.08);
+  line-height: 1.6;
+}
+
+.badgePublic {
+  background: #ecfdf5; /* green-50 */
+  color: #065f46; /* emerald-800 */
+  border-color: #10b981; /* emerald-500 */
+}
+
+.badgePrivate {
+  background: #f3f4f6; /* gray-100 */
+  color: #374151; /* gray-700 */
+  border-color: #9ca3af; /* gray-400 */
+}
+
+.dateText {
+  color: var(--text-muted, #6b7280);
+  font-size: 0.8rem;
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 10px;
+  cursor: pointer;
+  color: #111827;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.actionButton:hover {
+  background: #f9fafb;
+}
+
+.actionButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

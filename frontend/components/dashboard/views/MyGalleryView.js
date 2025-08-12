@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../../contexts/AuthContext';
-import { getUserProcessingResults } from '../../../utils/api';
+import { getUserProcessingResults, downloadProcessingResult, toggleProcessingResultVisibility } from '../../../utils/api';
 import styles from '../../../styles/MyCreations.module.css';
 
 export default function MyGalleryView({ onExploreClick }) {
@@ -11,6 +11,8 @@ export default function MyGalleryView({ onExploreClick }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [downloadLoading, setDownloadLoading] = useState(false);
+  const [visibilityLoading, setVisibilityLoading] = useState(false);
 
   useEffect(() => {
     if (!authenticated) return; // navigation should handle redirect; avoid flashing
@@ -49,11 +51,42 @@ export default function MyGalleryView({ onExploreClick }) {
 
   const handleDownload = async (creation) => {
     try {
-      if (creation.s3_url) {
-        window.open(creation.s3_url, '_blank');
+      setDownloadLoading(true);
+      const res = await downloadProcessingResult(creation.id);
+      const url = res.download_url || res.url || creation.s3_url;
+      if (url) {
+        window.open(url, '_blank');
+      } else {
+        alert('No se pudo obtener el enlace de descarga.');
       }
     } catch (error) {
       console.error('Error downloading image:', error);
+      alert('No se pudo descargar la imagen.');
+    } finally {
+      setDownloadLoading(false);
+    }
+  };
+
+  const handleToggleVisibility = async (creation) => {
+    try {
+      if (!authenticated) {
+        alert('Debes iniciar sesión para cambiar la visibilidad.');
+        return;
+      }
+      // In MyGallery, user is owner of their results
+      setVisibilityLoading(true);
+      const res = await toggleProcessingResultVisibility(creation.id);
+      const newPublic = !!res.is_public;
+      // Update list and selected
+      setCreations((prev) => prev.map((it) => (
+        it.id === creation.id ? { ...it, is_public: newPublic } : it
+      )));
+      setSelectedImage((prev) => prev && prev.id === creation.id ? { ...prev, is_public: newPublic } : prev);
+    } catch (error) {
+      console.error('Error toggling visibility:', error);
+      alert('No se pudo cambiar la visibilidad.');
+    } finally {
+      setVisibilityLoading(false);
     }
   };
 
@@ -145,12 +178,20 @@ export default function MyGalleryView({ onExploreClick }) {
             <div className={styles.modalInfo}>
               <div className={styles.modalMeta}>
                 <h3>Detalles de la creación</h3>
-                <button onClick={() => handleDownload(selectedImage)} className={styles.modalDownloadButton}>
-                  💾 Descargar
-                </button>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button onClick={() => handleDownload(selectedImage)} className={styles.modalDownloadButton} disabled={downloadLoading}>
+                    {downloadLoading ? 'Descargando…' : '💾 Descargar'}
+                  </button>
+                  <button onClick={() => handleToggleVisibility(selectedImage)} className={styles.modalActionButton} disabled={visibilityLoading} title={selectedImage.is_public ? 'Hacer privada' : 'Hacer pública'}>
+                    {visibilityLoading ? 'Guardando…' : (selectedImage.is_public ? 'Hacer privada' : 'Hacer pública')}
+                  </button>
+                </div>
               </div>
               <div className={styles.modalDetails}>
-                <span>{formatDate(selectedImage.created_at)}</span>
+                <span className={`${styles.badge} ${selectedImage.is_public ? styles.badgePublic : styles.badgePrivate}`}>
+                  {selectedImage.is_public ? 'Pública' : 'Privada'}
+                </span>
+                <span className={styles.dateText}>{formatDate(selectedImage.created_at)}</span>
               </div>
             </div>
           </div>

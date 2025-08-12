@@ -1,6 +1,5 @@
 - hacer login y registro funcional (falta con google)
 - en el registro hacer verificación de mail si no es por google
-- mejorar el modal de fotos en imagenes, poder ir al estilo utilizado para esa foto y ver fotos del autor que tenga en publico,
-- en la foto de mi galeria ver si esta publica o privada, numero de likes, fecha, boton de descargar y poder modificar el estado de publico o privado
+- mejorar el modal de fotos en imagenes, poder ir al estilo utilizado para esa foto y ver fotos del autor que tenga en publico y que no pueda cambiar entre publica y privada tan rápido (obligar a un delay, 5 minutos)
 - hacer un cerrar sesión, perfil del usaurio, mejoras esteticas dashboard
 - refactorizar codigo y modularizar todo lo posible

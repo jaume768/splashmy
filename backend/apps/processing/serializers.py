@@ -160,6 +160,7 @@ class ProcessingResultSerializer(serializers.ModelSerializer):
     signed_url = serializers.SerializerMethodField()
     like_count = serializers.SerializerMethodField()
     user_has_liked = serializers.SerializerMethodField()
+    is_owner = serializers.SerializerMethodField()
     
     class Meta:
         model = ProcessingResult
@@ -167,7 +168,7 @@ class ProcessingResultSerializer(serializers.ModelSerializer):
             'id', 'job', 'job_type', 'job_prompt',
             'result_format', 'result_size', 'result_quality', 'result_background',
             's3_url', 'signed_url', 'openai_created_at', 'token_usage',
-            'user_rating', 'is_favorite', 'is_public', 'like_count', 'user_has_liked', 'download_count',
+            'user_rating', 'is_favorite', 'is_public', 'like_count', 'user_has_liked', 'download_count', 'is_owner',
             'created_at', 'updated_at'
         ]
         read_only_fields = [
@@ -201,6 +202,16 @@ class ProcessingResultSerializer(serializers.ModelSerializer):
         if user is not None and getattr(user, 'is_authenticated', False):
             try:
                 return obj.likes.filter(user=user).exists()
+            except Exception:
+                return False
+        return False
+
+    def get_is_owner(self, obj):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        if user is not None and getattr(user, 'is_authenticated', False):
+            try:
+                return getattr(obj.job, 'user_id', None) == getattr(user, 'id', None)
             except Exception:
                 return False
         return False

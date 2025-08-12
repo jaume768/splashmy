@@ -18,6 +18,7 @@ urlpatterns = [
     path('results/<uuid:result_id>/', views.ProcessingResultDetailView.as_view(), name='result-detail'),
     path('results/<uuid:result_id>/favorite/', views.toggle_result_favorite, name='toggle-favorite'),
     path('results/<uuid:result_id>/like/', views.toggle_result_like, name='toggle-like'),
+    path('results/<uuid:result_id>/visibility/', views.toggle_result_visibility, name='toggle-visibility'),
     path('results/<uuid:result_id>/rate/', views.rate_result, name='rate-result'),
     path('results/<uuid:result_id>/download/', views.download_result, name='download-result'),
     
