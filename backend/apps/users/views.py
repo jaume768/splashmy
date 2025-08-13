@@ -12,6 +12,7 @@ from .serializers import (
     UserSerializer, UserRegistrationSerializer, LoginSerializer, 
     ChangePasswordSerializer, UserProfileSerializer,
     VerifyEmailSerializer, ResendVerificationSerializer, GoogleLoginSerializer,
+    PasswordResetRequestSerializer, PasswordResetConfirmSerializer,
 )
 from . import services
 
@@ -226,6 +227,42 @@ def verify_email_view(request):
             'token': token.key,
             'message': 'Email verificado correctamente'
         }, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def password_reset_request_view(request):
+    """Request a password reset code by email. Always return generic success."""
+    serializer = PasswordResetRequestSerializer(data=request.data)
+    if serializer.is_valid():
+        email = serializer.validated_data.get('email')
+        user = User.objects.filter(email__iexact=email).first()
+        if user:
+            try:
+                allowed, _ = services.can_resend_password_reset(user)
+                if allowed:
+                    services.generate_and_send_password_reset(user)
+            except Exception as e:  # pragma: no cover
+                print(f"[PasswordResetRequest] Error sending email: {e}")
+        # Generic success message (avoid user enumeration)
+        return Response({'message': 'Si el email existe, hemos enviado un código para restablecer tu contraseña.'}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def password_reset_confirm_view(request):
+    """Confirm password reset with code and set new password."""
+    serializer = PasswordResetConfirmSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.validated_data['user']
+        new_password = serializer.validated_data['new_password']
+        user.set_password(new_password)
+        user.save()
+        # Invalidate existing tokens (force logout on other sessions)
+        Token.objects.filter(user=user).delete()
+        return Response({'message': 'Contraseña restablecida correctamente. Inicia sesión con tu nueva contraseña.'}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

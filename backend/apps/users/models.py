@@ -97,6 +97,29 @@ class UserProfile(models.Model):
         return f"{self.user.email}'s Profile"
 
 
+class PasswordReset(models.Model):
+    """Stores hashed password reset codes for users (OTP)."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='password_resets')
+    code_hash = models.CharField(max_length=128)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveIntegerField(default=0)
+    last_sent_at = models.DateTimeField(null=True, blank=True)
+    resend_count = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        db_table = 'password_resets'
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['expires_at']),
+        ]
+        verbose_name = 'Password Reset'
+        verbose_name_plural = 'Password Resets'
+
+    def __str__(self):
+        return f"PasswordReset(user={self.user_id}, expires_at={self.expires_at})"
+
+
 class EmailVerification(models.Model):
     """Stores hashed email verification codes for users (OTP)."""
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='email_verifications')

@@ -39,6 +39,8 @@ export const API_ENDPOINTS = {
     VERIFY_EMAIL: '/api/v1/auth/verify-email/',
     RESEND_VERIFICATION: '/api/v1/auth/resend-verification/',
     GOOGLE_LOGIN: '/api/v1/auth/google-login/',
+    PASSWORD_RESET_REQUEST: '/api/v1/auth/password-reset/request/',
+    PASSWORD_RESET_CONFIRM: '/api/v1/auth/password-reset/confirm/',
   },
   
   // Images endpoints
@@ -243,6 +245,22 @@ export const changePassword = async (passwords) => {
       old_password: passwords.oldPassword,
       new_password: passwords.newPassword,
     }),
+  });
+};
+
+// Request password reset code (always returns generic message)
+export const requestPasswordReset = async (email) => {
+  return await apiFetch(API_ENDPOINTS.AUTH.PASSWORD_RESET_REQUEST, {
+    method: 'POST',
+    body: JSON.stringify({ email }),
+  });
+};
+
+// Confirm password reset with code and new password
+export const confirmPasswordReset = async ({ email, code, newPassword }) => {
+  return await apiFetch(API_ENDPOINTS.AUTH.PASSWORD_RESET_CONFIRM, {
+    method: 'POST',
+    body: JSON.stringify({ email, code, new_password: newPassword }),
   });
 };
 

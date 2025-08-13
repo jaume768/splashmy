@@ -12,6 +12,9 @@ urlpatterns = [
     path('change-password/', views.change_password_view, name='change-password'),
     path('verify-email/', views.verify_email_view, name='verify-email'),
     path('resend-verification/', views.resend_verification_view, name='resend-verification'),
+    # Password reset
+    path('password-reset/request/', views.password_reset_request_view, name='password-reset-request'),
+    path('password-reset/confirm/', views.password_reset_confirm_view, name='password-reset-confirm'),
     # Google OAuth Authorization Code flow
     path('google/start/', views.google_oauth_start, name='google-oauth-start'),
     path('google/callback/', views.google_oauth_callback, name='google-oauth-callback'),

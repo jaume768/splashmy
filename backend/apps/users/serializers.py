@@ -268,3 +268,43 @@ class GoogleLoginSerializer(serializers.Serializer):
         attrs['user'] = user
         attrs['created'] = created
         return attrs
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    """Serializer to request a password reset code via email.
+    Returns generic success in views to avoid user enumeration.
+    """
+    email = serializers.EmailField()
+
+    # No extra validation to avoid leaking existence; email format is enough
+    # View will always return generic success
+
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    """Serializer to confirm password reset with OTP code and new password."""
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=6)
+    new_password = serializers.CharField(write_only=True, min_length=8)
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        code = attrs.get('code')
+        new_password = attrs.get('new_password')
+
+        # Basic code format check
+        if not code or not code.isdigit() or len(code) != 6:
+            raise serializers.ValidationError({'code': 'Código inválido o expirado'})
+
+        # Avoid user enumeration: return generic error if user not found
+        user = User.objects.filter(email__iexact=email).first()
+        if not user:
+            raise serializers.ValidationError({'code': 'Código inválido o expirado'})
+
+        # Verify reset code
+        is_valid = services.verify_password_reset_code(user, code)
+        if not is_valid:
+            raise serializers.ValidationError({'code': 'Código inválido o expirado'})
+
+        attrs['user'] = user
+        attrs['new_password'] = new_password
+        return attrs
