@@ -19,3 +19,7 @@ django-environ==0.11.2
 
 # Email (Brevo / Sendinblue)
 sib-api-v3-sdk==7.6.0
+
+# Google OAuth (ID token verification)
+google-auth==2.29.0
+requests==2.31.0

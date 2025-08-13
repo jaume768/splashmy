@@ -1,6 +1,7 @@
-- hacer login y registro funcional (falta con google)
+
 - mejorar el modal de fotos en imagenes, poder ir al estilo utilizado para esa foto y ver fotos del autor que tenga en publico y que no pueda cambiar entre publica y privada tan rápido (obligar a un delay, 5 minutos)
 - refactorizar codigo y modularizar todo lo posible
 - hacer que el usuario pueda subir una foto de perfil
 - hacer reset de contraseña olvidad
 - cambiar estetica de modelo de verificacion de mail y si probar bien el de login
+- monetizacion con anuncios cuando se genera la imagen, pop up con anuncio que se cierra en 5 segundos

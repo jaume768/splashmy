@@ -38,6 +38,7 @@ export const API_ENDPOINTS = {
     CHANGE_PASSWORD: '/api/v1/auth/change-password/',
     VERIFY_EMAIL: '/api/v1/auth/verify-email/',
     RESEND_VERIFICATION: '/api/v1/auth/resend-verification/',
+    GOOGLE_LOGIN: '/api/v1/auth/google-login/',
   },
   
   // Images endpoints
@@ -156,6 +157,27 @@ export const registerUser = async (userData) => {
       localStorage.setItem('user', JSON.stringify(response.user));
     }
     
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Login/Register via Google ID token
+export const googleLogin = async (idToken) => {
+  try {
+    const response = await apiFetch(API_ENDPOINTS.AUTH.GOOGLE_LOGIN, {
+      method: 'POST',
+      body: JSON.stringify({
+        id_token: idToken,
+      }),
+    });
+
+    if (response.token) {
+      localStorage.setItem('authToken', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+    }
+
     return response;
   } catch (error) {
     throw error;

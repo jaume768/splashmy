@@ -3,6 +3,7 @@ from rest_framework.validators import UniqueValidator
 from django.contrib.auth import authenticate
 from .models import User, UserProfile
 from . import services
+from django.conf import settings
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -192,4 +193,78 @@ class ResendVerificationSerializer(serializers.Serializer):
 
         attrs['user'] = user
         attrs['seconds_remaining'] = seconds_remaining
+        return attrs
+
+
+class GoogleLoginSerializer(serializers.Serializer):
+    """Serializer to authenticate or register a user with a Google ID token."""
+    id_token = serializers.CharField()
+
+    def validate(self, attrs):
+        token = attrs.get('id_token')
+        if not token:
+            raise serializers.ValidationError({'id_token': 'Token requerido'})
+
+        # Verify Google ID token
+        try:
+            from google.oauth2 import id_token as google_id_token
+            from google.auth.transport import requests as google_requests
+
+            idinfo = google_id_token.verify_oauth2_token(
+                token,
+                google_requests.Request(),
+                settings.GOOGLE_OAUTH_CLIENT_ID or None,
+            )
+            # Verify issuer
+            if idinfo.get('iss') not in ['accounts.google.com', 'https://accounts.google.com']:
+                raise ValueError('Invalid issuer')
+        except Exception:
+            raise serializers.ValidationError({'id_token': 'Token de Google inválido'})
+
+        email = idinfo.get('email')
+        email_verified = idinfo.get('email_verified', False)
+        given_name = idinfo.get('given_name') or ''
+        family_name = idinfo.get('family_name') or ''
+
+        if not email:
+            raise serializers.ValidationError({'email': 'Email no proporcionado por Google'})
+        if not email_verified:
+            raise serializers.ValidationError({'email': 'El email de Google no está verificado'})
+
+        # Find or create user
+        user = User.objects.filter(email__iexact=email).first()
+        created = False
+        if not user:
+            # Generate a unique username based on email or given_name
+            import re
+            import random
+            base = (given_name or email.split('@')[0] or 'user').lower()
+            base = re.sub(r'[^a-z0-9_\.]+', '', base.replace(' ', '_'))
+            if not base:
+                base = 'user'
+            candidate = base
+            # Ensure uniqueness (case-insensitive)
+            while User.objects.filter(username__iexact=candidate).exists():
+                candidate = f"{base}{random.randint(1000, 99999)}"
+
+            user = User.objects.create_user(
+                email=email,
+                username=candidate,
+                password=User.objects.make_random_password(),
+            )
+            user.first_name = given_name
+            user.last_name = family_name
+            user.is_email_verified = True
+            user.save()
+            # Ensure profile exists
+            UserProfile.objects.get_or_create(user=user)
+            created = True
+        else:
+            # If existing user, mark email verified if not already
+            if not user.is_email_verified:
+                user.is_email_verified = True
+                user.save(update_fields=['is_email_verified'])
+
+        attrs['user'] = user
+        attrs['created'] = created
         return attrs
