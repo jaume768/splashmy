@@ -150,6 +150,6 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 
 # Customize admin site headers
-admin.site.site_header = "SplashMy Administration"
-admin.site.site_title = "SplashMy Admin"
-admin.site.index_title = "Welcome to SplashMy Administration"
+admin.site.site_header = "Fotomorfia Administration"
+admin.site.site_title = "Fotomorfia Admin"
+admin.site.index_title = "Welcome to Fotomorfia Administration"

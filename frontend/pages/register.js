@@ -176,8 +176,8 @@ function RegisterPage() {
   return (
     <RequireGuest>
       <Head>
-        <title>Registrarse - SplashMy</title>
-        <meta name="description" content="Crea tu cuenta en SplashMy y accede a las herramientas de IA" />
+        <title>Registrarse - Fotomorfia</title>
+        <meta name="description" content="Crea tu cuenta en Fotomorfia y accede a las herramientas de IA" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -187,7 +187,7 @@ function RegisterPage() {
           {/* Logo */}
           <div className={styles.logo}>
             <Link href="/">
-              <h1>SplashMy</h1>
+              <h1>Fotomorfia</h1>
             </Link>
           </div>
 
@@ -195,7 +195,7 @@ function RegisterPage() {
           <div className={styles.header}>
             <h2 className={styles.title}>Crear Cuenta</h2>
             <p className={styles.subtitle}>
-              Únete a SplashMy y transforma tus imágenes con IA
+              Únete a Fotomorfia y transforma tus imágenes con IA
             </p>
           </div>
 

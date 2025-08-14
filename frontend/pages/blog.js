@@ -8,7 +8,7 @@ export default function BlogPage() {
   return (
     <>
       <Head>
-        <title>Blog - SplashMy</title>
+        <title>Blog - Fotomorfia</title>
         <meta name="description" content="Nuestro blog estará disponible próximamente." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
@@ -26,7 +26,7 @@ export default function BlogPage() {
             <div className={styles.card}>
               <h2 className={styles.sectionTitle}>¿Qué publicarémos?</h2>
               <p className={styles.secondaryText}>
-                Noticias, guías y consejos sobre diseño con IA, flujos de trabajo y novedades de SplashMy.
+                Noticias, guías y consejos sobre diseño con IA, flujos de trabajo y novedades de Fotomorfia.
               </p>
               <p className={styles.secondaryText} style={{ marginTop: '1.5rem' }}>
                 Mientras tanto, puedes explorar el{' '}

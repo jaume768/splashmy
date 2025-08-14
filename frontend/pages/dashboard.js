@@ -160,8 +160,8 @@ const DashboardPage = () => {
   return (
     <>
       <Head>
-        <title>Panel de estilos - SplashMy</title>
-        <meta name="description" content="Explora todos los estilos de imágenes AI disponibles en SplashMy" />
+        <title>Panel de estilos - Fotomorfia</title>
+        <meta name="description" content="Explora todos los estilos de imágenes AI disponibles en Fotomorfia" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
@@ -282,10 +282,10 @@ const DashboardPage = () => {
           <div className={styles.container}>
             <div className={styles.footerContent}>
               <div className={styles.footerBrand}>
-                <span className={styles.footerLogo}>SplashMy</span>
+                <span className={styles.footerLogo}>Fotomorfia</span>
                 <span className={styles.footerTagline}>Creatividad infinita con IA</span>
               </div>
-              <p className={styles.footerCopyright}>© 2024 SplashMy</p>
+              <p className={styles.footerCopyright}>© 2024 Fotomorfia</p>
             </div>
           </div>
         </footer>

@@ -8,8 +8,8 @@ export default function SobreNosotrosPage() {
   return (
     <>
       <Head>
-        <title>Sobre Nosotros - SplashMy</title>
-        <meta name="description" content="Conoce a SplashMy: nuestra misión, visión y valores." />
+        <title>Sobre Nosotros - Fotomorfia</title>
+        <meta name="description" content="Conoce a Fotomorfia: nuestra misión, visión y valores." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
@@ -26,7 +26,7 @@ export default function SobreNosotrosPage() {
             <div className={styles.card}>
               <h2 className={styles.sectionTitle}>Nuestra misión</h2>
               <p className={styles.secondaryText}>
-                En SplashMy creemos que la inteligencia artificial debe potenciar a las personas creativas. 
+                En Fotomorfia creemos que la inteligencia artificial debe potenciar a las personas creativas. 
                 Por eso construimos herramientas sencillas, potentes y seguras para crear, editar y compartir imágenes.
               </p>
               <h3 className={styles.sectionTitle} style={{ marginTop: '1.5rem' }}>Lo que nos guía</h3>

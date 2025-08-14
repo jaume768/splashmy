@@ -5,18 +5,18 @@ import styles from '../../styles/components/home/FAQ.module.css';
 const faqData = [
   {
     id: 1,
-    question: "¿Qué es SplashMy y cómo funciona?",
-    answer: "SplashMy es una plataforma de IA que permite transformar y editar imágenes utilizando inteligencia artificial avanzada. Puedes aplicar diferentes estilos artísticos, y editar fotos de manera profesional directamente desde tu navegador."
+    question: "¿Qué es Fotomorfia y cómo funciona?",
+    answer: "Fotomorfia es una plataforma de IA que permite transformar y editar imágenes utilizando inteligencia artificial avanzada. Puedes aplicar diferentes estilos artísticos, y editar fotos de manera profesional directamente desde tu navegador."
   },
   {
     id: 2,
-    question: "¿Es gratis usar SplashMy?",
+    question: "¿Es gratis usar Fotomorfia?",
     answer: "Ofrecemos una prueba gratuita que te permite experimentar con nuestras herramientas para uso personal hasta profesional."
   },
   {
     id: 3,
     question: "¿Qué formatos de imagen son compatibles?",
-    answer: "SplashMy es compatible con los formatos más populares: JPG, PNG, WebP, y HEIC. Las imágenes pueden tener una resolución de hasta 4K para obtener resultados de la más alta calidad."
+    answer: "Fotomorfia es compatible con los formatos más populares: JPG, PNG, WebP, y HEIC. Las imágenes pueden tener una resolución de hasta 4K para obtener resultados de la más alta calidad."
   },
   {
     id: 4,
@@ -26,12 +26,12 @@ const faqData = [
   {
     id: 5,
     question: "¿Puedo usar las imágenes generadas comercialmente?",
-    answer: "Sí, todas las imágenes que generes o edites con SplashMy son tuyas para uso comercial. Te otorgamos una licencia completa para usar el contenido creado en tus proyectos profesionales."
+    answer: "Sí, todas las imágenes que generes o edites con Fotomorfia son tuyas para uso comercial. Te otorgamos una licencia completa para usar el contenido creado en tus proyectos profesionales."
   },
   {
     id: 6,
     question: "¿Funciona en dispositivos móviles?",
-    answer: "¡Por supuesto! SplashMy está optimizado para funcionar perfectamente en móviles, tablets y escritorio. Puedes editar y generar imágenes desde cualquier dispositivo con conexión a internet."
+    answer: "¡Por supuesto! Fotomorfia está optimizado para funcionar perfectamente en móviles, tablets y escritorio. Puedes editar y generar imágenes desde cualquier dispositivo con conexión a internet."
   }
 ];
 
@@ -61,7 +61,7 @@ export default function FAQ() {
         <div className={styles.header}>
           <h2 className={styles.title}>Preguntas Frecuentes</h2>
           <p className={styles.subtitle}>
-            Encuentra respuestas a las preguntas más comunes sobre SplashMy
+            Encuentra respuestas a las preguntas más comunes sobre Fotomorfia
           </p>
         </div>
 

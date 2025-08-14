@@ -8,8 +8,8 @@ export default function PoliticaCookies() {
   return (
     <>
       <Head>
-        <title>Política de Cookies | SplashMy</title>
-        <meta name="description" content="Política de cookies de SplashMy" />
+        <title>Política de Cookies | Fotomorfia</title>
+        <meta name="description" content="Política de cookies de Fotomorfia" />
       </Head>
 
       <div className={styles.header}>

@@ -8,8 +8,8 @@ export default function AvisoLegal() {
   return (
     <>
       <Head>
-        <title>Aviso Legal | SplashMy</title>
-        <meta name="description" content="Aviso legal del sitio SplashMy" />
+        <title>Aviso Legal | Fotomorfia</title>
+        <meta name="description" content="Aviso legal del sitio Fotomorfia" />
       </Head>
 
       <div className={styles.header}>
@@ -26,14 +26,14 @@ export default function AvisoLegal() {
             <p className={styles.paragraph}>Titular: Jaume Fernández Suñer (persona física)</p>
             <p className={styles.paragraph}>DNI: 41621021Z</p>
             <p className={styles.paragraph}>Domicilio fiscal: Calle Mallorca, n.50, 07500, Manacor, Islas Baleares, España</p>
-            <p className={styles.paragraph}>Email de contacto: <a className={styles.link} href="mailto:contacto@splashmy.com">contacto@splashmy.com</a></p>
+            <p className={styles.paragraph}>Email de contacto: <a className={styles.link} href="mailto:contacto@fotomorfia.com">contacto@fotomorfia.com</a></p>
             <p className={styles.paragraph}>Teléfono: 683472110</p>
           </div>
 
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>2. Objeto del sitio</h2>
             <p className={styles.paragraph}>
-              SplashMy es una plataforma de procesamiento de imágenes con inteligencia artificial que permite
+              Fotomorfia es una plataforma de procesamiento de imágenes con inteligencia artificial que permite
               generación, edición y transformación de estilo de imágenes.
             </p>
           </div>

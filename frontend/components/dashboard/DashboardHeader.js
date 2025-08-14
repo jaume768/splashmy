@@ -16,7 +16,7 @@ export default function DashboardHeader({ title = 'Explore' }) {
     <header className={styles.header}>
       <div className={`container ${styles.inner}`}>
         <div className={styles.brand} onClick={() => router.push('/dashboard')}>
-          <span className={styles.brandText}>SplashMy</span>
+          <span className={styles.brandText}>Fotomorfia</span>
         </div>
 
         <div className={styles.center}>

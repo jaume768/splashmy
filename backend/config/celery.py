@@ -1,5 +1,5 @@
 """
-Celery configuration for SplashMy image processing
+Celery configuration for Fotomorfia image processing
 """
 
 import os
@@ -9,7 +9,7 @@ from django.conf import settings
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
-app = Celery('splashmy')
+app = Celery('fotomorfia')
 
 # Using a string here means the worker doesn't have to serialize
 # the configuration object to child processes.

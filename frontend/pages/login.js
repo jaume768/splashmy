@@ -106,8 +106,8 @@ function LoginPage() {
   return (
     <RequireGuest>
       <Head>
-        <title>Iniciar Sesión - SplashMy</title>
-        <meta name="description" content="Inicia sesión en SplashMy para acceder a tus herramientas de IA" />
+        <title>Iniciar Sesión - Fotomorfia</title>
+        <meta name="description" content="Inicia sesión en Fotomorfia para acceder a tus herramientas de IA" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -117,7 +117,7 @@ function LoginPage() {
           {/* Logo */}
           <div className={styles.logo}>
             <Link href="/">
-              <h1>SplashMy</h1>
+              <h1>Fotomorfia</h1>
             </Link>
           </div>
 

@@ -233,7 +233,7 @@ OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
 # Brevo (Sendinblue) Email settings for verification
 BREVO_API_KEY = config('BREVO_API_KEY', default='')
 EMAIL_FROM_ADDRESS = config('EMAIL_FROM_ADDRESS', default='jaumefernandezsunyer12@gmail.com')
-EMAIL_FROM_NAME = config('EMAIL_FROM_NAME', default='SplashMy')
+EMAIL_FROM_NAME = config('EMAIL_FROM_NAME', default='Fotomorfia')
 EMAIL_VERIFICATION_TEMPLATE_ID = config('EMAIL_VERIFICATION_TEMPLATE_ID', default=None)
 EMAIL_VERIFICATION_CODE_TTL_MINUTES = config('EMAIL_VERIFICATION_CODE_TTL_MINUTES', default=10, cast=int)
 EMAIL_VERIFICATION_MAX_ATTEMPTS = config('EMAIL_VERIFICATION_MAX_ATTEMPTS', default=5, cast=int)

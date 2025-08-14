@@ -1,10 +1,10 @@
-# 🎨 SplashMy - AI Style Transfer App
+# 🎨 Fotomorfia - AI Style Transfer App
 
 Una aplicación web para convertir imágenes subidas por usuarios a diferentes estilos de animación y edición utilizando inteligencia artificial.
 
 ## 📋 Descripción
 
-SplashMy es una plataforma que permite a los usuarios transformar sus imágenes aplicando diferentes estilos artísticos como Studio Ghibli, Los Simpsons, Dragon Ball, Baki, y muchos más. La aplicación utiliza tecnología de vanguardia para crear transformaciones de alta calidad mientras mantiene la seguridad y privacidad de los usuarios.
+Fotomorfia es una plataforma que permite a los usuarios transformar sus imágenes aplicando diferentes estilos artísticos como Studio Ghibli, Los Simpsons, Dragon Ball, Baki, y muchos más. La aplicación utiliza tecnología de vanguardia para crear transformaciones de alta calidad mientras mantiene la seguridad y privacidad de los usuarios.
 
 ## ✨ Características Principales
 
@@ -71,7 +71,7 @@ SplashMy es una plataforma que permite a los usuarios transformar sus imágenes 
 ```bash
 # Clonar el repositorio
 git clone <repository-url>
-cd Splashmy
+cd Fotomorfia
 
 # Crear variables de entorno
 
@@ -117,7 +117,7 @@ El proyecto está configurado con hot reload tanto para backend como frontend:
 
 ### Estructura del Proyecto
 ```
-Splashmy/
+Fotomorfia/
 ├── backend/           # Django API
 │   ├── apps/         # Apps de Django
 │   ├── config/       # Configuración
@@ -142,7 +142,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 ## 📞 Contacto
 
-- **Proyecto**: SplashMy
+- **Proyecto**: Fotomorfia
 - **Repositorio**: [GitHub](repository-url)
 
 ---

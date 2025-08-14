@@ -10,12 +10,12 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>SplashMy - Transformador de estilos de imágenes IA | Generador de Imágenes IA</title>
+        <title>Fotomorfia - Transformador de estilos de imágenes IA | Generador de Imágenes IA</title>
         <meta name="description" content="Transformador de estilos de imágenes IA que te permite transformar tus imágenes en cualquier estilo que desees. Prueba 100% gratis." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="keywords" content="editor de fotos, IA, inteligencia artificial, generador de imágenes, diseño, SplashMy" />
-        <meta name="author" content="SplashMy" />
-        <meta property="og:title" content="SplashMy - Transformador de estilos de imágenes IA" />
+        <meta name="keywords" content="editor de fotos, IA, inteligencia artificial, generador de imágenes, diseño, Fotomorfia" />
+        <meta name="author" content="Fotomorfia" />
+        <meta property="og:title" content="Fotomorfia - Transformador de estilos de imágenes IA" />
         <meta property="og:description" content="Transformador de estilos de imágenes IA que te permite transformar tus imágenes en cualquier estilo que desees. Prueba 100% gratis." />
         <meta property="og:type" content="website" />
         <link rel="icon" href="/favicon.ico" />

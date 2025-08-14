@@ -52,10 +52,10 @@ def send_contact_email(payload: dict) -> None:
 
     sender = {
         "email": getattr(settings, "EMAIL_FROM_ADDRESS", "no-reply@example.com"),
-        "name": getattr(settings, "EMAIL_FROM_NAME", "SplashMy"),
+        "name": getattr(settings, "EMAIL_FROM_NAME", "Fotomorfia"),
     }
     inbox_email = getattr(settings, "SUPPORT_INBOX_EMAIL", sender["email"])
-    to = [{"email": inbox_email, "name": "Soporte SplashMy"}]
+    to = [{"email": inbox_email, "name": "Soporte Fotomorfia"}]
 
     template_id = getattr(settings, "CONTACT_SUPPORT_TEMPLATE_ID", None)
 

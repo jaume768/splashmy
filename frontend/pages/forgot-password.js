@@ -124,10 +124,10 @@ export default function ForgotPasswordPage() {
   return (
     <>
       <Head>
-        <title>Restablecer Contraseña - SplashMy</title>
+        <title>Restablecer Contraseña - Fotomorfia</title>
         <meta
           name="description"
-          content="Recupera el acceso a tu cuenta de SplashMy"
+          content="Recupera el acceso a tu cuenta de Fotomorfia"
         />
       </Head>
 
@@ -136,7 +136,7 @@ export default function ForgotPasswordPage() {
           {/* Logo */}
           <div className={styles.logo}>
             <Link href="/">
-              <h1>SplashMy</h1>
+              <h1>Fotomorfia</h1>
             </Link>
           </div>
 

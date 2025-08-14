@@ -14,7 +14,7 @@ export default function Header() {
       <div className={styles.container}>
         <div className={styles.logo}>
           <h1>
-            <Link href="/">SplashMy</Link>
+            <Link href="/">Fotomorfia</Link>
           </h1>
         </div>
         

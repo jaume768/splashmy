@@ -8,7 +8,7 @@ const testimonials = [
     role: "Diseñadora Gráfica",
     avatar: "MG",
     rating: 5,
-    text: "SplashMy ha revolucionado mi flujo de trabajo. La calidad de las transformaciones de estilo es increíble y me ahorra horas de edición manual."
+    text: "Fotomorfia ha revolucionado mi flujo de trabajo. La calidad de las transformaciones de estilo es increíble y me ahorra horas de edición manual."
   },
   {
     id: 2,
@@ -16,7 +16,7 @@ const testimonials = [
     role: "Fotógrafo",
     avatar: "CR",
     rating: 5,
-    text: "Como fotógrafo profesional, necesito herramientas que me den resultados rápidos y de calidad. SplashMy supera todas mis expectativas."
+    text: "Como fotógrafo profesional, necesito herramientas que me den resultados rápidos y de calidad. Fotomorfia supera todas mis expectativas."
   },
   {
     id: 3,
@@ -59,7 +59,7 @@ export default function Testimonials() {
         <div className={styles.header}>
           <h2 className={styles.title}>Lo que dicen nuestros usuarios</h2>
           <p className={styles.subtitle}>
-            Miles de creadores confían en SplashMy para transformar sus imágenes
+            Miles de creadores confían en Fotomorfia para transformar sus imágenes
           </p>
         </div>
 

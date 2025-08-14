@@ -58,8 +58,8 @@ export default function ContactoPage() {
   return (
     <>
       <Head>
-        <title>Contacto y Soporte - SplashMy</title>
-        <meta name="description" content="Ponte en contacto con el equipo de soporte de SplashMy. Estamos aquí para ayudarte." />
+        <title>Contacto y Soporte - Fotomorfia</title>
+        <meta name="description" content="Ponte en contacto con el equipo de soporte de Fotomorfia. Estamos aquí para ayudarte." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
@@ -171,7 +171,7 @@ export default function ContactoPage() {
                 <div className={styles.infoItem}>
                   <div>
                     <div className={styles.infoTitle}>Correo</div>
-                    <div className={styles.infoValue}><a href="mailto:contacto@splashmy.com">contacto@splashmy.com</a></div>
+                    <div className={styles.infoValue}><a href="mailto:contacto@fotomorfia.com">contacto@fotomorfia.com</a></div>
                   </div>
                 </div>
                 <div className={styles.infoItem}>

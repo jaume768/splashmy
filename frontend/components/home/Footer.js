@@ -35,7 +35,7 @@ export default function Footer() {
         <div className={styles.content}>
           {/* Logo y descripción */}
           <div className={styles.logoSection}>
-            <h3 className={styles.logo}>SplashMy</h3>
+            <h3 className={styles.logo}>Fotomorfia</h3>
             <p className={styles.description}>
               Transforma tus imágenes con el poder de la inteligencia artificial. 
               Crea, edita y diseña como nunca antes.
@@ -94,7 +94,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className={styles.bottom}>
           <p className={styles.copyright}>
-            © {currentYear} SplashMy. Todos los derechos reservados.
+            © {currentYear} Fotomorfia. Todos los derechos reservados.
           </p>
         </div>
       </div>

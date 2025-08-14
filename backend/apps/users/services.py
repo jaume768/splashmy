@@ -116,7 +116,7 @@ def send_verification_email(user: User, code: str) -> None:
 
     sender = {
         "email": getattr(settings, "EMAIL_FROM_ADDRESS", "no-reply@example.com"),
-        "name": getattr(settings, "EMAIL_FROM_NAME", "SplashMy"),
+        "name": getattr(settings, "EMAIL_FROM_NAME", "Fotomorfia"),
     }
     to = [{"email": user.email, "name": user.get_full_name() or user.username or user.email}]
 
@@ -134,7 +134,7 @@ def send_verification_email(user: User, code: str) -> None:
                 sender=sender,
             )
         else:
-            subject = "Verifica tu correo - SplashMy"
+            subject = "Verifica tu correo - Fotomorfia"
             html_content = (
                 f"<p>Hola {user.username or ''},</p>"
                 f"<p>Tu código de verificación es: <strong>{code}</strong></p>"
@@ -245,7 +245,7 @@ def send_password_reset_email(user: User, code: str) -> None:
 
     sender = {
         "email": getattr(settings, "EMAIL_FROM_ADDRESS", "no-reply@example.com"),
-        "name": getattr(settings, "EMAIL_FROM_NAME", "SplashMy"),
+        "name": getattr(settings, "EMAIL_FROM_NAME", "Fotomorfia"),
     }
     to = [{"email": user.email, "name": user.get_full_name() or user.username or user.email}]
 
@@ -263,7 +263,7 @@ def send_password_reset_email(user: User, code: str) -> None:
                 sender=sender,
             )
         else:
-            subject = "Restablece tu contraseña - SplashMy"
+            subject = "Restablece tu contraseña - Fotomorfia"
             html_content = (
                 f"<p>Hola {user.username or ''},</p>"
                 f"<p>Tu código para restablecer la contraseña es: <strong>{code}</strong></p>"

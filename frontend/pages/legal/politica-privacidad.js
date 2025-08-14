@@ -7,8 +7,8 @@ export default function PoliticaPrivacidad() {
   return (
     <>
       <Head>
-        <title>Política de Privacidad | SplashMy</title>
-        <meta name="description" content="Política de privacidad de SplashMy" />
+        <title>Política de Privacidad | Fotomorfia</title>
+        <meta name="description" content="Política de privacidad de Fotomorfia" />
       </Head>
 
       <div className={styles.header}>
@@ -25,7 +25,7 @@ export default function PoliticaPrivacidad() {
             <p className={styles.paragraph}>Jaume Fernández Suñer (persona física)</p>
             <p className={styles.paragraph}>DNI: 41621021Z</p>
             <p className={styles.paragraph}>Domicilio fiscal: Calle Mallorca, n.50, 07500, Manacor, Islas Baleares, España</p>
-            <p className={styles.paragraph}>Correo de contacto: contacto@splashmy.com</p>
+            <p className={styles.paragraph}>Correo de contacto: contacto@fotomorfia.com</p>
             <p className={styles.paragraph}>No existe Delegado de Protección de Datos (DPO).</p>
           </div>
 
@@ -73,7 +73,7 @@ export default function PoliticaPrivacidad() {
 
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>7. Derechos de las personas usuarias</h2>
-            <p className={styles.paragraph}>Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad enviando un email a contacto@splashmy.com, acreditando tu identidad.</p>
+            <p className={styles.paragraph}>Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad enviando un email a contacto@fotomorfia.com, acreditando tu identidad.</p>
             <p className={styles.paragraph}>También tienes derecho a presentar una reclamación ante la Agencia Española de Protección de Datos (AEPD) si consideras que el tratamiento no se ajusta a la normativa.</p>
           </div>
 

@@ -1,4 +1,4 @@
-# SplashMy Backend - Documentación Completa
+# Fotomorfia Backend - Documentación Completa
 
 ## 📋 Tabla de Contenidos
 
@@ -17,7 +17,7 @@
 
 ## 🎯 Visión General
 
-**SplashMy** es una plataforma de transformación de imágenes que utiliza **OpenAI GPT-Image-1** para generar, editar y aplicar estilos a imágenes. El backend está construido con **Django REST Framework** y proporciona una API completa para la gestión de usuarios, imágenes, estilos y procesamiento asíncrono.
+**Fotomorfia** es una plataforma de transformación de imágenes que utiliza **OpenAI GPT-Image-1** para generar, editar y aplicar estilos a imágenes. El backend está construido con **Django REST Framework** y proporciona una API completa para la gestión de usuarios, imágenes, estilos y procesamiento asíncrono.
 
 ### Características Principales
 
@@ -545,4 +545,4 @@ LOGGING_LEVEL=DEBUG
 
 ---
 
-**¡El backend de SplashMy está listo para transformar imágenes con el poder de la IA!** 🎨✨
+**¡El backend de Fotomorfia está listo para transformar imágenes con el poder de la IA!** 🎨✨

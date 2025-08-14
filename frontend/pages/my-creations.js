@@ -12,7 +12,7 @@ export default function MyCreationsRedirect() {
   return (
     <>
       <Head>
-        <title>Mis Creaciones - SplashMy</title>
+        <title>Mis Creaciones - Fotomorfia</title>
         <meta name="robots" content="noindex" />
       </Head>
       <div style={{ padding: '24px' }}>Redirigiendo a tu galería…</div>
