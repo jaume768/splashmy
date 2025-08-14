@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import styles from '../../styles/components/home/Footer.module.css';
 
 // Social Media Icons
@@ -40,17 +41,11 @@ export default function Footer() {
               Crea, edita y diseña como nunca antes.
             </p>
             <div className={styles.socialLinks}>
-              <a href="#" className={styles.socialLink} aria-label="Twitter">
-                <TwitterIcon />
-              </a>
               <a href="#" className={styles.socialLink} aria-label="Instagram">
                 <InstagramIcon />
               </a>
               <a href="#" className={styles.socialLink} aria-label="LinkedIn">
                 <LinkedInIcon />
-              </a>
-              <a href="#" className={styles.socialLink} aria-label="Facebook">
-                <FacebookIcon />
               </a>
             </div>
           </div>
@@ -60,29 +55,24 @@ export default function Footer() {
             <div className={styles.linkGroup}>
               <h4 className={styles.linkGroupTitle}>Producto</h4>
               <ul className={styles.linkList}>
-                <li><a href="#" className={styles.link}>Editor de Fotos IA</a></li>
-                <li><a href="#" className={styles.link}>Generador de Imágenes</a></li>
-                <li><a href="#" className={styles.link}>Relleno Generativo</a></li>
-                <li><a href="#" className={styles.link}>Galería de Estilos</a></li>
+                <li><Link href="/dashboard" className={styles.link}>Transformador de estilos</Link></li>
+                <li><Link href="/dashboard" className={styles.link}>Generador de Imágenes</Link></li>
+                <li><Link href="/dashboard" className={styles.link}>Galería de Estilos</Link></li>
               </ul>
             </div>
 
             <div className={styles.linkGroup}>
               <h4 className={styles.linkGroupTitle}>Empresa</h4>
               <ul className={styles.linkList}>
-                <li><a href="#" className={styles.link}>Sobre Nosotros</a></li>
-                <li><a href="#" className={styles.link}>Blog</a></li>
-                <li><a href="#" className={styles.link}>Carreras</a></li>
-                <li><a href="#" className={styles.link}>Prensa</a></li>
+                <li><Link href="/sobre-nosotros" className={styles.link}>Sobre Nosotros</Link></li>
+                <li><Link href="/blog" className={styles.link}>Blog</Link></li>
               </ul>
             </div>
 
             <div className={styles.linkGroup}>
               <h4 className={styles.linkGroupTitle}>Recursos</h4>
               <ul className={styles.linkList}>
-                <li><a href="#" className={styles.link}>Centro de Ayuda</a></li>
-                <li><a href="#" className={styles.link}>Tutoriales</a></li>
-                <li><a href="#" className={styles.link}>API</a></li>
+                <li><Link href="/contacto" className={styles.link}>Centro de Ayuda</Link></li>
                 <li><a href="#" className={styles.link}>Estado del Sistema</a></li>
               </ul>
             </div>
@@ -90,10 +80,9 @@ export default function Footer() {
             <div className={styles.linkGroup}>
               <h4 className={styles.linkGroupTitle}>Legal</h4>
               <ul className={styles.linkList}>
-                <li><a href="#" className={styles.link}>Términos de Servicio</a></li>
-                <li><a href="#" className={styles.link}>Política de Privacidad</a></li>
-                <li><a href="#" className={styles.link}>Política de Cookies</a></li>
-                <li><a href="#" className={styles.link}>GDPR</a></li>
+                <li><Link href="/legal/aviso-legal" className={styles.link}>Aviso Legal</Link></li>
+                <li><Link href="/legal/politica-privacidad" className={styles.link}>Política de Privacidad</Link></li>
+                <li><Link href="/legal/politica-cookies" className={styles.link}>Política de Cookies</Link></li>
               </ul>
             </div>
           </div>

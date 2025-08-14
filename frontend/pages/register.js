@@ -22,6 +22,15 @@ function RegisterPage() {
   const router = useRouter();
   const { login } = useAuth();
   const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [compact, setCompact] = useState(false);
+
+  useEffect(() => {
+    const check = () => setCompact(window.innerHeight < 720);
+    // Run once on mount
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // Note: GIS script not needed for server-side OAuth code flow
 
@@ -173,7 +182,7 @@ function RegisterPage() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className={styles.authContainer}>
+      <div className={`${styles.authContainer} ${compact ? styles.compact : ''}`}>
         <div className={styles.authCard}>
           {/* Logo */}
           <div className={styles.logo}>
@@ -213,81 +222,83 @@ function RegisterPage() {
             )}
 
 
-            <div className={styles.inputGroup}>
-              <label htmlFor="username" className={styles.label}>
-                Nombre de usuario *
-              </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                required
-                className={`${styles.input} ${errors.username ? styles.inputError : ''}`}
-                placeholder="usuario_123"
-                value={formData.username}
-                onChange={handleChange}
-                disabled={loading}
-              />
-              {errors.username && <span className={styles.errorText}>{errors.username}</span>}
-            </div>
+            <div className={styles.formGrid}>
+              <div className={styles.inputGroup}>
+                <label htmlFor="username" className={styles.label}>
+                  Nombre de usuario *
+                </label>
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  required
+                  className={`${styles.input} ${errors.username ? styles.inputError : ''}`}
+                  placeholder="usuario_123"
+                  value={formData.username}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+                {errors.username && <span className={styles.errorText}>{errors.username}</span>}
+              </div>
 
-            <div className={styles.inputGroup}>
-              <label htmlFor="email" className={styles.label}>
-                Correo electrónico *
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
-                placeholder="tu@email.com"
-                value={formData.email}
-                onChange={handleChange}
-                disabled={loading}
-              />
-              {errors.email && <span className={styles.errorText}>{errors.email}</span>}
-            </div>
+              <div className={styles.inputGroup}>
+                <label htmlFor="email" className={styles.label}>
+                  Correo electrónico *
+                </label>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  required
+                  className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
+                  placeholder="tu@email.com"
+                  value={formData.email}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+                {errors.email && <span className={styles.errorText}>{errors.email}</span>}
+              </div>
 
-            <div className={styles.inputGroup}>
-              <label htmlFor="password" className={styles.label}>
-                Contraseña *
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                disabled={loading}
-              />
-              {!errors.password && (
-                <small className={styles.passwordHint}>
-                  Mínimo 8 caracteres
-                </small>
-              )}
-              {errors.password && <span className={styles.errorText}>{errors.password}</span>}
-            </div>
+              <div className={styles.inputGroup}>
+                <label htmlFor="password" className={styles.label}>
+                  Contraseña *
+                </label>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+                {!errors.password && (
+                  <small className={styles.passwordHint}>
+                    Mínimo 8 caracteres
+                  </small>
+                )}
+                {errors.password && <span className={styles.errorText}>{errors.password}</span>}
+              </div>
 
-            <div className={styles.inputGroup}>
-              <label htmlFor="confirmPassword" className={styles.label}>
-                Confirmar contraseña *
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                required
-                className={`${styles.input} ${errors.confirmPassword ? styles.inputError : ''}`}
-                placeholder="••••••••"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                disabled={loading}
-              />
-              {errors.confirmPassword && <span className={styles.errorText}>{errors.confirmPassword}</span>}
+              <div className={styles.inputGroup}>
+                <label htmlFor="confirmPassword" className={styles.label}>
+                  Confirmar contraseña *
+                </label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  required
+                  className={`${styles.input} ${errors.confirmPassword ? styles.inputError : ''}`}
+                  placeholder="••••••••"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+                {errors.confirmPassword && <span className={styles.errorText}>{errors.confirmPassword}</span>}
+              </div>
             </div>
 
             <div className={styles.terms}>

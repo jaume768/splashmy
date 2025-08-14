@@ -1,0 +1,60 @@
+/* Estilos para páginas legales */
+.legalPage {
+  padding: var(--spacing-2xl) 0;
+  color: var(--color-darkest);
+}
+
+.header {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  color: var(--color-white);
+  padding: var(--spacing-xl) 0;
+  box-shadow: var(--shadow-md);
+}
+
+.title {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+}
+
+.meta {
+  opacity: 0.95;
+  font-size: var(--font-size-sm);
+}
+
+.content {
+  background: var(--color-white);
+  padding: var(--spacing-2xl) var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow);
+  margin-top: calc(var(--spacing-xl) * -1.5);
+}
+
+.section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-xl);
+  color: var(--color-dark);
+  margin-bottom: var(--spacing-sm);
+}
+
+.paragraph {
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-darkest);
+}
+
+.list {
+  padding-left: var(--spacing-lg);
+  margin: var(--spacing-sm) 0;
+}
+
+.listItem {
+  margin-bottom: var(--spacing-xs);
+}
+
+.link {
+  color: var(--color-primary);
+  text-decoration: underline;
+}

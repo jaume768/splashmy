@@ -1,3 +1,4 @@
+import { useRouter } from 'next/router';
 import styles from '../../styles/components/home/Hero.module.css';
 
 // SVG Icons Components
@@ -16,6 +17,7 @@ const EditIcon = () => (
 );
 
 export default function Hero() {
+  const router = useRouter();
   return (
     <section className={styles.hero}>
       <div className={styles.container}>
@@ -26,13 +28,13 @@ export default function Hero() {
             <span className={styles.titleMain}>CON IA!</span>
           </h1>
           <p className={styles.subtitle}>
-            Generador de imágenes IA y herramientas de diseño IA
+            Transformador de estilos de imágenes con IA y generador de imágenes
           </p>
           
           <div className={styles.buttons}>
-            <button className={styles.primaryButton}>
+            <button className={styles.primaryButton} onClick={() => router.push('/dashboard')}>
               <UploadIcon />
-              Abrir editor de fotos IA
+              Abrir estilos de imágenes IA
             </button>
             <button className={styles.secondaryButton}>
               <EditIcon />
@@ -40,8 +42,8 @@ export default function Hero() {
             </button>
           </div>
           
-          <button className={styles.trialButton}>
-            INICIAR PRUEBA DIARIA
+          <button className={styles.trialButton} onClick={() => router.push('/dashboard')}>
+            INICIAR PRUEBA GRATUITA
           </button>
         </div>
       </div>

@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import styles from '../../styles/components/home/GenerativeAI.module.css';
 
 export default function GenerativeAI() {
   const [inputValue, setInputValue] = useState('Estilo anime');
+  const router = useRouter();
 
   return (
     <section className={styles.generativeAI}>
@@ -10,15 +12,13 @@ export default function GenerativeAI() {
         <div className={styles.content}>
           <div className={styles.textSection}>
             <span className={styles.badge}>IA GENERATIVA</span>
-            <h2 className={styles.title}>Increíble ¡Relleno generativo IA!</h2>
+            <h2 className={styles.title}>Increíble ¡Transformador de estilos de imágenes IA!</h2>
             <p className={styles.description}>
-              Desde la conceptualización de ideas creativas hasta la realización de 
-              ediciones y refinamientos completos, el relleno generativo puede 
-              ayudarte a materializar rápidamente tu visión mientras te da control 
-              total sobre cada creación.
+              Transformador de estilos de imágenes IA que te permite transformar 
+              tus imágenes en cualquier estilo que desees.
             </p>
-            <button className={styles.ctaButton}>
-              Probar relleno generativo
+            <button className={styles.ctaButton} onClick={() => router.push('/dashboard')}>
+              Probar transformador
             </button>
           </div>
           
@@ -50,7 +50,7 @@ export default function GenerativeAI() {
                     className={styles.styleInput}
                     placeholder="Describe el estilo..."
                   />
-                  <button className={styles.generateButton}>
+                  <button className={styles.generateButton} onClick={() => router.push('/dashboard')}>
                     Generar
                   </button>
                 </div>

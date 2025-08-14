@@ -69,6 +69,11 @@ export const API_ENDPOINTS = {
     QUOTA: '/api/v1/processing/quota/',
     STATS: '/api/v1/processing/stats/',
   },
+  
+  // Support endpoints
+  SUPPORT: {
+    CONTACT: '/api/v1/support/contact/',
+  },
 };
 
 // Generic fetch wrapper with error handling
@@ -605,6 +610,22 @@ export const getImageStats = async () => {
     return response;
   } catch (error) {
     console.error('Image stats fetch error:', error);
+    throw error;
+  }
+};
+
+// ============================================================================
+// SUPPORT / CONTACT API FUNCTIONS
+// ============================================================================
+
+export const sendContactMessage = async ({ name, email, subject, message, spam_trap = '' }) => {
+  try {
+    const response = await apiFetch(API_ENDPOINTS.SUPPORT.CONTACT, {
+      method: 'POST',
+      body: JSON.stringify({ name, email, subject, message, spam_trap }),
+    });
+    return response;
+  } catch (error) {
     throw error;
   }
 };

@@ -1,16 +1,17 @@
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import styles from '../../styles/components/home/FAQ.module.css';
 
 const faqData = [
   {
     id: 1,
     question: "¿Qué es SplashMy y cómo funciona?",
-    answer: "SplashMy es una plataforma de IA que permite transformar y editar imágenes utilizando inteligencia artificial avanzada. Puedes aplicar diferentes estilos artísticos, generar nuevas imágenes desde texto, y editar fotos de manera profesional directamente desde tu navegador."
+    answer: "SplashMy es una plataforma de IA que permite transformar y editar imágenes utilizando inteligencia artificial avanzada. Puedes aplicar diferentes estilos artísticos, y editar fotos de manera profesional directamente desde tu navegador."
   },
   {
     id: 2,
     question: "¿Es gratis usar SplashMy?",
-    answer: "Ofrecemos una prueba gratuita que te permite experimentar con nuestras herramientas. Después puedes elegir entre nuestros planes de suscripción que se adaptan a diferentes necesidades, desde uso personal hasta profesional."
+    answer: "Ofrecemos una prueba gratuita que te permite experimentar con nuestras herramientas para uso personal hasta profesional."
   },
   {
     id: 3,
@@ -20,7 +21,7 @@ const faqData = [
   {
     id: 4,
     question: "¿Cuánto tiempo toma procesar una imagen?",
-    answer: "El tiempo de procesamiento varía según la complejidad de la transformación, pero generalmente toma entre 10-30 segundos. Los usuarios Premium tienen acceso a procesamiento prioritario para resultados más rápidos."
+    answer: "El tiempo de procesamiento varía según la complejidad de la transformación, pero generalmente toma entre 30-60 segundos."
   },
   {
     id: 5,
@@ -31,11 +32,6 @@ const faqData = [
     id: 6,
     question: "¿Funciona en dispositivos móviles?",
     answer: "¡Por supuesto! SplashMy está optimizado para funcionar perfectamente en móviles, tablets y escritorio. Puedes editar y generar imágenes desde cualquier dispositivo con conexión a internet."
-  },
-  {
-    id: 7,
-    question: "¿Cómo cancelo mi suscripción?",
-    answer: "Puedes cancelar tu suscripción en cualquier momento desde tu panel de usuario. No hay penalizaciones por cancelación y mantendrás acceso hasta el final de tu período de facturación actual."
   }
 ];
 
@@ -47,6 +43,7 @@ const ChevronDownIcon = () => (
 
 export default function FAQ() {
   const [openItems, setOpenItems] = useState(new Set([1])); // Primer item abierto por defecto
+  const router = useRouter();
 
   const toggleItem = (id) => {
     const newOpenItems = new Set(openItems);
@@ -59,7 +56,7 @@ export default function FAQ() {
   };
 
   return (
-    <section className={styles.faq}>
+    <section id="faq" className={styles.faq}>
       <div className={styles.container}>
         <div className={styles.header}>
           <h2 className={styles.title}>Preguntas Frecuentes</h2>
@@ -97,7 +94,7 @@ export default function FAQ() {
           <p className={styles.ctaText}>
             Nuestro equipo de soporte está aquí para ayudarte
           </p>
-          <button className={styles.ctaButton}>
+          <button className={styles.ctaButton} onClick={() => router.push('/contacto')}>
             Contactar Soporte
           </button>
         </div>

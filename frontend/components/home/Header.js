@@ -13,19 +13,18 @@ export default function Header() {
     <header className={styles.header}>
       <div className={styles.container}>
         <div className={styles.logo}>
-          <h1>SplashMy</h1>
+          <h1>
+            <Link href="/">SplashMy</Link>
+          </h1>
         </div>
         
         <nav className={`${styles.nav} ${isMenuOpen ? styles.navOpen : ''}`}>
           <ul className={styles.navList}>
             <li className={styles.navItem}>
-              <a href="#" className={styles.navLink}>Precios y prueba gratuita</a>
-            </li>
-            <li className={styles.navItem}>
               <Link href="/login" className={styles.navLink}>Regístrate e inicia sesión</Link>
             </li>
             <li className={styles.navItem}>
-              <a href="/dashboard" className={`${styles.navLink} ${styles.premium}`}>Prueba diaria</a>
+              <a href="/dashboard" className={`${styles.navLink} ${styles.premium}`}>Prueba gratuita</a>
             </li>
           </ul>
         </nav>

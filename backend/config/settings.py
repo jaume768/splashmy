@@ -50,6 +50,7 @@ LOCAL_APPS = [
     'apps.images',
     'apps.styles',
     'apps.processing',
+    'apps.support',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -151,6 +152,10 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
+    # Throttling: only define rates; activate per-view (e.g., ContactView uses ScopedRateThrottle)
+    'DEFAULT_THROTTLE_RATES': {
+        'contact': '5/minute',
+    },
 }
 
 # CORS settings
@@ -172,12 +177,16 @@ OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
 
 # Brevo (Sendinblue) Email settings for verification
 BREVO_API_KEY = config('BREVO_API_KEY', default='')
-EMAIL_FROM_ADDRESS = config('EMAIL_FROM_ADDRESS', default='no-reply@example.com')
+EMAIL_FROM_ADDRESS = config('EMAIL_FROM_ADDRESS', default='jaumefernandezsunyer12@gmail.com')
 EMAIL_FROM_NAME = config('EMAIL_FROM_NAME', default='SplashMy')
 EMAIL_VERIFICATION_TEMPLATE_ID = config('EMAIL_VERIFICATION_TEMPLATE_ID', default=None)
 EMAIL_VERIFICATION_CODE_TTL_MINUTES = config('EMAIL_VERIFICATION_CODE_TTL_MINUTES', default=10, cast=int)
 EMAIL_VERIFICATION_MAX_ATTEMPTS = config('EMAIL_VERIFICATION_MAX_ATTEMPTS', default=5, cast=int)
 EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS = config('EMAIL_VERIFICATION_RESEND_COOLDOWN_SECONDS', default=60, cast=int)
+
+# Support email settings
+SUPPORT_INBOX_EMAIL = config('SUPPORT_INBOX_EMAIL', default='jaumefernandezsunyer12@gmail.com')
+CONTACT_SUPPORT_TEMPLATE_ID = config('CONTACT_SUPPORT_TEMPLATE_ID', default=None)
 
 # Password reset settings
 PASSWORD_RESET_TEMPLATE_ID = config('PASSWORD_RESET_TEMPLATE_ID', default=None)

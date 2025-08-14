@@ -59,6 +59,13 @@
   gap: var(--spacing-lg);
 }
 
+/* Grid layout for inputs (used to create 2-column form on larger screens) */
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-md);
+}
+
 .nameRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -84,6 +91,7 @@
   font-size: var(--font-size-base);
   transition: var(--transition-fast);
   background: var(--color-white);
+  min-height: 44px; /* Accessible touch target */
 }
 
 .input:focus {
@@ -244,6 +252,50 @@
 }
 
 /* ==========================================================================
+   COMPACT HEIGHT MODE
+   ========================================================================== */
+.compact { --is-compact: 1; }
+.compact .authCard {
+  padding: var(--spacing-xl);
+}
+
+.compact .logo {
+  margin-bottom: var(--spacing-lg);
+}
+
+.compact .header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.compact .subtitle {
+  display: none;
+}
+
+.compact .input {
+  padding: calc(var(--spacing-sm) + 2px);
+}
+
+.compact .label {
+  font-size: var(--font-size-xs);
+}
+
+.compact .divider {
+  margin: var(--spacing-md) 0 var(--spacing-sm);
+}
+
+.compact .socialLogin {
+  margin-bottom: var(--spacing-sm);
+}
+
+.compact .submitButton {
+  margin-top: var(--spacing-xs);
+}
+
+.compact .passwordHint {
+  display: none;
+}
+
+/* ==========================================================================
    ERROR AND SUCCESS MESSAGES
    ========================================================================== */
 .errorMessage {
@@ -330,11 +382,22 @@
   .authCard {
     padding: var(--spacing-xl);
   }
-  
-  .nameRow {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+
+  /* Reduce vertical rhythm on small screens */
+  .form { gap: var(--spacing-md); }
+  .inputGroup { gap: var(--spacing-xs); }
+  .input { padding: calc(var(--spacing-sm) + 2px); }
+  .label { font-size: var(--font-size-xs); }
+  .divider { margin: var(--spacing-md) 0 var(--spacing-sm); }
+  .socialLogin { margin-bottom: var(--spacing-sm); }
+  .submitButton { margin-top: var(--spacing-xs); }
+
+  /* Apilar posibles filas en grid */
+  .nameRow { grid-template-columns: 1fr; }
+
+  /* Hints solo cuando el campo está en foco */
+  .passwordHint { display: none; }
+  .inputGroup:focus-within .passwordHint { display: block; }
 }
 
 @media (max-width: 480px) {
@@ -349,4 +412,10 @@
   .title {
     font-size: var(--font-size-lg);
   }
+}
+
+/* Wider screens: expand card and enable 2-column grid */
+@media (min-width: 640px) {
+  .authCard { max-width: 660px; }
+  .formGrid { grid-template-columns: 1fr 1fr; }
 }

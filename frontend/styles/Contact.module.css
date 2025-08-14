@@ -1,0 +1,149 @@
+/* Estilos oscuros para página de contacto */
+.page {
+  background: linear-gradient(180deg, var(--color-darkest) 0%, var(--color-dark) 100%);
+  min-height: 100vh;
+  padding-bottom: var(--spacing-3xl);
+}
+
+.header {
+  padding: var(--spacing-3xl) 0 var(--spacing-xl);
+  color: var(--color-white);
+  text-align: center;
+}
+
+.title {
+  font-size: var(--font-size-4xl);
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--spacing-sm);
+}
+
+.subtitle {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.content {
+  margin-top: var(--spacing-xl);
+}
+
+.grid {
+  gap: var(--spacing-xl);
+  grid-template-columns: 1fr;
+  display: grid;
+  display: flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  max-width: 900px;
+  margin: auto;
+}
+
+@media (min-width: 900px) {
+  .grid {
+    grid-template-columns: 1.3fr 0.7fr;
+  }
+}
+
+.card {
+  background: rgba(5, 25, 35, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  color: var(--color-white);
+  backdrop-filter: blur(6px);
+}
+
+.sectionTitle {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+}
+
+.form {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.input, .textarea, .select {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-white);
+  outline: none;
+  transition: var(--transition-base);
+}
+
+.input::placeholder, .textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.input:focus, .textarea:focus, .select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 166, 251, 0.2);
+}
+
+.textarea {
+  min-height: 160px;
+  resize: vertical;
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: var(--spacing-sm);
+}
+
+.submit {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  color: var(--color-white);
+  padding: 0.9rem 1.25rem;
+  font-weight: 700;
+  border-radius: var(--border-radius);
+  transition: var(--transition-base);
+}
+
+.submit:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.secondaryText {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.infoList {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.infoItem {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: flex-start;
+}
+
+.infoTitle {
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.infoValue {
+  color: rgba(255, 255, 255, 0.85);
+}
