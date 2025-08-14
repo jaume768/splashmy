@@ -6,9 +6,10 @@ from django.utils import timezone
 from django.conf import settings
 from django.db.models import Q, Avg, Count
 from rest_framework import generics, status, permissions
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.throttling import ScopedRateThrottle
 from django.http import StreamingHttpResponse
 from .models import ProcessingJob, ProcessingResult, StreamingEvent, UserProcessingQuota, ProcessingTemplate, ProcessingResultLike
 from .serializers import (
@@ -28,6 +29,8 @@ class ProcessingJobCreateView(generics.CreateAPIView):
     
     serializer_class = ProcessingJobCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'processing_job_create'
     
     def create(self, request, *args, **kwargs):
         try:
@@ -281,6 +284,8 @@ class ProcessingJobListView(generics.ListAPIView):
     
     serializer_class = ProcessingJobSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'processing_job_results'
     
     def get_queryset(self):
         user = self.request.user
@@ -304,6 +309,8 @@ class ProcessingJobDetailView(generics.RetrieveAPIView):
     
     serializer_class = ProcessingJobSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'processing_job_results'
     
     def get_queryset(self):
         return ProcessingJob.objects.filter(user=self.request.user)
@@ -314,6 +321,8 @@ class ProcessingResultListView(generics.ListAPIView):
     
     serializer_class = ProcessingResultSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'processing_results_list'
     
     def build_media_url(self, file_path):
         """Build absolute URL for media files in development, relative in production"""
@@ -377,6 +386,8 @@ class LikedProcessingResultListView(generics.ListAPIView):
     
     serializer_class = ProcessingResultSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'processing_results_list'
     
     def build_media_url(self, file_path):
         """Build absolute URL for media files in development, relative in production"""
@@ -436,6 +447,8 @@ class ProcessingResultDetailView(generics.RetrieveAPIView):
     """Retrieve a single processing result. Public results are visible to anyone; non-public only to owner."""
     serializer_class = ProcessingResultSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'processing_result_detail'
 
     lookup_url_kwarg = 'result_id'
     lookup_field = 'id'
@@ -484,6 +497,8 @@ class PublicProcessingResultListView(generics.ListAPIView):
     
     serializer_class = ProcessingResultSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'processing_public_results'
     
     def build_media_url(self, file_path):
         """Build absolute URL for media files in development, relative in production"""
@@ -540,6 +555,7 @@ class PublicProcessingResultListView(generics.ListAPIView):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
 def cancel_processing_job(request, job_id):
     """Cancel a processing job"""
     
@@ -563,9 +579,12 @@ def cancel_processing_job(request, job_id):
             'error': str(e)
         }, status=status.HTTP_400_BAD_REQUEST)
 
+cancel_processing_job.throttle_scope = 'processing_job_cancel'
+
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
 def toggle_result_favorite(request, result_id):
     """Toggle favorite status of processing result"""
     
@@ -589,9 +608,12 @@ def toggle_result_favorite(request, result_id):
             'error': str(e)
         }, status=status.HTTP_400_BAD_REQUEST)
 
+toggle_result_favorite.throttle_scope = 'processing_favorite_toggle'
+
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
 def toggle_result_like(request, result_id):
     """Toggle like for a public processing result by the current user."""
     try:
@@ -614,9 +636,12 @@ def toggle_result_like(request, result_id):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+toggle_result_like.throttle_scope = 'processing_like'
+
 
 @api_view(['POST', 'PATCH'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
 def toggle_result_visibility(request, result_id):
     """Toggle or set the visibility (is_public) of a processing result.
 
@@ -648,9 +673,12 @@ def toggle_result_visibility(request, result_id):
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+toggle_result_visibility.throttle_scope = 'processing_visibility'
+
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
 def rate_result(request, result_id):
     """Rate a processing result"""
     
@@ -680,10 +708,11 @@ def rate_result(request, result_id):
         return Response({
             'error': str(e)
         }, status=status.HTTP_400_BAD_REQUEST)
-
+rate_result.throttle_scope = 'processing_rate'
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
 def download_result(request, result_id):
     """Generate download URL for processing result"""
     
@@ -748,10 +777,11 @@ def download_result(request, result_id):
         return Response({
             'error': str(e)
         }, status=status.HTTP_400_BAD_REQUEST)
-
+download_result.throttle_scope = 'processing_download'
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
 def user_quota(request):
     """Get user's processing quota and limits"""
     
@@ -760,9 +790,12 @@ def user_quota(request):
     
     return Response(serializer.data)
 
+user_quota.throttle_scope = 'processing_quota'
+
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
 def processing_stats(request):
     """Get user's processing statistics"""
     
@@ -806,12 +839,16 @@ def processing_stats(request):
     
     return Response(stats)
 
+processing_stats.throttle_scope = 'processing_stats'
+
 
 class ProcessingTemplateListView(generics.ListCreateAPIView):
     """List and create processing templates"""
     
     serializer_class = ProcessingTemplateSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'processing_templates'
     
     def get_queryset(self):
         queryset = ProcessingTemplate.objects.filter(is_public=True)
@@ -834,6 +871,7 @@ class ProcessingTemplateListView(generics.ListCreateAPIView):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
 def get_job_results(request, job_id):
     """Get complete job results with all processing data"""
     
@@ -934,3 +972,5 @@ def get_job_results(request, job_id):
             'error': 'Failed to get job results',
             'details': str(e)
         }, status=status.HTTP_400_BAD_REQUEST)
+
+get_job_results.throttle_scope = 'processing_job_results'

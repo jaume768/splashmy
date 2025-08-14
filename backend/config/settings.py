@@ -152,9 +152,64 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
-    # Throttling: only define rates; activate per-view (e.g., ContactView uses ScopedRateThrottle)
+    # Throttling: enable base user/anon limits and define per-scope rates
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.AnonRateThrottle',
+    ],
     'DEFAULT_THROTTLE_RATES': {
+        # Base sustained limits
+        'user': '2000/day',
+        'anon': '1000/day',
+
+        # Support
         'contact': '5/minute',
+
+        # Auth
+        'auth_register': '3/minute',
+        'auth_login': '10/minute',
+        'auth_verify_email': '12/minute',
+        'auth_resend_verification': '3/minute',
+        'auth_reset_request': '5/minute',
+        'auth_reset_confirm': '10/minute',
+        'auth_google_login': '10/minute',
+        'auth_google_oauth': '5/minute',
+
+        # Images
+        'images_upload': '6/minute',
+        'images_download': '20/minute',
+        'images_public_list': '120/minute',
+        'images_toggle_favorite': '60/minute',
+        'images_rate': '30/minute',
+        'images_tags_list': '120/minute',
+        'images_stats': '60/minute',
+
+        # Processing
+        'processing_job_create': '10/minute',
+        'processing_job_cancel': '30/minute',
+        'processing_job_results': '120/minute',
+        'processing_results_list': '120/minute',
+        'processing_public_results': '180/minute',
+        'processing_result_detail': '180/minute',
+        'processing_like': '60/minute',
+        'processing_favorite_toggle': '60/minute',
+        'processing_visibility': '30/minute',
+        'processing_rate': '30/minute',
+        'processing_download': '20/minute',
+        'processing_quota': '60/minute',
+        'processing_stats': '60/minute',
+        'processing_templates': '30/minute',
+
+        # Styles
+        'styles_list': '240/minute',
+        'styles_detail': '240/minute',
+        'styles_popular': '120/minute',
+        'styles_examples': '120/minute',
+        'styles_preferences': '30/minute',
+        'styles_toggle_favorite': '60/minute',
+        'styles_rate': '30/minute',
+        'styles_stats': '60/minute',
+        'styles_user_activity': '60/minute',
     },
 }
 

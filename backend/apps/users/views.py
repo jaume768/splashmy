@@ -1,10 +1,11 @@
 from rest_framework import generics, status, permissions
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import login, logout
 from django.conf import settings
 from django.shortcuts import redirect
+from rest_framework.throttling import ScopedRateThrottle
 import secrets
 from urllib.parse import urlencode
 from .models import User, UserProfile
@@ -23,6 +24,8 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'auth_register'
     
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -43,6 +46,7 @@ class RegisterView(generics.CreateAPIView):
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes([ScopedRateThrottle])
 def login_view(request):
     """User login endpoint"""
     
@@ -62,10 +66,12 @@ def login_view(request):
         serializer.errors, 
         status=status.HTTP_400_BAD_REQUEST
     )
+login_view.throttle_scope = 'auth_login'
 
 
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes([ScopedRateThrottle])
 def google_oauth_start(request):
     """Start Google OAuth Authorization Code flow by redirecting to Google."""
     next_path = request.GET.get('next', '/dashboard')
@@ -87,10 +93,12 @@ def google_oauth_start(request):
 
     auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' + urlencode(params)
     return redirect(auth_url)
+google_oauth_start.throttle_scope = 'auth_google_oauth'
 
 
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes([ScopedRateThrottle])
 def google_oauth_callback(request):
     """Handle Google OAuth callback, exchange code for tokens, and sign in user."""
     state = request.GET.get('state')
@@ -139,6 +147,7 @@ def google_oauth_callback(request):
         return redirect(redirect_url)
     except Exception as e:
         return Response({'error': 'OAuth callback error', 'details': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+google_oauth_callback.throttle_scope = 'auth_google_oauth'
 
 
 @api_view(['POST'])
@@ -216,6 +225,7 @@ def change_password_view(request):
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes([ScopedRateThrottle])
 def verify_email_view(request):
     """Verify email with OTP code and return auth token."""
     serializer = VerifyEmailSerializer(data=request.data)
@@ -228,10 +238,12 @@ def verify_email_view(request):
             'message': 'Email verificado correctamente'
         }, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+verify_email_view.throttle_scope = 'auth_verify_email'
 
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes([ScopedRateThrottle])
 def password_reset_request_view(request):
     """Request a password reset code by email. Always return generic success."""
     serializer = PasswordResetRequestSerializer(data=request.data)
@@ -248,10 +260,12 @@ def password_reset_request_view(request):
         # Generic success message (avoid user enumeration)
         return Response({'message': 'Si el email existe, hemos enviado un código para restablecer tu contraseña.'}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+password_reset_request_view.throttle_scope = 'auth_reset_request'
 
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes([ScopedRateThrottle])
 def password_reset_confirm_view(request):
     """Confirm password reset with code and set new password."""
     serializer = PasswordResetConfirmSerializer(data=request.data)
@@ -264,10 +278,12 @@ def password_reset_confirm_view(request):
         Token.objects.filter(user=user).delete()
         return Response({'message': 'Contraseña restablecida correctamente. Inicia sesión con tu nueva contraseña.'}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+password_reset_confirm_view.throttle_scope = 'auth_reset_confirm'
 
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes([ScopedRateThrottle])
 def resend_verification_view(request):
     """Resend verification code subject to cooldown."""
     serializer = ResendVerificationSerializer(data=request.data)
@@ -279,10 +295,12 @@ def resend_verification_view(request):
             print(f"[ResendVerification] Error: {e}")
         return Response({'message': 'Código reenviado'}, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+resend_verification_view.throttle_scope = 'auth_resend_verification'
 
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes([ScopedRateThrottle])
 def google_login_view(request):
     """Authenticate or register a user using a Google ID token and return DRF token."""
     serializer = GoogleLoginSerializer(data=request.data)
@@ -296,3 +314,4 @@ def google_login_view(request):
             'message': 'Login con Google exitoso'
         }, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+google_login_view.throttle_scope = 'auth_google_login'

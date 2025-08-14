@@ -1,5 +1,6 @@
 from rest_framework import generics, status, permissions
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django.db.models import Q, Avg, Count
@@ -18,6 +19,8 @@ class StyleCategoryListView(generics.ListAPIView):
     
     serializer_class = StyleCategorySerializer
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'styles_list'
     
     def get_queryset(self):
         return StyleCategory.objects.filter(is_active=True).order_by('sort_order', 'name')
@@ -28,6 +31,8 @@ class StyleListView(generics.ListAPIView):
     
     serializer_class = StyleListSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'styles_list'
     
     def get_queryset(self):
         queryset = Style.objects.filter(is_active=True).select_related('category')
@@ -69,6 +74,8 @@ class StyleDetailView(generics.RetrieveAPIView):
     
     serializer_class = StyleSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'styles_detail'
     
     def get_queryset(self):
         return Style.objects.filter(is_active=True).select_related('category').prefetch_related('examples')
@@ -79,6 +86,8 @@ class PopularStylesView(generics.ListAPIView):
     
     serializer_class = StyleListSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'styles_popular'
     
     def get_queryset(self):
         return Style.objects.filter(
@@ -91,6 +100,8 @@ class StyleExampleListView(generics.ListAPIView):
     
     serializer_class = StyleExampleSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'styles_examples'
     
     def get_queryset(self):
         style_id = self.kwargs.get('pk')
@@ -104,6 +115,8 @@ class UserStylePreferenceListView(generics.ListCreateAPIView):
     
     serializer_class = UserStylePreferenceSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'styles_preferences'
     
     def get_queryset(self):
         user = self.request.user
@@ -122,6 +135,7 @@ class UserStylePreferenceListView(generics.ListCreateAPIView):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
 def toggle_favorite_style(request, pk):
     """Toggle favorite status of a style"""
     
@@ -149,8 +163,11 @@ def toggle_favorite_style(request, pk):
             'error': str(e)
         }, status=status.HTTP_400_BAD_REQUEST)
 
+toggle_favorite_style.throttle_scope = 'styles_toggle_favorite'
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
 def rate_style(request, pk):
     """Rate a style (1-5 stars)"""
     
@@ -197,9 +214,11 @@ def rate_style(request, pk):
             'error': str(e)
         }, status=status.HTTP_400_BAD_REQUEST)
 
+rate_style.throttle_scope = 'styles_rate'
 
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
+@throttle_classes([ScopedRateThrottle])
 def style_stats(request):
     """Get general style statistics"""
     
@@ -229,10 +248,13 @@ def style_stats(request):
     stats['categories'] = StyleCategorySerializer(categories, many=True).data
     
     return Response(stats)
+ 
+style_stats.throttle_scope = 'styles_stats'
 
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
 def user_style_activity(request):
     """Get user's style activity and recommendations"""
     
@@ -282,3 +304,5 @@ def user_style_activity(request):
     }
     
     return Response(activity)
+ 
+user_style_activity.throttle_scope = 'styles_user_activity'

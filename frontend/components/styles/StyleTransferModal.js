@@ -490,16 +490,6 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
                   </svg>
                   {downloadingResult ? 'Descargando...' : 'Descargar'}
                 </button>
-                
-                <button
-                  onClick={handleCloseWithResult}
-                  className={styles.completeButton}
-                >
-                  <svg className={styles.buttonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Completar
-                </button>
               </div>
             </div>
           )}
@@ -519,20 +509,25 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
 
         {/* Footer con botones */}
         <div className={styles.footer}>
-          <button
-            onClick={handleClose}
-            className={styles.cancelButton}
-            disabled={isProcessing}
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={handleStyleTransfer}
-            className={styles.applyButton}
-            disabled={!uploadedImage || isProcessing}
-          >
-            {isProcessing ? 'Procesando...' : 'Aplicar Estilo'}
-          </button>
+          {processingComplete && processingResult && processingResult.results && processingResult.results.length > 0 ? (
+            <button
+              onClick={handleCloseWithResult}
+              className={styles.completeButton}
+            >
+              <svg className={styles.buttonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Completar
+            </button>
+          ) : (
+            <button
+              onClick={handleStyleTransfer}
+              className={styles.applyButton}
+              disabled={!uploadedImage || isProcessing}
+            >
+              {isProcessing ? 'Procesando...' : 'Aplicar Estilo'}
+            </button>
+          )}
         </div>
       </div>
     </div>

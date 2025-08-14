@@ -149,12 +149,6 @@ export default function MyGalleryView({ onExploreClick }) {
                     className={styles.creationImage}
                   />
                 </div>
-
-                <div className={styles.cardInfo}>
-                  <div className={styles.cardMeta}>
-                    <span className={styles.creationDate}>{formatDate(creation.created_at)}</span>
-                  </div>
-                </div>
               </div>
             ))}
           </div>
@@ -177,7 +171,6 @@ export default function MyGalleryView({ onExploreClick }) {
 
             <div className={styles.modalInfo}>
               <div className={styles.modalMeta}>
-                <h3>Detalles de la creación</h3>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <button onClick={() => handleDownload(selectedImage)} className={styles.modalDownloadButton} disabled={downloadLoading}>
                     {downloadLoading ? 'Descargando…' : '💾 Descargar'}

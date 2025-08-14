@@ -1,12 +1,14 @@
 from rest_framework import generics, status, permissions
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.throttling import ScopedRateThrottle
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.db.models import Q
+from django.conf import settings
 from .models import Image, ProcessedImage, ImageTag
 from .serializers import (
     ImageUploadSerializer, ImageSerializer, ProcessedImageSerializer,
@@ -24,6 +26,8 @@ class ImageUploadView(generics.CreateAPIView):
     serializer_class = ImageUploadSerializer
     permission_classes = [permissions.IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'images_upload'
     
     def create(self, request, *args, **kwargs):
         try:
@@ -109,6 +113,8 @@ class PublicImageListView(generics.ListAPIView):
     
     serializer_class = ImageSerializer
     permission_classes = [permissions.AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'images_public_list'
     
     def get_queryset(self):
         return Image.objects.filter(
@@ -169,6 +175,7 @@ class ProcessedImageDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
 def toggle_favorite(request, pk):
     """Toggle favorite status of processed image"""
     
@@ -192,9 +199,12 @@ def toggle_favorite(request, pk):
             'error': str(e)
         }, status=status.HTTP_400_BAD_REQUEST)
 
+toggle_favorite.throttle_scope = 'images_toggle_favorite'
+
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
 def rate_processed_image(request, pk):
     """Rate a processed image (1-5 stars)"""
     
@@ -225,9 +235,12 @@ def rate_processed_image(request, pk):
             'error': str(e)
         }, status=status.HTTP_400_BAD_REQUEST)
 
+rate_processed_image.throttle_scope = 'images_rate'
+
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
 def download_image(request, pk):
     """Generate download URL for image"""
     
@@ -274,12 +287,16 @@ def download_image(request, pk):
             'error': str(e)
         }, status=status.HTTP_400_BAD_REQUEST)
 
+download_image.throttle_scope = 'images_download'
+
 
 class ImageTagListView(generics.ListCreateAPIView):
     """List and create image tags"""
     
     serializer_class = ImageTagSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'images_tags_list'
     
     def get_queryset(self):
         return ImageTag.objects.all().order_by('name')
@@ -287,6 +304,7 @@ class ImageTagListView(generics.ListCreateAPIView):
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
 def user_stats(request):
     """Get user's image statistics"""
     
@@ -312,6 +330,7 @@ def user_stats(request):
     
     return Response(stats)
 
+user_stats.throttle_scope = 'images_stats'
 
 # Admin views for content moderation
 class ImageModerationListView(generics.ListAPIView):

@@ -150,6 +150,8 @@
 .styleInfo {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
@@ -590,6 +592,7 @@
   background: linear-gradient(135deg, #10b981, #059669);
   border-radius: 8px;
   font-size: 14px;
+  width: 100%;
   font-weight: 600;
   color: white;
   cursor: pointer;
@@ -790,7 +793,6 @@
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     padding: 16px;
-    position: sticky;
     top: 24px;
   }
 
