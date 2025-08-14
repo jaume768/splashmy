@@ -1,7 +1,12 @@
 - Sistema de cahche para estilos populares?
 - Lógica de negocio mezclada y servicios demasiado grantes y monoíticos?
 - Análisis de costos por usuario/estilo
-- Rate limiting por IP/usuario
+- Rate limiting: okey, quiero que analices la estructura de negocio, el objetivo de la plataforma, 
+y todas las apps con los .py importantes
+ y me digas donde implementarias los rate limit 
+ y durante cuanto tiempo y el porque y te diré si implantarlo o no
+
+
 - Monitoreo de jobs en tiempo real
 - Implementar open api
 - Optimización de consultas DB
