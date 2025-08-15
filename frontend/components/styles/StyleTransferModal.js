@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { useAuth } from '../../contexts/AuthContext';
 import { uploadImage, createStyleTransferJob, getJobStatus, getJobResults, downloadProcessingResult } from '../../utils/api';
+import AuthenticatedImage from '../ui/AuthenticatedImage';
 import styles from './StyleTransferModal.module.css';
 
 const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
@@ -447,10 +448,11 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
                     <p className={styles.imageLabel}>Con estilo {selectedStyle.name}</p>
                     <div className={styles.imageWrapper}>
                       {processingResult.results[0].s3_url && (
-                        <img 
+                        <AuthenticatedImage 
                           src={processingResult.results[0].s3_url} 
                           alt="Resultado estilizado" 
                           className={styles.comparisonImage}
+                          isPrivate={!isPublic}
                         />
                       )}
                     </div>
