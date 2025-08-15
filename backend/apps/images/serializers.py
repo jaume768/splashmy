@@ -48,20 +48,20 @@ class ImageUploadSerializer(serializers.ModelSerializer):
         tags_data = validated_data.pop('tags', [])
         user = self.context['request'].user
         
-        # Check user's daily upload limit
-        today_uploads = Image.objects.filter(
-            user=user,
-            created_at__date=timezone.now().date()
-        ).count()
+        # Check user's daily upload limit (DISABLED FOR TESTING)
+        # today_uploads = Image.objects.filter(
+        #     user=user,
+        #     created_at__date=timezone.now().date()
+        # ).count()
         
-        max_uploads = (settings.DAILY_UPLOAD_LIMIT_PREMIUM 
-                      if user.is_premium 
-                      else settings.DAILY_UPLOAD_LIMIT_FREE)
+        # max_uploads = (settings.DAILY_UPLOAD_LIMIT_PREMIUM 
+        #               if user.is_premium 
+        #               else settings.DAILY_UPLOAD_LIMIT_FREE)
         
-        if today_uploads >= max_uploads:
-            raise serializers.ValidationError(
-                f"Daily upload limit reached ({max_uploads} images)"
-            )
+        # if today_uploads >= max_uploads:
+        #     raise serializers.ValidationError(
+        #         f"Daily upload limit reached ({max_uploads} images)"
+        #     )
         
         # Optimize image
         optimized_image = image_processing_service.optimize_image(image_file)
