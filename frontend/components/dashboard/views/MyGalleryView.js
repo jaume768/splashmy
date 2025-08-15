@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../../contexts/AuthContext';
 import { getUserProcessingResults, downloadProcessingResult, toggleProcessingResultVisibility } from '../../../utils/api';
+import AuthenticatedImage from '../../ui/AuthenticatedImage';
 import styles from '../../../styles/MyCreations.module.css';
 
 export default function MyGalleryView({ onExploreClick }) {
@@ -143,11 +144,20 @@ export default function MyGalleryView({ onExploreClick }) {
             {creations.map((creation) => (
               <div key={creation.id} className={styles.creationCard}>
                 <div className={styles.imageContainer} onClick={() => handleImageClick(creation)}>
-                  <img
-                    src={creation.s3_url}
-                    alt={`Creación ${creation.id}`}
-                    className={styles.creationImage}
-                  />
+                  {creation.is_public ? (
+                    <img
+                      src={creation.s3_url}
+                      alt={`Creación ${creation.id}`}
+                      className={styles.creationImage}
+                    />
+                  ) : (
+                    <AuthenticatedImage
+                      src={creation.s3_url}
+                      alt={`Creación ${creation.id}`}
+                      className={styles.creationImage}
+                      isPrivate={true}
+                    />
+                  )}
                 </div>
               </div>
             ))}
@@ -166,7 +176,16 @@ export default function MyGalleryView({ onExploreClick }) {
             </button>
 
             <div className={styles.modalImage}>
-              <img src={selectedImage.s3_url} alt={`Creación ${selectedImage.id}`} className={styles.fullImage} />
+              {selectedImage.is_public ? (
+                <img src={selectedImage.s3_url} alt={`Creación ${selectedImage.id}`} className={styles.fullImage} />
+              ) : (
+                <AuthenticatedImage
+                  src={selectedImage.s3_url}
+                  alt={`Creación ${selectedImage.id}`}
+                  className={styles.fullImage}
+                  isPrivate={true}
+                />
+              )}
             </div>
 
             <div className={styles.modalInfo}>

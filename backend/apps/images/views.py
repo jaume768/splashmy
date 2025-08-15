@@ -363,3 +363,212 @@ def approve_image(request, pk):
         return Response({
             'error': str(e)
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+import mimetypes
+from django.http import HttpResponse, Http404, FileResponse
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
+import os
+from django.conf import settings
+
+@require_http_methods(["GET"])
+@csrf_exempt
+def serve_media_file(request, file_path):
+    """
+    Securely serve media files with authentication and authorization checks
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    try:
+        # Build the full file path
+        full_path = os.path.join(settings.MEDIA_ROOT, file_path)
+        
+        # Security: Prevent directory traversal attacks
+        if not os.path.normpath(full_path).startswith(os.path.normpath(settings.MEDIA_ROOT)):
+            raise Http404("Access denied")
+        
+        # Check if file exists
+        if not os.path.exists(full_path):
+            raise Http404("File not found")
+        
+        # Additional security checks based on file type/location
+        if file_path.startswith('processed/'):
+            # For processed images, check if user owns the result or it's public
+            from apps.processing.models import ProcessingResult
+            
+            try:
+                # Find the result by s3_key
+                result = ProcessingResult.objects.select_related('job__user').filter(
+                    s3_key=file_path
+                ).first()
+                
+                if not result:
+                    raise Http404("File not found in database")
+                
+                # Allow if user is authenticated and owns this result
+                if request.user.is_authenticated and result.job.user == request.user:
+                    pass  # User can access their own files (public or private)
+                # Allow if it's a public result (regardless of authentication)
+                elif result.is_public:
+                    pass  # Anyone can access public files
+                else:
+                    raise Http404("Access denied")
+                    
+            except ProcessingResult.DoesNotExist:
+                raise Http404("File not found in database")
+            except Exception as e:
+                logger.error(f"Error checking result ownership: {str(e)}")
+                raise Http404("Access denied")
+        
+        elif file_path.startswith('images/uploads/'):
+            # For original uploads, require authentication and ownership
+            if not request.user.is_authenticated:
+                raise Http404("Authentication required")
+                
+            path_parts = file_path.split('/')
+            if len(path_parts) >= 3:
+                user_id = path_parts[2]
+                if str(request.user.id) != user_id:
+                    # Check if user owns this image
+                    from apps.images.models import Image
+                    image_id = os.path.splitext(os.path.basename(file_path))[0]
+                    
+                    try:
+                        image = Image.objects.get(id=image_id, user=request.user)
+                    except:
+                        raise Http404("Access denied")
+        
+        # Determine content type
+        content_type, _ = mimetypes.guess_type(full_path)
+        if not content_type:
+            content_type = 'application/octet-stream'
+        
+        # Serve the file with security headers
+        response = FileResponse(
+            open(full_path, 'rb'),
+            content_type=content_type,
+            as_attachment=False
+        )
+        
+        # Security headers
+        response['X-Content-Type-Options'] = 'nosniff'
+        response['X-Frame-Options'] = 'DENY'
+        response['Cache-Control'] = 'private, max-age=3600'
+        
+        # Set proper filename for downloads
+        filename = os.path.basename(file_path)
+        response['Content-Disposition'] = f'inline; filename="{filename}"'
+        
+        return response
+        
+    except FileNotFoundError:
+        raise Http404("File not found")
+    except PermissionError:
+        raise Http404("Access denied")
+    except Exception as e:
+        # Log the error but don't expose details
+        logger.error(f"Media serve error: {str(e)}")
+        raise Http404("File not found")
+
+
+@api_view(['GET', 'HEAD'])
+@permission_classes([permissions.IsAuthenticated])
+def authenticated_media_proxy(request, file_path):
+    """
+    Authenticated media proxy for serving private images to logged-in users
+    This endpoint requires authentication and can serve images via API calls with tokens
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    try:
+        # Build the full file path
+        full_path = os.path.join(settings.MEDIA_ROOT, file_path)
+        
+        # Security: Prevent directory traversal attacks
+        if not os.path.normpath(full_path).startswith(os.path.normpath(settings.MEDIA_ROOT)):
+            raise Http404("Access denied")
+        
+        # Check if file exists
+        if not os.path.exists(full_path):
+            raise Http404("File not found")
+        
+        # Additional security checks based on file type/location
+        if file_path.startswith('processed/'):
+            # For processed images, check if user owns the result or it's public
+            from apps.processing.models import ProcessingResult
+            
+            try:
+                # Find the result by s3_key
+                result = ProcessingResult.objects.select_related('job__user').filter(
+                    s3_key=file_path
+                ).first()
+                
+                if not result:
+                    raise Http404("File not found in database")
+                
+                # Allow if user owns this result
+                if result.job.user == request.user:
+                    pass  # User can access their own files (public or private)
+                # Allow if it's a public result
+                elif result.is_public:
+                    pass  # Anyone can access public files
+                else:
+                    raise Http404("Access denied")
+                    
+            except ProcessingResult.DoesNotExist:
+                raise Http404("File not found in database")
+            except Exception as e:
+                logger.error(f"Error checking result ownership: {str(e)}")
+                raise Http404("Access denied")
+        
+        elif file_path.startswith('images/uploads/'):
+            # For original uploads, require ownership
+            from apps.images.models import Image
+            path_parts = file_path.split('/')
+            if len(path_parts) >= 3:
+                user_id = path_parts[2]
+                if str(request.user.id) != user_id:
+                    # Check if user owns this image
+                    image_id = os.path.splitext(os.path.basename(file_path))[0]
+                    
+                    try:
+                        image = Image.objects.get(id=image_id, user=request.user)
+                    except:
+                        raise Http404("Access denied")
+        
+        # Determine content type
+        content_type, _ = mimetypes.guess_type(full_path)
+        if not content_type:
+            content_type = 'application/octet-stream'
+        
+        # Serve the file with security headers
+        response = FileResponse(
+            open(full_path, 'rb'),
+            content_type=content_type,
+            as_attachment=False
+        )
+        
+        # Security headers
+        response['X-Content-Type-Options'] = 'nosniff'
+        response['X-Frame-Options'] = 'DENY'
+        response['Cache-Control'] = 'private, max-age=3600'
+        
+        # Set proper filename for downloads
+        filename = os.path.basename(file_path)
+        response['Content-Disposition'] = f'inline; filename="{filename}"'
+        
+        return response
+        
+    except FileNotFoundError:
+        raise Http404("File not found")
+    except PermissionError:
+        raise Http404("Access denied")
+    except Exception as e:
+        # Log the error but don't expose details
+        logger.error(f"Authenticated media proxy error: {str(e)}")
+        raise Http404("File not found")

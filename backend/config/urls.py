@@ -15,7 +15,15 @@ urlpatterns = [
     path('api/v1/support/', include('apps.support.urls')),
 ]
 
-# Serve media files in development
+# Media file serving
 if settings.DEBUG:
+    # Development: Serve media files directly (insecure but convenient)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+else:
+    # Production: Serve media files through secure view
+    from apps.images.views import serve_media_file, authenticated_media_proxy
+    urlpatterns += [
+        path('media/<path:file_path>', serve_media_file, name='secure_media'),
+        path('api/v1/media/<path:file_path>', authenticated_media_proxy, name='authenticated_media'),
+    ]

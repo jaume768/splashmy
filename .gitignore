@@ -120,6 +120,9 @@ venv.bak/
 # mkdocs documentation
 /site
 
+docker-compose-produccion.yml
+.env.production.backend
+
 # mypy
 .mypy_cache/
 .dmypy.json
