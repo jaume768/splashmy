@@ -57,46 +57,134 @@ def _get_image_file(img_obj) -> InMemoryUploadedFile:
     2️⃣  Si existe fichero local usando s3_key  
     3️⃣  Si existe fichero local usando original_image.name
     """
+    import os
+    from urllib.parse import urlparse
+    
+    logger.info(f"Loading image for Celery task. Image ID: {img_obj.id}")
+    logger.info(f"Image s3_key: {img_obj.s3_key}")
+    logger.info(f"Image s3_url: {getattr(img_obj, 's3_url', 'N/A')}")
+    logger.info(f"Image original_image field: {getattr(img_obj, 'original_image', 'N/A')}")
+    logger.info(f"MEDIA_ROOT: {settings.MEDIA_ROOT}")
+    logger.info(f"USE_S3: {USE_S3}")
+    
     # --- S3 ---------------------------------------------------------
     if USE_S3 and img_obj.s3_key:
         return _load_image_from_storage(img_obj)
 
-    # --- LOCAL con s3_key ------------------------------------------
+    # --- LOCAL with robust path resolution --------------------------
+    local_path = None
+    tried_paths = []
+    
+    # Strategy 1: Clean s3_key if it contains URL components
     if img_obj.s3_key:
-        local_path = os.path.join(settings.MEDIA_ROOT, img_obj.s3_key.lstrip("/"))
-        if os.path.exists(local_path):
-            with open(local_path, "rb") as f:
-                data = f.read()
-            return InMemoryUploadedFile(
-                io.BytesIO(data),
-                "ImageField",
-                os.path.basename(local_path),
-                "image/png",
-                len(data),
-                None,
-            )
+        s3_key = img_obj.s3_key
+        
+        # Handle absolute URLs
+        if s3_key.startswith(('http://', 'https://')):
+            parsed = urlparse(s3_key)
+            s3_key = parsed.path.lstrip('/')
+            if s3_key.startswith('media/'):
+                s3_key = s3_key[6:]  # Remove 'media/' prefix
+        
+        # Handle paths starting with /media/
+        elif s3_key.startswith('/media/'):
+            s3_key = s3_key[7:]  # Remove '/media/' prefix
+        
+        # Handle paths starting with media/
+        elif s3_key.startswith('media/'):
+            s3_key = s3_key[6:]  # Remove 'media/' prefix
+        
+        local_path = os.path.join(settings.MEDIA_ROOT, s3_key)
+        tried_paths.append(f"Strategy 1 (cleaned s3_key): {local_path}")
+    
+    # Strategy 2: Use Django FileField path if s3_key strategy failed
+    if not local_path or not os.path.exists(local_path):
+        if hasattr(img_obj, 'original_image') and img_obj.original_image:
+            try:
+                # Try Django FileField .path property
+                if hasattr(img_obj.original_image, 'path'):
+                    local_path = img_obj.original_image.path
+                    tried_paths.append(f"Strategy 2a (FileField.path): {local_path}")
+                else:
+                    # Build path from FileField .name
+                    local_path = os.path.join(settings.MEDIA_ROOT, str(img_obj.original_image))
+                    tried_paths.append(f"Strategy 2b (FileField.name): {local_path}")
+            except Exception as e:
+                tried_paths.append(f"Strategy 2 failed: {str(e)}")
+    
+    # Strategy 3: Try s3_url as fallback
+    if not local_path or not os.path.exists(local_path):
+        if hasattr(img_obj, 's3_url') and img_obj.s3_url:
+            s3_url = img_obj.s3_url
+            
+            # Handle absolute URLs in s3_url
+            if s3_url.startswith(('http://', 'https://')):
+                parsed = urlparse(s3_url)
+                s3_url = parsed.path.lstrip('/')
+                if s3_url.startswith('media/'):
+                    s3_url = s3_url[6:]  # Remove 'media/' prefix
+            elif s3_url.startswith('/media/'):
+                s3_url = s3_url[7:]  # Remove '/media/' prefix
+            elif s3_url.startswith('media/'):
+                s3_url = s3_url[6:]  # Remove 'media/' prefix
+            
+            if s3_url:  # Only if we have something left
+                local_path = os.path.join(settings.MEDIA_ROOT, s3_url)
+                tried_paths.append(f"Strategy 3 (cleaned s3_url): {local_path}")
 
-    # --- LOCAL con original_image ---------------------------------
-    field = getattr(img_obj, "original_image", None)
-    if field and field.name:
-        local_path = os.path.join(settings.MEDIA_ROOT, field.name.lstrip("/"))
-        if os.path.exists(local_path):
-            with open(local_path, "rb") as f:
-                data = f.read()
-            return InMemoryUploadedFile(
-                io.BytesIO(data),
-                "ImageField",
-                os.path.basename(local_path),
-                "image/png",
-                len(data),
-                None,
-            )
+    # Log what we tried
+    for path_attempt in tried_paths:
+        logger.info(f"Tried path: {path_attempt}")
 
-    # --- nada encontrado ------------------------------------------
-    raise ValueError(
-        f"Image {img_obj.id} not found locally and USE_S3={USE_S3}"
-    )
+    # Final check
+    if not local_path or not os.path.exists(local_path):
+        # List actual files in media directory for debugging
+        try:
+            if os.path.exists(settings.MEDIA_ROOT):
+                media_contents = []
+                for root, dirs, files in os.walk(settings.MEDIA_ROOT):
+                    for file in files[:10]:  # Limit to first 10 files per directory
+                        rel_path = os.path.relpath(os.path.join(root, file), settings.MEDIA_ROOT)
+                        media_contents.append(rel_path)
+                logger.info(f"Media directory contents (sample): {media_contents}")
+        except Exception as e:
+            logger.error(f"Could not list media directory: {e}")
+        
+        debug_info = {
+            'MEDIA_ROOT': settings.MEDIA_ROOT,
+            'USE_S3': USE_S3,
+            's3_key': img_obj.s3_key,
+            's3_url': getattr(img_obj, 's3_url', None),
+            'original_image_field': str(getattr(img_obj, 'original_image', None)),
+            'attempted_paths': tried_paths,
+            'final_path': local_path,
+            'path_exists': os.path.exists(local_path) if local_path else False
+        }
+        raise ValueError(f"Image {img_obj.id} not found locally and USE_S3={USE_S3}. Debug info: {debug_info}")
 
+    logger.info(f"Successfully found image at: {local_path}")
+    
+    # Load and validate the file
+    try:
+        with open(local_path, 'rb') as f:
+            data = f.read()
+        
+        if len(data) == 0:
+            raise ValueError(f"Image file is empty: {local_path}")
+        
+        logger.info(f"Loaded image data: {len(data)} bytes")
+        
+        return InMemoryUploadedFile(
+            io.BytesIO(data),
+            "ImageField",
+            os.path.basename(local_path),
+            "image/png",
+            len(data),
+            None,
+        )
+        
+    except Exception as e:
+        raise ValueError(f"Failed to load image file {local_path}: {str(e)}")
 
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)

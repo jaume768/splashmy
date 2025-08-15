@@ -186,10 +186,10 @@ class ProcessingJobCreateView(generics.CreateAPIView):
         try:
             if not job.original_image or not job.style:
                 return {"error": "Both original image and style required for style transfer"}
-            
+
             # Build style-specific prompt
             prompt = job.style.get_full_prompt(job.prompt)
-            
+
             # Use style's default parameters if not overridden
             style_params = job.openai_parameters.copy()
             if style_params.get('quality') == 'auto':
@@ -200,35 +200,143 @@ class ProcessingJobCreateView(generics.CreateAPIView):
                 style_params['output_format'] = job.style.default_output_format
             if style_params.get('size') == 'auto':
                 style_params['size'] = job.style.default_size
-            
+
             # Get original image file for editing
             original_image = job.original_image
-            if not original_image.s3_key:
-                return {"error": "Original image not found in storage"}
-            
+
             # Load image file from storage
             if hasattr(settings, 'USE_S3_STORAGE') and settings.USE_S3_STORAGE:
                 # TODO: Load from S3
                 return {"error": "S3 image loading not implemented yet"}
             else:
-                # Load from local storage
+                # Load from local storage - handle different path formats
                 import os
-                local_path = os.path.join(settings.MEDIA_ROOT, original_image.s3_key)
-                if not os.path.exists(local_path):
-                    return {"error": f"Original image file not found: {local_path}"}
+                from urllib.parse import urlparse
                 
-                from django.core.files.uploadedfile import InMemoryUploadedFile
-                with open(local_path, 'rb') as f:
-                    image_data = f.read()
+                logger.info(f"Loading image for style transfer. Image ID: {original_image.id}")
+                logger.info(f"Image s3_key: {original_image.s3_key}")
+                logger.info(f"Image s3_url: {getattr(original_image, 's3_url', 'N/A')}")
+                logger.info(f"Image original_image field: {getattr(original_image, 'original_image', 'N/A')}")
+                logger.info(f"MEDIA_ROOT: {settings.MEDIA_ROOT}")
+                logger.info(f"MEDIA_URL: {settings.MEDIA_URL}")
+                
+                local_path = None
+                tried_paths = []
+                
+                # Strategy 1: Clean s3_key if it contains URL components
+                if original_image.s3_key:
+                    s3_key = original_image.s3_key
+                    
+                    # Handle absolute URLs
+                    if s3_key.startswith(('http://', 'https://')):
+                        parsed = urlparse(s3_key)
+                        s3_key = parsed.path.lstrip('/')
+                        if s3_key.startswith('media/'):
+                            s3_key = s3_key[6:]  # Remove 'media/' prefix
+                    
+                    # Handle paths starting with /media/
+                    elif s3_key.startswith('/media/'):
+                        s3_key = s3_key[7:]  # Remove '/media/' prefix
+                    
+                    # Handle paths starting with media/
+                    elif s3_key.startswith('media/'):
+                        s3_key = s3_key[6:]  # Remove 'media/' prefix
+                    
+                    local_path = os.path.join(settings.MEDIA_ROOT, s3_key)
+                    tried_paths.append(f"Strategy 1 (cleaned s3_key): {local_path}")
+                
+                # Strategy 2: Use Django FileField path if s3_key strategy failed
+                if not local_path or not os.path.exists(local_path):
+                    if hasattr(original_image, 'original_image') and original_image.original_image:
+                        try:
+                            # Try Django FileField .path property
+                            if hasattr(original_image.original_image, 'path'):
+                                local_path = original_image.original_image.path
+                                tried_paths.append(f"Strategy 2a (FileField.path): {local_path}")
+                            else:
+                                # Build path from FileField .name
+                                local_path = os.path.join(settings.MEDIA_ROOT, str(original_image.original_image))
+                                tried_paths.append(f"Strategy 2b (FileField.name): {local_path}")
+                        except Exception as e:
+                            tried_paths.append(f"Strategy 2 failed: {str(e)}")
+                
+                # Strategy 3: Try s3_url as fallback
+                if not local_path or not os.path.exists(local_path):
+                    if hasattr(original_image, 's3_url') and original_image.s3_url:
+                        s3_url = original_image.s3_url
+                        
+                        # Handle absolute URLs in s3_url
+                        if s3_url.startswith(('http://', 'https://')):
+                            parsed = urlparse(s3_url)
+                            s3_url = parsed.path.lstrip('/')
+                            if s3_url.startswith('media/'):
+                                s3_url = s3_url[6:]  # Remove 'media/' prefix
+                        elif s3_url.startswith('/media/'):
+                            s3_url = s3_url[7:]  # Remove '/media/' prefix
+                        elif s3_url.startswith('media/'):
+                            s3_url = s3_url[6:]  # Remove 'media/' prefix
+                        
+                        if s3_url:  # Only if we have something left
+                            local_path = os.path.join(settings.MEDIA_ROOT, s3_url)
+                            tried_paths.append(f"Strategy 3 (cleaned s3_url): {local_path}")
+
+                # Log what we tried
+                for path_attempt in tried_paths:
+                    logger.info(f"Tried path: {path_attempt}")
+
+                # Final check
+                if not local_path or not os.path.exists(local_path):
+                    # List actual files in media directory for debugging
+                    try:
+                        if os.path.exists(settings.MEDIA_ROOT):
+                            media_contents = []
+                            for root, dirs, files in os.walk(settings.MEDIA_ROOT):
+                                for file in files[:10]:  # Limit to first 10 files per directory
+                                    rel_path = os.path.relpath(os.path.join(root, file), settings.MEDIA_ROOT)
+                                    media_contents.append(rel_path)
+                            logger.info(f"Media directory contents (sample): {media_contents}")
+                    except Exception as e:
+                        logger.error(f"Could not list media directory: {e}")
+                    
+                    debug_info = {
+                        'MEDIA_ROOT': settings.MEDIA_ROOT,
+                        'MEDIA_URL': settings.MEDIA_URL,
+                        's3_key': original_image.s3_key,
+                        's3_url': getattr(original_image, 's3_url', None),
+                        'original_image_field': str(getattr(original_image, 'original_image', None)),
+                        'attempted_paths': tried_paths,
+                        'final_path': local_path,
+                        'path_exists': os.path.exists(local_path) if local_path else False
+                    }
+                    return {"error": f"Original image file not found after trying all strategies. Debug info: {debug_info}"}
+
+                logger.info(f"Successfully found image at: {local_path}")
+                
+                # Load and validate the file
+                try:
+                    with open(local_path, 'rb') as f:
+                        image_data = f.read()
+                    
+                    if len(image_data) == 0:
+                        return {"error": f"Image file is empty: {local_path}"}
+                    
+                    logger.info(f"Loaded image data: {len(image_data)} bytes")
+                    
+                    # Create InMemoryUploadedFile for OpenAI
                     image_file = InMemoryUploadedFile(
                         io.BytesIO(image_data),
                         'ImageField',
-                        original_image.original_filename,
-                        f'image/{original_image.format.lower()}',
+                        original_image.original_filename or 'image.png',
+                        f'image/{original_image.format.lower()}' if hasattr(original_image, 'format') else 'image/png',
                         len(image_data),
                         None
                     )
-            
+                    
+                    logger.info(f"Created InMemoryUploadedFile: {image_file.name}, size: {image_file.size}")
+                    
+                except Exception as e:
+                    return {"error": f"Failed to load image file {local_path}: {str(e)}"}
+
             # Use edit_image for style transfer
             result = openai_service.edit_image(
                 image_files=[image_file],
@@ -236,10 +344,11 @@ class ProcessingJobCreateView(generics.CreateAPIView):
                 style_params=style_params,
                 user_id=str(job.user.id)
             )
-            
+
             return result
-            
+
         except Exception as e:
+            logger.error(f"Style transfer failed: {str(e)}", exc_info=True)
             return {"error": str(e)}
     
     def _save_processing_results(self, job: ProcessingJob, result: dict):

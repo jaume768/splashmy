@@ -98,7 +98,24 @@ class ImageUploadSerializer(serializers.ModelSerializer):
         
         if s3_url:
             image.s3_key = s3_key
-            image.s3_url = s3_url
+            
+            # In production without S3, s3_url contains absolute URL
+            # Store relative path to avoid path resolution issues
+            if not getattr(settings, 'USE_S3_STORAGE', False):
+                # Extract relative path from absolute URL
+                if s3_url.startswith(('http://', 'https://')):
+                    from urllib.parse import urlparse
+                    parsed = urlparse(s3_url)
+                    relative_path = parsed.path
+                    if relative_path.startswith('/media/'):
+                        relative_path = relative_path[7:]  # Remove /media/ prefix
+                    image.s3_url = relative_path
+                else:
+                    image.s3_url = s3_url
+            else:
+                # S3 storage: keep absolute URL
+                image.s3_url = s3_url
+            
             image.s3_bucket = getattr(settings, 'AWS_STORAGE_BUCKET_NAME', 'local-dev')
             image.status = 'uploaded'
         else:
