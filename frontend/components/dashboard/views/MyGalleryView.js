@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../../contexts/AuthContext';
-import { getUserProcessingResults, downloadProcessingResult, toggleProcessingResultVisibility } from '../../../utils/api';
+import { getUserProcessingResults, downloadProcessingResult, toggleProcessingResultVisibility, deleteProcessingResult } from '../../../utils/api';
 import AuthenticatedImage from '../../ui/AuthenticatedImage';
 import styles from '../../../styles/MyCreations.module.css';
 
@@ -14,6 +14,8 @@ export default function MyGalleryView({ onExploreClick }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [visibilityLoading, setVisibilityLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (!authenticated) return; // navigation should handle redirect; avoid flashing
@@ -89,6 +91,39 @@ export default function MyGalleryView({ onExploreClick }) {
     } finally {
       setVisibilityLoading(false);
     }
+  };
+
+  const handleDeleteImage = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!selectedImage) return;
+    
+    try {
+      setDeleteLoading(true);
+      await deleteProcessingResult(selectedImage.id);
+      
+      // Remove the deleted image from the creations list
+      setCreations((prev) => prev.filter((creation) => creation.id !== selectedImage.id));
+      
+      // Close the modal and confirmation dialog
+      setSelectedImage(null);
+      setShowDeleteConfirm(false);
+      
+      // Show success message (optional)
+      // You could add a toast notification here if you have one
+      
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      alert('No se pudo eliminar la imagen. Inténtalo de nuevo.');
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
   };
 
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString('es-ES', {
@@ -197,6 +232,9 @@ export default function MyGalleryView({ onExploreClick }) {
                   <button onClick={() => handleToggleVisibility(selectedImage)} className={styles.modalActionButton} disabled={visibilityLoading} title={selectedImage.is_public ? 'Hacer privada' : 'Hacer pública'}>
                     {visibilityLoading ? 'Guardando…' : (selectedImage.is_public ? 'Hacer privada' : 'Hacer pública')}
                   </button>
+                  <button onClick={handleDeleteImage} className={styles.modalDeleteButton} disabled={deleteLoading} title="Eliminar imagen">
+                    🗑️ Eliminar
+                  </button>
                 </div>
               </div>
               <div className={styles.modalDetails}>
@@ -205,6 +243,28 @@ export default function MyGalleryView({ onExploreClick }) {
                 </span>
                 <span className={styles.dateText}>{formatDate(selectedImage.created_at)}</span>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Popup */}
+      {showDeleteConfirm && (
+        <div className={styles.confirmModal} onClick={cancelDelete}>
+          <div className={styles.confirmContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.confirmHeader}>
+              <h3>¿Eliminar imagen?</h3>
+            </div>
+            <div className={styles.confirmBody}>
+              <p>Esta acción no se puede deshacer. La imagen será eliminada de tu galería permanentemente.</p>
+            </div>
+            <div className={styles.confirmActions}>
+              <button onClick={cancelDelete} className={styles.cancelButton} disabled={deleteLoading}>
+                Cancelar
+              </button>
+              <button onClick={confirmDelete} className={styles.confirmButton} disabled={deleteLoading}>
+                {deleteLoading ? 'Eliminando...' : 'Eliminar'}
+              </button>
             </div>
           </div>
         </div>

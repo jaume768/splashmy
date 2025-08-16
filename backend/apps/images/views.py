@@ -55,7 +55,7 @@ class ImageListView(generics.ListAPIView):
     
     def get_queryset(self):
         user = self.request.user
-        queryset = Image.objects.filter(user=user, is_content_safe=True)
+        queryset = Image.active_objects.filter(user=user, is_content_safe=True)
         
         # Filter by status
         status_filter = self.request.query_params.get('status')
@@ -89,23 +89,36 @@ class ImageDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
-        return Image.objects.filter(user=self.request.user)
+        return Image.active_objects.filter(user=self.request.user)
     
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
         
-        # Delete from S3 if exists
-        if instance.s3_key:
-            aws_image_service.delete_from_s3(instance.s3_key)
+        # Soft delete the image
+        instance.is_deleted = True
+        instance.deleted_at = timezone.now()
+        instance.save(update_fields=['is_deleted', 'deleted_at'])
         
-        # Delete processed versions from S3
-        for processed in instance.processed_versions.all():
-            if hasattr(processed, 'processed_image') and processed.processed_image:
-                s3_key = str(processed.processed_image)
-                aws_image_service.delete_from_s3(s3_key)
+        # Also soft delete related processing jobs and results
+        from apps.processing.models import ProcessingJob, ProcessingResult
         
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        # Soft delete all processing jobs that use this image
+        jobs = ProcessingJob.active_objects.filter(original_image=instance)
+        for job in jobs:
+            job.is_deleted = True
+            job.deleted_at = timezone.now()
+            job.save(update_fields=['is_deleted', 'deleted_at'])
+            
+            # Soft delete all results from these jobs
+            results = ProcessingResult.active_objects.filter(job=job)
+            for result in results:
+                result.is_deleted = True
+                result.deleted_at = timezone.now()
+                result.save(update_fields=['is_deleted', 'deleted_at'])
+        
+        return Response({
+            'message': 'Image deleted successfully'
+        }, status=status.HTTP_200_OK)
 
 
 class PublicImageListView(generics.ListAPIView):
@@ -117,7 +130,7 @@ class PublicImageListView(generics.ListAPIView):
     throttle_scope = 'images_public_list'
     
     def get_queryset(self):
-        return Image.objects.filter(
+        return Image.active_objects.filter(
             is_public=True, 
             is_content_safe=True,
             status='uploaded'
@@ -132,7 +145,8 @@ class ProcessedImageListView(generics.ListAPIView):
     
     def get_queryset(self):
         user = self.request.user
-        queryset = ProcessedImage.objects.filter(user=user)
+        # Note: ProcessedImage model doesn't have soft delete, but filter by non-deleted original images
+        queryset = ProcessedImage.objects.filter(user=user, original_image__is_deleted=False)
         
         # Filter by original image
         original_image_id = self.request.query_params.get('original_image')
@@ -159,7 +173,7 @@ class ProcessedImageDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
-        return ProcessedImage.objects.filter(user=self.request.user)
+        return ProcessedImage.objects.filter(user=self.request.user, original_image__is_deleted=False)
     
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

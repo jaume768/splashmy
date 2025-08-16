@@ -5,6 +5,18 @@ from apps.images.models import Image
 from apps.styles.models import Style
 
 
+class ActiveProcessingJobManager(models.Manager):
+    """Manager that only returns non-deleted processing jobs"""
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
+class ActiveProcessingResultManager(models.Manager):
+    """Manager that only returns non-deleted processing results"""
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
 class ProcessingJob(models.Model):
     """Track image processing jobs with OpenAI gpt-image-1"""
     
@@ -68,6 +80,14 @@ class ProcessingJob(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    # Soft delete
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    
+    # Managers
+    objects = models.Manager()  # Default manager (includes deleted)
+    active_objects = ActiveProcessingJobManager()  # Only non-deleted
+    
     class Meta:
         db_table = 'processing_jobs'
         verbose_name = 'Processing Job'
@@ -107,6 +127,14 @@ class ProcessingResult(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    
+    # Soft delete
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    
+    # Managers
+    objects = models.Manager()  # Default manager (includes deleted)
+    active_objects = ActiveProcessingResultManager()  # Only non-deleted
     
     class Meta:
         db_table = 'processing_results'

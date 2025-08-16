@@ -463,7 +463,7 @@ class ProcessingResultListView(generics.ListAPIView):
     
     def get_queryset(self):
         user = self.request.user
-        queryset = ProcessingResult.objects.filter(job__user=user)
+        queryset = ProcessingResult.active_objects.filter(job__user=user)
         
         # Filter by job
         job_id = self.request.query_params.get('job_id')
@@ -528,7 +528,7 @@ class LikedProcessingResultListView(generics.ListAPIView):
     
     def get_queryset(self):
         user = self.request.user
-        queryset = ProcessingResult.objects.filter(likes__user=user).annotate(
+        queryset = ProcessingResult.active_objects.filter(likes__user=user).annotate(
             like_count=Count('likes')
         )
         # Support ordering by like_count or created_at
@@ -638,7 +638,7 @@ class PublicProcessingResultListView(generics.ListAPIView):
             return f"{settings.MEDIA_URL}{file_path}"
     
     def get_queryset(self):
-        queryset = ProcessingResult.objects.filter(is_public=True).annotate(
+        queryset = ProcessingResult.active_objects.filter(is_public=True).annotate(
             like_count=Count('likes')
         )
         # Support ordering by like_count or created_at
@@ -1083,3 +1083,48 @@ def get_job_results(request, job_id):
         }, status=status.HTTP_400_BAD_REQUEST)
 
 get_job_results.throttle_scope = 'processing_job_results'
+
+
+@api_view(['DELETE'])
+@permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ScopedRateThrottle])
+def soft_delete_processing_result(request, result_id):
+    """Soft delete a processing result - for user's gallery management"""
+    try:
+        result = ProcessingResult.active_objects.get(
+            id=result_id,
+            job__user=request.user
+        )
+        
+        # Soft delete the result
+        result.is_deleted = True
+        result.deleted_at = timezone.now()
+        result.save(update_fields=['is_deleted', 'deleted_at'])
+        
+        # Check if this was the last active result for the job
+        job = result.job
+        remaining_results = ProcessingResult.active_objects.filter(job=job).count()
+        
+        # If no active results remain, also soft delete the job
+        if remaining_results == 0:
+            job.is_deleted = True
+            job.deleted_at = timezone.now()
+            job.save(update_fields=['is_deleted', 'deleted_at'])
+        
+        return Response({
+            'message': 'Image deleted successfully',
+            'result_id': result_id
+        }, status=status.HTTP_200_OK)
+        
+    except ProcessingResult.DoesNotExist:
+        return Response({
+            'error': 'Image not found or already deleted'
+        }, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        logger.error(f"Error soft deleting processing result {result_id}: {str(e)}")
+        return Response({
+            'error': 'Failed to delete image',
+            'details': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+soft_delete_processing_result.throttle_scope = 'processing_delete'

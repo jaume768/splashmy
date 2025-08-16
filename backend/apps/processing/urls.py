@@ -21,6 +21,7 @@ urlpatterns = [
     path('results/<uuid:result_id>/visibility/', views.toggle_result_visibility, name='toggle-visibility'),
     path('results/<uuid:result_id>/rate/', views.rate_result, name='rate-result'),
     path('results/<uuid:result_id>/download/', views.download_result, name='download-result'),
+    path('results/<uuid:result_id>/delete/', views.soft_delete_processing_result, name='soft-delete-result'),
     
     # User quota and stats
     path('quota/', views.user_quota, name='user-quota'),

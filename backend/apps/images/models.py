@@ -19,6 +19,12 @@ def upload_to_processed(instance, filename):
     return f"images/processed/{instance.user.id}/{filename}"
 
 
+class ActiveImageManager(models.Manager):
+    """Manager that only returns non-deleted images"""
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
 class Image(models.Model):
     """Model for uploaded images"""
     
@@ -62,6 +68,14 @@ class Image(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_public = models.BooleanField(default=False)
+    
+    # Soft delete
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    
+    # Managers
+    objects = models.Manager()  # Default manager (includes deleted)
+    active_objects = ActiveImageManager()  # Only non-deleted
     
     class Meta:
         db_table = 'images'

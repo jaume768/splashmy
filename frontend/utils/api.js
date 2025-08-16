@@ -66,6 +66,7 @@ export const API_ENDPOINTS = {
     TOGGLE_LIKE: (id) => `/api/v1/processing/results/${id}/like/`,
     TOGGLE_VISIBILITY: (id) => `/api/v1/processing/results/${id}/visibility/`,
     DOWNLOAD_RESULT: (id) => `/api/v1/processing/results/${id}/download/`,
+    DELETE_RESULT: (id) => `/api/v1/processing/results/${id}/delete/`,
     QUOTA: '/api/v1/processing/quota/',
     STATS: '/api/v1/processing/stats/',
   },
@@ -520,6 +521,19 @@ export const downloadProcessingResult = async (resultId) => {
     return response;
   } catch (error) {
     console.error('Result download error:', error);
+    throw error;
+  }
+};
+
+// Delete processing result (soft delete)
+export const deleteProcessingResult = async (resultId) => {
+  try {
+    const response = await apiFetch(API_ENDPOINTS.PROCESSING.DELETE_RESULT(resultId), {
+      method: 'DELETE',
+    });
+    return response;
+  } catch (error) {
+    console.error('Result delete error:', error);
     throw error;
   }
 };
