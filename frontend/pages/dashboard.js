@@ -288,7 +288,7 @@ const DashboardPage = () => {
                 <span className={styles.footerLogo}>Fotomorfia</span>
                 <span className={styles.footerTagline}>Creatividad infinita con IA</span>
               </div>
-              <p className={styles.footerCopyright}>© 2024 Fotomorfia</p>
+              <p className={styles.footerCopyright}>© 2025 Fotomorfia</p>
             </div>
           </div>
         </footer>
