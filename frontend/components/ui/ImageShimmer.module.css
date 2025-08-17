@@ -1,0 +1,170 @@
+/* Shimmer animation keyframes */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Grid layouts */
+.shimmerGrid {
+  display: grid;
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
+.galleryGrid {
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.imagesGrid {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .galleryGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-xs);
+  }
+  
+  .imagesGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-xs);
+  }
+}
+
+/* Shimmer card */
+.shimmerCard {
+  background: var(--color-white);
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.shimmerCard.gallery {
+  aspect-ratio: 3/4;
+  display: flex;
+  flex-direction: column;
+}
+
+.shimmerCard.images {
+  aspect-ratio: 1;
+}
+
+/* Shimmer image container */
+.shimmerImage {
+  position: relative;
+  flex: 1;
+  background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 50%, #f0f0f0 100%);
+  overflow: hidden;
+  border-radius: var(--border-radius-lg);
+}
+
+.shimmerCard.gallery .shimmerImage {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Shimmer wave effect */
+.shimmerWave {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+/* Meta information for gallery type */
+.shimmerMeta {
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  background: var(--color-white);
+}
+
+.shimmerLine {
+  height: 12px;
+  background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 50%, #f0f0f0 100%);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
+.shimmerLine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .shimmerCard {
+    border-radius: var(--border-radius);
+  }
+  
+  .shimmerImage {
+    border-radius: var(--border-radius);
+  }
+  
+  .shimmerCard.gallery .shimmerImage {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  
+  .shimmerMeta {
+    padding: var(--spacing-sm);
+  }
+  
+  .shimmerLine {
+    height: 10px;
+  }
+}
+
+/* Staggered animation for better effect */
+.shimmerCard:nth-child(2n) .shimmerWave {
+  animation-delay: 0.7s;
+}
+
+.shimmerCard:nth-child(3n) .shimmerWave {
+  animation-delay: 0.3s;
+}
+
+.shimmerCard:nth-child(2n) .shimmerLine::after {
+  animation-delay: 1.2s;
+}
+
+.shimmerCard:nth-child(3n) .shimmerLine::after {
+  animation-delay: 0.8s;
+}

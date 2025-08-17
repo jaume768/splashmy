@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useAuth } from '../../../contexts/AuthContext';
 import { getUserProcessingResults, downloadProcessingResult, toggleProcessingResultVisibility, deleteProcessingResult } from '../../../utils/api';
 import AuthenticatedImage from '../../ui/AuthenticatedImage';
+import ImageShimmer from '../../ui/ImageShimmer';
 import styles from '../../../styles/MyCreations.module.css';
 
 export default function MyGalleryView({ onExploreClick }) {
@@ -148,17 +149,13 @@ export default function MyGalleryView({ onExploreClick }) {
       </header>
 
       <main className={styles.main}>
-        {loading && (
-          <div className={styles.loadingState}>
-            <div className={styles.loader}></div>
-            <p>Cargando tus creaciones...</p>
-          </div>
+        {loading && !error && (
+          <ImageShimmer count={12} type="gallery" />
         )}
 
         {error && (
-          <div className={styles.errorState}>
-            <div className={styles.errorIcon}>⚠️</div>
-            <p className={styles.errorMessage}>{error}</p>
+          <div className={styles.error}>
+            <p>{error}</p>
             <button onClick={fetchUserCreations} className={styles.retryButton}>Reintentar</button>
           </div>
         )}

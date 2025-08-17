@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import styles from '../../../styles/ImagesView.module.css';
 import { getPublicProcessingResults, getProcessingResultDetail, toggleProcessingResultLike, downloadProcessingResult, toggleProcessingResultVisibility } from '../../../utils/api';
 import { useAuth } from '../../../contexts/AuthContext';
+import ImageShimmer from '../../ui/ImageShimmer';
 
 export default function TopView() {
   const [items, setItems] = useState([]);
@@ -10,6 +11,7 @@ export default function TopView() {
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [initialLoading, setInitialLoading] = useState(true);
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
   const PAGE_SIZE = 30;
@@ -69,6 +71,7 @@ export default function TopView() {
       }
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   }, [loading, hasMore, page]);
 
@@ -210,32 +213,40 @@ export default function TopView() {
         <div className={styles.error}>{error}</div>
       )}
 
-      <section className={styles.masonry}>
-        {items.map((item) => (
-          <article key={item.id} className={styles.card} onClick={() => openModal(item)}>
-            <div className={styles.imageWrap}>
-              <button
-                className={`${styles.likeButton} ${item.user_has_liked ? styles.liked : ''}`}
-                disabled={likeLoadingId === item.id}
-                onClick={(e) => { e.stopPropagation(); handleToggleLike(item); }}
-                aria-label={item.user_has_liked ? 'Quitar me gusta' : 'Dar me gusta'}
-                title={item.user_has_liked ? 'Quitar me gusta' : 'Dar me gusta'}
-              >
-                <svg className={styles.likeIcon} viewBox="0 0 24 24" fill={item.user_has_liked ? '#dc2626' : 'none'} stroke="#dc2626" strokeWidth="2">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                </svg>
-                <span className={styles.likeCount}>{item.like_count || 0}</span>
-              </button>
-              <img
-                src={item.s3_url || item.signed_url}
-                alt={item.job_prompt ? `Imagen generada: ${item.job_prompt}` : 'Imagen generada'}
-                loading="lazy"
-                className={styles.image}
-              />
-            </div>
-          </article>
-        ))}
-      </section>
+      {/* Show shimmer only on initial load when no items */}
+      {initialLoading && items.length === 0 && !error && (
+        <ImageShimmer count={12} type="images" />
+      )}
+
+      {/* Show images when available */}
+      {items.length > 0 && (
+        <section className={styles.masonry}>
+          {items.map((item) => (
+            <article key={item.id} className={styles.card} onClick={() => openModal(item)}>
+              <div className={styles.imageWrap}>
+                <button
+                  className={`${styles.likeButton} ${item.user_has_liked ? styles.liked : ''}`}
+                  disabled={likeLoadingId === item.id}
+                  onClick={(e) => { e.stopPropagation(); handleToggleLike(item); }}
+                  aria-label={item.user_has_liked ? 'Quitar me gusta' : 'Dar me gusta'}
+                  title={item.user_has_liked ? 'Quitar me gusta' : 'Dar me gusta'}
+                >
+                  <svg className={styles.likeIcon} viewBox="0 0 24 24" fill={item.user_has_liked ? '#dc2626' : 'none'} stroke="#dc2626" strokeWidth="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                  <span className={styles.likeCount}>{item.like_count || 0}</span>
+                </button>
+                <img
+                  src={item.s3_url || item.signed_url}
+                  alt={item.job_prompt ? `Imagen generada: ${item.job_prompt}` : 'Imagen generada'}
+                  loading="lazy"
+                  className={styles.image}
+                />
+              </div>
+            </article>
+          ))}
+        </section>
+      )}
 
       {isModalOpen && selectedItem && (
         <div className={styles.modalBackdrop} onClick={closeModal}>
