@@ -87,6 +87,9 @@ const DashboardPage = () => {
     setActiveView(viewKey);
     const query = viewKey === 'explore' ? {} : { tab: viewKey };
     router.replace({ pathname: '/dashboard', query }, undefined, { shallow: true });
+    
+    // Scroll to top when navigating between views (especially important for mobile)
+    window.scrollTo(0, 0);
   };
 
   const handleSearchChange = (e) => {
