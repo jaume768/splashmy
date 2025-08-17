@@ -171,9 +171,11 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
       setDownloadingResult(true);
       const downloadData = await downloadProcessingResult(resultId);
       
-      // Abrir URL de descarga en nueva pestaña
-      if (downloadData.download_url) {
-        window.open(downloadData.download_url, '_blank');
+      if (downloadData.success) {
+        // Download handled automatically by the function
+        console.log(`Downloaded: ${downloadData.filename}`);
+      } else {
+        setError('Error al descargar la imagen');
       }
     } catch (err) {
       console.error('Error downloading result:', err);

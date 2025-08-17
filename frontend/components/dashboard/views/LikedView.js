@@ -169,11 +169,11 @@ export default function LikedView() {
     try {
       setDownloadLoading(true);
       const res = await downloadProcessingResult(item.id);
-      const url = res.download_url || res.url || item.s3_url || item.signed_url;
-      if (url) {
-        window.open(url, '_blank');
+      if (res.success) {
+        // Download handled automatically by the function
+        console.log(`Downloaded: ${res.filename}`);
       } else {
-        alert('No se pudo obtener el enlace de descarga.');
+        alert('No se pudo descargar la imagen.');
       }
     } catch (err) {
       console.error('Error al descargar:', err);

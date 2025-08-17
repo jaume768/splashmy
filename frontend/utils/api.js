@@ -514,11 +514,57 @@ export const getProcessingResults = async (params = {}) => {
   }
 };
 
-// Download processing result
-export const downloadProcessingResult = async (resultId) => {
+// Download processing result with authentication
+export const downloadProcessingResult = async (resultId, filename = null) => {
   try {
-    const response = await apiFetch(API_ENDPOINTS.PROCESSING.DOWNLOAD_RESULT(resultId));
-    return response;
+    // Get auth token
+    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    
+    // Fetch image as blob with authentication
+    const response = await fetch(buildApiUrl(API_ENDPOINTS.PROCESSING.DOWNLOAD_RESULT(resultId)), {
+      method: 'GET',
+      headers: {
+        ...(token && { 'Authorization': `Token ${token}` }),
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Download failed: ${response.status} ${response.statusText}`);
+    }
+
+    // Get the blob data
+    const blob = await response.blob();
+    
+    // Get filename from Content-Disposition header or use provided filename
+    let downloadFilename = filename;
+    if (!downloadFilename) {
+      const contentDisposition = response.headers.get('Content-Disposition');
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        if (match && match[1]) {
+          downloadFilename = match[1].replace(/['"]/g, '');
+        }
+      }
+    }
+    
+    // Fallback filename
+    if (!downloadFilename) {
+      downloadFilename = `fotomorfia-image-${resultId}.jpg`;
+    }
+
+    // Create blob URL and trigger download
+    const blobUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = downloadFilename;
+    document.body.appendChild(link);
+    link.click();
+    
+    // Cleanup
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
+    
+    return { success: true, filename: downloadFilename };
   } catch (error) {
     console.error('Result download error:', error);
     throw error;

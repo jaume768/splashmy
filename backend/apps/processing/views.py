@@ -823,69 +823,101 @@ rate_result.throttle_scope = 'processing_rate'
 @permission_classes([permissions.IsAuthenticated])
 @throttle_classes([ScopedRateThrottle])
 def download_result(request, result_id):
-    """Generate download URL for processing result"""
-    
-    def build_download_url(s3_url):
-        """Build absolute URL for download in development, S3 URL in production"""
-        from django.conf import settings
-        
-        if not s3_url:
-            return ''
-            
-        # If it's already an absolute URL (S3), return as is
-        if s3_url.startswith(('http://', 'https://')):
-            return s3_url
-            
-        # For development, build absolute URL pointing to backend
-        if settings.DEBUG and not getattr(settings, 'USE_S3_STORAGE', False):
-            backend_host = getattr(settings, 'BACKEND_HOST', 'localhost:8000')
-            scheme = 'https' if request.is_secure() else 'http'
-            
-            # Clean path if it starts with /media/
-            clean_path = s3_url
-            if clean_path.startswith(settings.MEDIA_URL):
-                clean_path = clean_path[len(settings.MEDIA_URL):]
-                
-            return f"{scheme}://{backend_host}{settings.MEDIA_URL}{clean_path}"
-        else:
-            # Production: try to generate presigned URL
-            try:
-                download_url = aws_image_service.generate_presigned_url(
-                    s3_url, 
-                    expiration=3600
-                )
-                return download_url
-            except:
-                return s3_url
+    """Download processing result file directly"""
+    from django.http import HttpResponse, Http404
+    from django.conf import settings
+    import os
+    import mimetypes
     
     try:
+        # Check authorization first
         result = get_object_or_404(
             ProcessingResult, 
             id=result_id, 
             job__user=request.user
         )
         
-        # Use s3_url (which contains the file path) for building download URL
-        download_url = build_download_url(result.s3_url)
+        # For development/local storage - serve file directly
+        if not getattr(settings, 'USE_S3_STORAGE', False):
+            if not result.s3_url:
+                raise Http404("File not found")
+            
+            # Extract file path from URL
+            from urllib.parse import urlparse
+            
+            # Parse the URL to get the path component
+            parsed_url = urlparse(result.s3_url)
+            url_path = parsed_url.path  # e.g., '/media/processed/2/2025/08/15/filename.png'
+            
+            # Remove '/media/' prefix to get relative path within MEDIA_ROOT
+            if url_path.startswith('/media/'):
+                file_path = url_path[7:]  # Remove '/media/' (7 characters)
+            elif url_path.startswith('media/'):
+                file_path = url_path[6:]  # Remove 'media/' (6 characters)
+            else:
+                # If path doesn't start with media, assume it's already relative
+                file_path = url_path.lstrip('/')
+            
+            full_path = os.path.join(settings.MEDIA_ROOT, file_path)
+            
+            if not os.path.exists(full_path):
+                raise Http404("File not found in storage")
+            
+            # Determine content type
+            content_type, _ = mimetypes.guess_type(full_path)
+            if not content_type:
+                content_type = 'application/octet-stream'
+            
+            # Generate filename for download
+            filename = f"fotomorfia-image-{result_id}.jpg"
+            if result.result_format:
+                filename = f"fotomorfia-image-{result_id}.{result.result_format}"
+            
+            # Read and serve file
+            try:
+                with open(full_path, 'rb') as f:
+                    file_data = f.read()
+                
+                response = HttpResponse(file_data, content_type=content_type)
+                response['Content-Disposition'] = f'attachment; filename="{filename}"'
+                response['Content-Length'] = len(file_data)
+                
+                # Increment download count
+                result.download_count += 1
+                result.save()
+                
+                return response
+                
+            except IOError:
+                raise Http404("Could not read file")
         
-        if not download_url:
-            return Response({
-                'error': 'Result not found in storage'
-            }, status=status.HTTP_404_NOT_FOUND)
+        else:
+            # For S3 storage - redirect to presigned URL
+            try:
+                from apps.core.services.aws_image_service import aws_image_service
+                download_url = aws_image_service.generate_presigned_url(
+                    result.s3_url, 
+                    expiration=3600
+                )
+                
+                if download_url:
+                    # Increment download count
+                    result.download_count += 1
+                    result.save()
+                    
+                    # Redirect to presigned URL
+                    from django.shortcuts import redirect
+                    return redirect(download_url)
+                else:
+                    raise Http404("Could not generate download URL")
+                    
+            except Exception as e:
+                raise Http404(f"S3 download error: {str(e)}")
         
-        # Increment download count
-        result.download_count += 1
-        result.save()
-        
-        return Response({
-            'download_url': download_url,
-            'expires_in': 3600
-        })
-        
+    except ProcessingResult.DoesNotExist:
+        raise Http404("Result not found or access denied")
     except Exception as e:
-        return Response({
-            'error': str(e)
-        }, status=status.HTTP_400_BAD_REQUEST)
+        raise Http404(f"Download error: {str(e)}")
 download_result.throttle_scope = 'processing_download'
 
 @api_view(['GET'])

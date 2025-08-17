@@ -56,11 +56,11 @@ export default function MyGalleryView({ onExploreClick }) {
     try {
       setDownloadLoading(true);
       const res = await downloadProcessingResult(creation.id);
-      const url = res.download_url || res.url || creation.s3_url;
-      if (url) {
-        window.open(url, '_blank');
+      if (res.success) {
+        // Download handled automatically by the function
+        console.log(`Downloaded: ${res.filename}`);
       } else {
-        alert('No se pudo obtener el enlace de descarga.');
+        alert('No se pudo descargar la imagen.');
       }
     } catch (error) {
       console.error('Error downloading image:', error);
@@ -204,13 +204,10 @@ export default function MyGalleryView({ onExploreClick }) {
         <div className={styles.modal} onClick={closeImageModal}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
             <button className={styles.closeButton} onClick={closeImageModal}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
+              ×
             </button>
 
-            <div className={styles.modalImage}>
+            <div className={styles.modalImageContainer}>
               {selectedImage.is_public ? (
                 <img src={selectedImage.s3_url} alt={`Creación ${selectedImage.id}`} className={styles.fullImage} />
               ) : (
@@ -223,25 +220,39 @@ export default function MyGalleryView({ onExploreClick }) {
               )}
             </div>
 
-            <div className={styles.modalInfo}>
-              <div className={styles.modalMeta}>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => handleDownload(selectedImage)} className={styles.modalDownloadButton} disabled={downloadLoading}>
-                    {downloadLoading ? 'Descargando…' : '💾 Descargar'}
-                  </button>
-                  <button onClick={() => handleToggleVisibility(selectedImage)} className={styles.modalActionButton} disabled={visibilityLoading} title={selectedImage.is_public ? 'Hacer privada' : 'Hacer pública'}>
-                    {visibilityLoading ? 'Guardando…' : (selectedImage.is_public ? 'Hacer privada' : 'Hacer pública')}
-                  </button>
-                  <button onClick={handleDeleteImage} className={styles.modalDeleteButton} disabled={deleteLoading} title="Eliminar imagen">
-                    🗑️ Eliminar
-                  </button>
-                </div>
-              </div>
-              <div className={styles.modalDetails}>
-                <span className={`${styles.badge} ${selectedImage.is_public ? styles.badgePublic : styles.badgePrivate}`}>
+            <div className={styles.modalFooter}>
+              <div className={styles.modalInfo}>
+                <span className={`${styles.statusBadge} ${selectedImage.is_public ? styles.statusPublic : styles.statusPrivate}`}>
                   {selectedImage.is_public ? 'Pública' : 'Privada'}
                 </span>
-                <span className={styles.dateText}>{formatDate(selectedImage.created_at)}</span>
+                <span className={styles.dateInfo}>{formatDate(selectedImage.created_at)}</span>
+              </div>
+              
+              <div className={styles.modalControls}>
+                <button 
+                  onClick={() => handleDownload(selectedImage)} 
+                  className={styles.actionButton} 
+                  disabled={downloadLoading}
+                  title="Descargar"
+                >
+                  {downloadLoading ? '⏳' : '⬇️'}
+                </button>
+                <button 
+                  onClick={() => handleToggleVisibility(selectedImage)} 
+                  className={styles.actionButton} 
+                  disabled={visibilityLoading}
+                  title={selectedImage.is_public ? 'Hacer privada' : 'Hacer pública'}
+                >
+                  {visibilityLoading ? '⏳' : (selectedImage.is_public ? '🔓' : '🔒')}
+                </button>
+                <button 
+                  onClick={handleDeleteImage} 
+                  className={styles.deleteButton} 
+                  disabled={deleteLoading}
+                  title="Eliminar"
+                >
+                  {deleteLoading ? '⏳' : '🗑️'}
+                </button>
               </div>
             </div>
           </div>

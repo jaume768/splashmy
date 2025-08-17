@@ -301,72 +301,134 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
+}
+
+@media (max-width: 768px) {
+  .modal {
+    padding: var(--spacing-xs);
+    align-items: flex-start;
+    padding-top: var(--spacing-lg);
+  }
 }
 
 .modalContent {
   background: var(--color-white);
   border-radius: var(--border-radius-xl);
   box-shadow: var(--shadow-lg);
-  max-width: 95vw;
-  max-height: 95vh;
+  max-width: 90vw;
+  max-height: 90vh;
   overflow: hidden;
   position: relative;
   display: flex;
   flex-direction: column;
+  width: 600px;
+}
+
+@media (max-width: 768px) {
+  .modalContent {
+    max-width: 95vw;
+    max-height: 85vh;
+    width: auto;
+    border-radius: var(--border-radius-lg);
+  }
 }
 
 .closeButton {
   position: absolute;
   top: var(--spacing-md);
   right: var(--spacing-md);
-  width: 44px;
-  height: 44px;
-  background: var(--color-white);
-  color: var(--color-dark);
+  width: 36px;
+  height: 36px;
+  background: rgba(0, 0, 0, 0.7);
+  color: var(--color-white);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1001;
   transition: var(--transition-fast);
-  box-shadow: var(--shadow-md);
+  font-size: 20px;
+  font-weight: 300;
+}
+
+@media (max-width: 768px) {
+  .closeButton {
+    width: 32px;
+    height: 32px;
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    font-size: 18px;
+  }
 }
 
 .closeButton:hover {
   background: var(--color-danger);
-  color: var(--color-white);
   transform: scale(1.1);
 }
 
-.modalImage {
+/* New modal image container for larger display */
+.modalImageContainer {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-lg);
+  padding: var(--spacing-xl);
   min-height: 0;
+  background: #f8f9fa;
+}
+
+@media (max-width: 768px) {
+  .modalImageContainer {
+    padding: var(--spacing-md);
+  }
 }
 
 .fullImage {
   max-width: 100%;
-  max-height: 100%;
+  max-height: 70vh;
   object-fit: contain;
   border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
 }
 
-.modalInfo {
+@media (max-width: 768px) {
+  .fullImage {
+    max-height: 60vh;
+    border-radius: var(--border-radius);
+  }
+}
+
+/* Minimalist modal footer */
+.modalFooter {
   padding: var(--spacing-lg);
-  background: var(--color-gray-light);
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.modalMeta {
+  background: var(--color-white);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--spacing-md);
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .modalFooter {
+    padding: var(--spacing-md);
+    flex-direction: column;
+    gap: var(--spacing-md);
+    align-items: center;
+  }
+}
+
+/* Simple info section */
+.modalInfo {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .modalInfo {
+    justify-content: center;
+  }
 }
 
 .modalMeta h3 {
@@ -376,53 +438,109 @@
   margin: 0;
 }
 
-.modalDetails {
+/* Minimalist controls */
+.modalControls {
   display: flex;
-  flex-wrap: wrap;
   gap: var(--spacing-sm);
+  align-items: center;
 }
 
-.modalDetails span {
-  padding: var(--spacing-xs) var(--spacing-sm);
-  background: var(--color-white);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: var(--border-radius);
-  font-size: var(--font-size-sm);
-  color: var(--color-dark);
+/* Minimalist icon buttons */
+.actionButton {
+  width: 44px;
+  height: 44px;
+  background: var(--color-gray-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.actionButton:hover {
+  background: var(--color-primary);
+  transform: scale(1.1);
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 768px) {
+  .actionButton {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+}
+
+/* Minimalist delete button */
+.deleteButton {
+  width: 44px;
+  height: 44px;
+  background: #fee2e2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  transition: all 0.2s ease;
+  border: none;
+  color: #dc2626;
+}
+
+.deleteButton:hover {
+  background: var(--color-danger);
+  color: white;
+  transform: scale(1.1);
+}
+
+.deleteButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 768px) {
+  .deleteButton {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+}
+
+/* Simple status indicators */
+.statusBadge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: var(--font-size-xs);
   font-weight: 500;
 }
 
-.modalDownloadButton {
-  padding: var(--spacing-md) var(--spacing-xl);
-  background: var(--color-primary);
-  color: var(--color-white);
-  border-radius: var(--border-radius-full);
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  transition: var(--transition-base);
-  box-shadow: var(--shadow-md);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
+.statusPublic {
+  background: #dcfce7;
+  color: #166534;
 }
 
-.modalDownloadButton:hover {
-  background: var(--color-secondary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+.statusPrivate {
+  background: #fef3c7;
+  color: #92400e;
 }
 
-/* Extra modal actions and metadata badges */
-.modalActionButton {
-  padding: var(--spacing-md) var(--spacing-xl);
-  background: var(--color-white);
-  color: var(--color-dark);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: var(--border-radius-full);
-  font-size: var(--font-size-base);
-  font-weight: 600;
-  transition: var(--transition-base);
-  box-shadow: var(--shadow-md);
+.dateInfo {
+  font-size: var(--font-size-xs);
+  color: var(--color-gray);
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  .statusBadge, .dateInfo {
+    font-size: 11px;
+  }
 }
 
 .modalActionButton:hover {
