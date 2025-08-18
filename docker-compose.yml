@@ -24,7 +24,14 @@ services:
     container_name: style_transfer_redis
     ports:
       - "6380:6379"
-    command: redis-server --appendonly yes
+    command: >
+      redis-server
+      --appendonly yes
+      --auto-aof-rewrite-percentage 100
+      --auto-aof-rewrite-min-size 64mb
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --save 900 1 300 10 60 10000
     volumes:
       - redis_data:/data
     healthcheck:
