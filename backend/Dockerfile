@@ -15,14 +15,6 @@ RUN apt-get update \
         build-essential \
         libmariadb-dev \
         pkg-config \
-        libwebp-dev \
-        libjpeg-dev \
-        libpng-dev \
-        zlib1g-dev \
-        libfreetype6-dev \
-        liblcms2-dev \
-        libopenjp2-7-dev \
-        libtiff5-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies

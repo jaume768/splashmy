@@ -823,13 +823,11 @@ rate_result.throttle_scope = 'processing_rate'
 @permission_classes([permissions.IsAuthenticated])
 @throttle_classes([ScopedRateThrottle])
 def download_result(request, result_id):
-    """Download processing result file as PNG (converts from WebP if necessary)"""
+    """Download processing result file directly"""
     from django.http import HttpResponse, Http404
     from django.conf import settings
     import os
     import mimetypes
-    import base64
-    import io
     
     try:
         # Check authorization first
@@ -839,30 +837,6 @@ def download_result(request, result_id):
             job__user=request.user
         )
         
-        # Always serve as PNG for maximum compatibility
-        filename = f"fotomorfia-image-{result_id}.png"
-        
-        # If we have the original PNG base64, use it directly
-        if result.result_b64:
-            try:
-                # Convert base64 back to PNG file data
-                png_data = base64.b64decode(result.result_b64)
-                
-                response = HttpResponse(png_data, content_type='image/png')
-                response['Content-Disposition'] = f'attachment; filename="{filename}"'
-                response['Content-Length'] = len(png_data)
-                
-                # Increment download count
-                result.download_count += 1
-                result.save()
-                
-                return response
-                
-            except Exception as e:
-                # If base64 conversion fails, fallback to file conversion
-                pass
-        
-        # Fallback: convert WebP file to PNG
         # For development/local storage - serve file directly
         if not getattr(settings, 'USE_S3_STORAGE', False):
             if not result.s3_url:
@@ -873,7 +847,7 @@ def download_result(request, result_id):
             
             # Parse the URL to get the path component
             parsed_url = urlparse(result.s3_url)
-            url_path = parsed_url.path  # e.g., '/media/processed/2/2025/08/15/filename.webp'
+            url_path = parsed_url.path  # e.g., '/media/processed/2/2025/08/15/filename.png'
             
             # Remove '/media/' prefix to get relative path within MEDIA_ROOT
             if url_path.startswith('/media/'):
@@ -889,13 +863,24 @@ def download_result(request, result_id):
             if not os.path.exists(full_path):
                 raise Http404("File not found in storage")
             
-            # Convert WebP to PNG if necessary
+            # Determine content type
+            content_type, _ = mimetypes.guess_type(full_path)
+            if not content_type:
+                content_type = 'application/octet-stream'
+            
+            # Generate filename for download
+            filename = f"fotomorfia-image-{result_id}.jpg"
+            if result.result_format:
+                filename = f"fotomorfia-image-{result_id}.{result.result_format}"
+            
+            # Read and serve file
             try:
-                png_data = _convert_to_png_for_download(full_path)
+                with open(full_path, 'rb') as f:
+                    file_data = f.read()
                 
-                response = HttpResponse(png_data, content_type='image/png')
+                response = HttpResponse(file_data, content_type=content_type)
                 response['Content-Disposition'] = f'attachment; filename="{filename}"'
-                response['Content-Length'] = len(png_data)
+                response['Content-Length'] = len(file_data)
                 
                 # Increment download count
                 result.download_count += 1
@@ -903,62 +888,28 @@ def download_result(request, result_id):
                 
                 return response
                 
-            except Exception as e:
-                # If conversion fails, serve original file
-                try:
-                    with open(full_path, 'rb') as f:
-                        file_data = f.read()
-                    
-                    # Determine content type
-                    content_type, _ = mimetypes.guess_type(full_path)
-                    if not content_type:
-                        content_type = 'application/octet-stream'
-                    
-                    response = HttpResponse(file_data, content_type=content_type)
-                    response['Content-Disposition'] = f'attachment; filename="{filename}"'
-                    response['Content-Length'] = len(file_data)
-                    
+            except IOError:
+                raise Http404("Could not read file")
+        
+        else:
+            # For S3 storage - redirect to presigned URL
+            try:
+                from apps.core.services.aws_image_service import aws_image_service
+                download_url = aws_image_service.generate_presigned_url(
+                    result.s3_url, 
+                    expiration=3600
+                )
+                
+                if download_url:
                     # Increment download count
                     result.download_count += 1
                     result.save()
                     
-                    return response
-                    
-                except IOError:
-                    raise Http404("Could not read file")
-        
-        else:
-            # For S3 storage - download and convert to PNG
-            try:
-                from apps.images.services import aws_image_service
-                import requests
-                
-                # Get presigned URL
-                download_url = aws_image_service.generate_presigned_url(
-                    result.s3_key, 
-                    expiration=3600
-                )
-                
-                if not download_url:
+                    # Redirect to presigned URL
+                    from django.shortcuts import redirect
+                    return redirect(download_url)
+                else:
                     raise Http404("Could not generate download URL")
-                
-                # Download WebP file from S3
-                response_s3 = requests.get(download_url, timeout=30)
-                if response_s3.status_code != 200:
-                    raise Http404("Could not download file from S3")
-                
-                # Convert WebP to PNG
-                png_data = _convert_webp_bytes_to_png(response_s3.content)
-                
-                response = HttpResponse(png_data, content_type='image/png')
-                response['Content-Disposition'] = f'attachment; filename="{filename}"'
-                response['Content-Length'] = len(png_data)
-                
-                # Increment download count
-                result.download_count += 1
-                result.save()
-                
-                return response
                     
             except Exception as e:
                 raise Http404(f"S3 download error: {str(e)}")
@@ -967,58 +918,6 @@ def download_result(request, result_id):
         raise Http404("Result not found or access denied")
     except Exception as e:
         raise Http404(f"Download error: {str(e)}")
-
-
-def _convert_to_png_for_download(file_path: str) -> bytes:
-    """Convert image file to PNG bytes for download"""
-    from PIL import Image
-    import io
-    
-    with Image.open(file_path) as img:
-        # Convert to RGB if necessary (removes transparency for better compatibility)
-        if img.mode in ('RGBA', 'LA', 'P'):
-            # Create white background for transparency
-            background = Image.new('RGB', img.size, (255, 255, 255))
-            if img.mode in ('RGBA', 'LA'):
-                background.paste(img, mask=img.split()[-1])  # Use alpha channel as mask
-            else:
-                background.paste(img)
-            img = background
-        elif img.mode != 'RGB':
-            img = img.convert('RGB')
-        
-        # Save as PNG
-        output = io.BytesIO()
-        img.save(output, format='PNG', optimize=True)
-        return output.getvalue()
-
-
-def _convert_webp_bytes_to_png(webp_bytes: bytes) -> bytes:
-    """Convert WebP bytes to PNG bytes"""
-    from PIL import Image
-    import io
-    
-    # Load WebP from bytes
-    webp_io = io.BytesIO(webp_bytes)
-    with Image.open(webp_io) as img:
-        # Convert to RGB (removes transparency for better compatibility)
-        if img.mode in ('RGBA', 'LA', 'P'):
-            # Create white background for transparency
-            background = Image.new('RGB', img.size, (255, 255, 255))
-            if img.mode in ('RGBA', 'LA'):
-                background.paste(img, mask=img.split()[-1])  # Use alpha channel as mask
-            else:
-                background.paste(img)
-            img = background
-        elif img.mode != 'RGB':
-            img = img.convert('RGB')
-        
-        # Save as PNG
-        output = io.BytesIO()
-        img.save(output, format='PNG', optimize=True)
-        return output.getvalue()
-
-
 download_result.throttle_scope = 'processing_download'
 
 @api_view(['GET'])

@@ -351,7 +351,7 @@ def _process_style_transfer_task(job: ProcessingJob) -> Dict[str, Any]:
 
 
 def _save_processing_results(job: ProcessingJob, result: Dict[str, Any]):
-    """Save processing results to database and S3 with WebP conversion"""
+    """Save processing results to database and S3"""
     try:
         images = result.get('images', [])
         
@@ -364,23 +364,20 @@ def _save_processing_results(job: ProcessingJob, result: Dict[str, Any]):
             if not b64_data:
                 continue
             
-            # Convert base64 to PNG image file
-            png_filename = f"processed_{job.id}_{i}.png"
-            png_file = openai_service.base64_to_image_file(b64_data, png_filename)
+            # Convert base64 to image file
+            filename = f"processed_{job.id}_{i}.{result.get('output_format', 'png')}"
+            image_file = openai_service.base64_to_image_file(b64_data, filename)
             
-            # Convert PNG to WebP for storage optimization
-            webp_file = _convert_png_to_webp(png_file, quality=85)
-            
-            # Upload WebP to S3
+            # Upload to S3
             s3_key, s3_url = aws_image_service.upload_processed_image(
-                webp_file, job.user.id
+                image_file, job.user.id
             )
             
-            # Create ProcessingResult - store as webp but keep PNG b64 for downloads
+            # Create ProcessingResult
             ProcessingResult.objects.create(
                 job=job,
-                result_b64=b64_data,  # Keep original PNG base64 for PNG downloads
-                result_format='webp',  # Stored format is WebP
+                result_b64=b64_data,
+                result_format=result.get('output_format', 'png'),
                 result_size=result.get('size', '1024x1024'),
                 result_quality=result.get('quality', 'auto'),
                 result_background=result.get('background', 'auto'),
@@ -394,46 +391,6 @@ def _save_processing_results(job: ProcessingJob, result: Dict[str, Any]):
     except Exception as e:
         logger.error(f"Failed to save results for job {job.id}: {str(e)}")
         raise
-
-
-def _convert_png_to_webp(png_file: InMemoryUploadedFile, quality: int = 85) -> InMemoryUploadedFile:
-    """Convert PNG to WebP for storage optimization while preserving transparency"""
-    try:
-        from PIL import Image
-        import io
-        import os
-        
-        png_file.seek(0)
-        with Image.open(png_file) as img:
-            # Preserve transparency for RGBA images
-            if img.mode in ('RGBA', 'LA'):
-                img = img.convert('RGBA')
-            else:
-                img = img.convert('RGB')
-            
-            # Save as WebP
-            output = io.BytesIO()
-            # Use lossless=False for smaller files, but high quality
-            img.save(output, format='WebP', quality=quality, lossless=False)
-            output.seek(0)
-            
-            # Generate WebP filename
-            original_name = os.path.splitext(png_file.name)[0]
-            webp_filename = f"{original_name}.webp"
-            
-            return InMemoryUploadedFile(
-                output,
-                'ImageField',
-                webp_filename,
-                'image/webp',
-                output.getbuffer().nbytes,
-                None
-            )
-            
-    except Exception as e:
-        logger.error(f"Failed to convert PNG to WebP: {str(e)}")
-        # Fallback to original PNG if conversion fails
-        return png_file
 
 
 @shared_task
