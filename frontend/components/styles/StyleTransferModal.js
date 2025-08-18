@@ -406,18 +406,6 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
             </div>
           )}
 
-          {/* Estado de procesamiento */}
-          {isProcessing && (
-            <div className={styles.processingSection}>
-              <div className={styles.processingContent}>
-                <div className={styles.spinner}></div>
-                <p className={styles.processingText}>{processingStep}</p>
-                <div className={styles.processingBar}>
-                  <div className={styles.processingProgress}></div>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* Sección de resultados */}
           {processingComplete && processingResult && processingResult.results && processingResult.results.length > 0 && (
@@ -533,6 +521,21 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
             </button>
           )}
         </div>
+
+        {/* Modal de procesamiento superpuesto */}
+        {isProcessing && (
+          <div className={styles.processingOverlay}>
+            <div className={styles.processingModal}>
+              <div className={styles.processingContent}>
+                <div className={styles.spinner}></div>
+                <p className={styles.processingText}>{processingStep}</p>
+                <div className={styles.processingBar}>
+                  <div className={styles.processingProgress}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
