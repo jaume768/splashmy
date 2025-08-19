@@ -127,124 +127,75 @@ class OpenAIImageService:
     
     def edit_image(
         self,
-        image_files: List[InMemoryUploadedFile],   # [0] se edita; [1..] opcionales (también se editan si no hay máscara)
+        image_files: List[InMemoryUploadedFile],
         prompt: str,
         style_params: Dict = None,
-        user_id: str = None,
-        mask_file: Optional[InMemoryUploadedFile] = None,          # NUEVO: máscara PNG con alfa (opaco = conservar)
-        reference_images: Optional[List[InMemoryUploadedFile]] = None  # NUEVO: imágenes extra como referencia
+        user_id: str = None
     ) -> Dict:
         """
-        Edit image using OpenAI gpt-image-1 con foco en consistencia facial:
-        - Usa input_fidelity="high" para preservar rasgos.
-        - Aplica máscara RGBA (opaca = conservar, transparente = editar) sobre la primera imagen.
-        - Permite pasar imágenes de referencia adicionales.
+        Edit image using OpenAI gpt-image-1
+        
+        Args:
+            image_files: List of images to edit (only first image used)
+            prompt: Text description for image editing
+            style_params: Style-specific parameters
+            user_id: User identifier for OpenAI monitoring
+        
+        Returns:
+            Dict with edited image data or error
         """
         if not self.client:
             return {"error": "OpenAI client not configured"}
-
-        style_params = style_params or {}
-
+        
         try:
-            # 1) Validación/moderación de las imágenes base
-            moderated_images: List[InMemoryUploadedFile] = []
-            for img in image_files:
-                is_safe, mod = self._validate_and_moderate_image(img)
+            # Validate and moderate images
+            moderated_images = []
+            for image_file in image_files:
+                is_safe, moderation_result = self._validate_and_moderate_image(image_file)
                 if not is_safe:
-                    return {"error": "Image contains inappropriate content", "moderation": mod}
-                moderated_images.append(img)
-
-            if not moderated_images:
-                return {"error": "No input images provided"}
-
-            # 2) Cargar bytes de la imagen base (índice 0) y preparar lista de archivos para la API
-            files_for_api = []
-            base_img = moderated_images[0]
-            base_img.seek(0)
-            base_bytes = base_img.read()
-            files_for_api.append((base_img.name, base_bytes, base_img.content_type or "image/png"))
-
-            # 3) Añadir el resto de imágenes a editar (si las hay)
-            for extra in moderated_images[1:]:
-                extra.seek(0)
-                files_for_api.append((extra.name, extra.read(), extra.content_type or "image/png"))
-
-            # 4) Añadir imágenes de referencia (no estrictamente diferenciadas por la API,
-            #    pero útiles para reforzar identidad si las incluyes en el array)
-            if reference_images:
-                for ref in reference_images:
-                    ok, _ = self._validate_and_moderate_image(ref)
-                    if not ok:
-                        return {"error": "Reference image failed moderation"}
-                    ref.seek(0)
-                    files_for_api.append((ref.name, ref.read(), ref.content_type or "image/png"))
-
-            # 5) Preparar máscara (PNG RGBA, mismas dimensiones que la imagen base)
-            mask_tuple = None
-            if mask_file:
-                # Normalizar a PNG RGBA y ajustar tamaño a la base si hace falta
-                mask_file.seek(0)
-                raw_mask = mask_file.read()
-
-            try:
-                base_im = Image.open(io.BytesIO(base_bytes)).convert("RGBA")
-                mw = Image.open(io.BytesIO(raw_mask))
-                # Asegurar RGBA
-                if mw.mode != "RGBA":
-                    mw = mw.convert("RGBA")
-                # Ajustar tamaño si no coincide
-                if mw.size != base_im.size:
-                    mw = mw.resize(base_im.size, Image.LANCZOS)
-                # Guardar a bytes PNG
-                mask_buf = io.BytesIO()
-                mw.save(mask_buf, format="PNG")
-                mask_buf.seek(0)
-                mask_tuple = (mask_file.name if mask_file.name.lower().endswith(".png") else "mask.png",
-                              mask_buf.read(),
-                              "image/png")
-            except Exception as _:
-                # Si la máscara falla, continúa sin máscara (mejor que bloquear)
-                mask_tuple = None
-
-            # 6) Parámetros de edición orientados a CONSISTENCIA
+                    return {"error": "Image contains inappropriate content", "moderation": moderation_result}
+                
+                # Keep original file for OpenAI (no base64 conversion)
+                moderated_images.append(image_file)
+            
+            # Only use first image (OpenAI limitation)
+            image_file = moderated_images[0]
+            image_file.seek(0)  # ¡MUY IMPORTANTE! Reset file pointer
+            image_bytes = image_file.read()
+            
             params = {
                 "model": "gpt-image-1",
-                "image": files_for_api,                           # lista de (filename, bytes, mimetype)
+                "image": (image_file.name, image_bytes, image_file.content_type or "image/png"),
                 "prompt": prompt,
                 "n": style_params.get("n", 1),
                 "size": style_params.get("size", "1024x1024"),
-                "quality": style_params.get("quality", "auto"),
-                # Clave para preservar rasgos (caras/logos) en edits:
-                "input_fidelity": style_params.get("input_fidelity", "high"),
+                #"quality": style_params.get("quality", "standard"),
             }
-            if mask_tuple:
-                params["mask"] = mask_tuple
-
+            
             if user_id:
                 params["user"] = str(user_id)
-
             start_time = time.time()
-            try:
-                response = self.client.images.edit(**params)
-            except TypeError as te:
-                # Fallback si la versión del SDK aún no soporta input_fidelity
-                if "input_fidelity" in str(te):
-                    params.pop("input_fidelity", None)
-                response = self.client.images.edit(**params)
-            else:
-                raise
+            response = self.client.images.edit(**params)
             processing_time = time.time() - start_time
-
             return self._process_edit_response(response, processing_time)
-
+                
         except Exception as e:
-            logger.exception("Image editing failed")
-        # Si el error viene con .response, puedes loguear status/text aquí si lo deseas
-        return {
-            "error": "Image editing failed",
-            "details": str(e)
-        }
-
+            print(f"Error type: {type(e).__name__}")
+            print(f"Error message: {str(e)}")
+            print(f"Error details: {repr(e)}")
+            
+            # Try to get more details if it's an OpenAI error
+            if hasattr(e, 'response'):
+                print(f"Response status: {getattr(e.response, 'status_code', 'N/A')}")
+                print(f"Response text: {getattr(e.response, 'text', 'N/A')}")
+            
+            import traceback
+            print(f"Full traceback: {traceback.format_exc()}")
+            
+            return {
+                "error": "Image editing failed",
+                "details": str(e)
+            }
     
     def _process_generation_response(self, response, processing_time: float) -> Dict:
         """Process OpenAI generation response"""
