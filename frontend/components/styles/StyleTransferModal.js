@@ -259,7 +259,7 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
         </div>
 
         {/* Contenido principal - Stack vertical mobile-first */}
-        <div className={styles.content}>
+        <div className={`${styles.content} ${processingComplete ? styles.resultOnlyMode : ''}`}>
           {/* Preview del estilo */}
           <div className={styles.stylePreview}>
             <div className={styles.previewImage}>

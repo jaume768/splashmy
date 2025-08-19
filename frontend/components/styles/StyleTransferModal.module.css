@@ -115,6 +115,28 @@
   gap: 24px;
 }
 
+/* Result-only mode for mobile */
+.resultOnlyMode .stylePreview,
+.resultOnlyMode .uploadSection,
+.resultOnlyMode .visibilitySection,
+.resultOnlyMode .optionsSection {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .resultOnlyMode .stylePreview,
+  .resultOnlyMode .uploadSection,
+  .resultOnlyMode .visibilitySection,
+  .resultOnlyMode .optionsSection {
+    display: flex;
+  }
+  
+  .resultOnlyMode .uploadSection {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 /* Style Preview */
 .stylePreview {
   display: flex;
