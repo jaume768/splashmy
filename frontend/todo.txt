@@ -2,3 +2,5 @@
 - mejorar el modal de fotos en imagenes, poder ir al estilo utilizado para esa foto y ver fotos del autor que tenga en publico y que no pueda cambiar entre publica y privada tan rápido (obligar a un delay, 5 minutos)
 - refactorizar codigo y modularizar todo lo posible
 - monetizacion con anuncios cuando se genera la imagen, pop up con anuncio que se cierra en 5 segundos
+
+- investiga el proyecto y dime como aplicarias a ImagesView, TopView y LikedView, un efecto como de carga en las imagenes y hasta que no esten cargadas no salga, para que no pase como en la foto que te he compartido que van cargando poco a poco, dime la mejor estrategia (posar foto)
