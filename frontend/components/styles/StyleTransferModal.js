@@ -173,7 +173,6 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
       
       if (downloadData.success) {
         // Download handled automatically by the function
-        console.log(`Downloaded: ${downloadData.filename}`);
       } else {
         setError('Error al descargar la imagen');
       }

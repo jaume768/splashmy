@@ -21,10 +21,10 @@ const AdMobSetup = ({ publisherId }) => {
         crossOrigin="anonymous"
         strategy="afterInteractive"
         onLoad={() => {
-          console.log('Google AdSense loaded successfully');
+          // Google AdSense loaded successfully
         }}
         onError={(e) => {
-          console.error('Error loading Google AdSense:', e);
+          // Error loading Google AdSense
         }}
       />
     </>

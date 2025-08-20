@@ -174,7 +174,6 @@ export default function LikedView() {
       const res = await downloadProcessingResult(item.id);
       if (res.success) {
         // Download handled automatically by the function
-        console.log(`Downloaded: ${res.filename}`);
       } else {
         alert('No se pudo descargar la imagen.');
       }

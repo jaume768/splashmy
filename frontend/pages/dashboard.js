@@ -119,8 +119,6 @@ const DashboardPage = () => {
   
   // Handle style transfer completion
   const handleStyleTransferComplete = (jobResult) => {
-    console.log('Style transfer completed:', jobResult);
-    
     // Close modal
     setShowStyleTransferModal(false);
     setSelectedStyle(null);

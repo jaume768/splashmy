@@ -24,10 +24,6 @@ const StyleGrid = ({ searchTerm = '', selectedCategory = null, onStyleClick }) =
           fetchStyleCategories()
         ]);
 
-        // Debug: log the response structure
-        console.log('Styles API Response:', stylesResponse);
-        console.log('Categories API Response:', categoriesResponse);
-
         // Handle different response formats
         // If the response has a 'results' field (paginated), use that
         // Otherwise, assume it's a direct array
@@ -38,9 +34,6 @@ const StyleGrid = ({ searchTerm = '', selectedCategory = null, onStyleClick }) =
         const categoriesData = Array.isArray(categoriesResponse)
           ? categoriesResponse
           : (categoriesResponse?.results || []);
-
-        console.log('Processed styles data:', stylesData);
-        console.log('Processed categories data:', categoriesData);
 
         setStylesData(stylesData);
         setCategories(categoriesData);
