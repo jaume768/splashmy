@@ -13,8 +13,10 @@ export default function TopView() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [timePeriod, setTimePeriod] = useState('all');
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
+  const loadingRef = useRef(false); // Prevent concurrent loads
   const PAGE_SIZE = 30;
   const { authenticated } = useAuth();
   const [likeLoadingId, setLikeLoadingId] = useState(null);
@@ -23,45 +25,53 @@ export default function TopView() {
   const [downloadLoading, setDownloadLoading] = useState(false);
   const [visibilityLoading, setVisibilityLoading] = useState(false);
 
-  const loadPage = useCallback(async (nextPage) => {
-    if (loading || !hasMore) return;
+  // Stable loadPage function using refs to avoid dependency issues
+  const timePeriodRef = useRef(timePeriod);
+  
+  // Update ref when timePeriod changes
+  useEffect(() => {
+    timePeriodRef.current = timePeriod;
+  }, [timePeriod]);
+
+  const loadPage = useCallback(async (nextPageNum) => {
+    if (loadingRef.current || !hasMore) return;
+    
+    loadingRef.current = true;
     setLoading(true);
     setError(null);
+    
     try {
-      const data = await getPublicProcessingResults(nextPage, PAGE_SIZE, '-like_count');
+      const data = await getPublicProcessingResults(nextPageNum, PAGE_SIZE, '-like_count', timePeriodRef.current);
       const results = Array.isArray(data) ? data : (data?.results || []);
-      setItems((prev) => (nextPage === 1 ? results : [...prev, ...results]));
+      
+      setItems((prev) => (nextPageNum === 1 ? results : [...prev, ...results]));
 
       // Determine if more pages exist
       if (data && typeof data === 'object') {
         if (data.next) {
-          // Parse next page from URL to stay compatible with apiFetch base
           try {
             const url = new URL(data.next);
             const next = parseInt(url.searchParams.get('page') || '', 10);
             setNextPage(Number.isFinite(next) ? next : null);
             setHasMore(Number.isFinite(next));
           } catch {
-            // If parsing fails, fallback using results length
             const more = results.length === PAGE_SIZE;
             setHasMore(more);
-            setNextPage(more ? (page + 1) : null);
+            setNextPage(more ? (nextPageNum + 1) : null);
           }
         } else {
           setHasMore(false);
           setNextPage(null);
         }
       } else {
-        // Non-paginated fallback
         const more = results.length === PAGE_SIZE;
         setHasMore(more);
-        setNextPage(more ? (page + 1) : null);
+        setNextPage(more ? (nextPageNum + 1) : null);
       }
 
-      setPage(nextPage);
+      setPage(nextPageNum);
     } catch (err) {
       console.error('Error loading top images:', err);
-      // Gracefully handle out-of-range page requests
       const is404 = err?.status === 404 || (typeof err?.message === 'string' && err.message.includes('"status":404'));
       const invalidPage = is404 && (err?.response?.errors?.detail === 'Invalid page.' || (typeof err?.message === 'string' && err.message.includes('Invalid page')));
       if (invalidPage) {
@@ -73,36 +83,58 @@ export default function TopView() {
     } finally {
       setLoading(false);
       setInitialLoading(false);
+      loadingRef.current = false;
     }
-  }, [loading, hasMore, page]);
+  }, []); // Empty dependencies - use refs for current values
 
-  // Initial load
+  // Initial load only
   useEffect(() => {
     loadPage(1);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadPage]);
 
-  // IntersectionObserver for infinite scroll
+  // Reset and reload when time period changes
   useEffect(() => {
-    if (!sentinelRef.current) return;
-
+    // Immediately disconnect observer
     if (observerRef.current) {
       observerRef.current.disconnect();
+      observerRef.current = null;
+    }
+    
+    // Reset states
+    setItems([]);
+    setPage(1);
+    setNextPage(1);
+    setHasMore(true);
+    setInitialLoading(true);
+    setError(null);
+    loadingRef.current = false;
+    
+    // Load new data
+    loadPage(1);
+  }, [timePeriod, loadPage]);
+
+  // IntersectionObserver setup - separate and stable
+  useEffect(() => {
+    if (!sentinelRef.current || initialLoading || !hasMore) {
+      return;
     }
 
-    observerRef.current = new IntersectionObserver((entries) => {
+    const observer = new IntersectionObserver((entries) => {
       const first = entries[0];
-      if (first.isIntersecting && !loading && hasMore) {
-        if (nextPage) {
-          loadPage(nextPage);
-        }
+      if (first.isIntersecting && !loadingRef.current && hasMore && nextPage) {
+        loadPage(nextPage);
       }
     }, { rootMargin: '200px' });
 
-    observerRef.current.observe(sentinelRef.current);
+    observer.observe(sentinelRef.current);
+    observerRef.current = observer;
 
-    return () => observerRef.current && observerRef.current.disconnect();
-  }, [page, hasMore, nextPage, loading, loadPage]);
+    return () => {
+      if (observer) {
+        observer.disconnect();
+      }
+    };
+  }, [initialLoading, hasMore, nextPage, loadPage]); // Stable dependencies
 
   // Handlers for likes
   const handleToggleLike = useCallback(async (item) => {
@@ -205,8 +237,25 @@ export default function TopView() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <h1 className={styles.title}>Top imágenes</h1>
-        <p className={styles.subtitle}>Resultados públicos con más me gusta</p>
+        <div className={styles.headerContent}>
+          <div className={styles.headerText}>
+            <h1 className={styles.title}>Top imágenes</h1>
+            <p className={styles.subtitle}>Resultados públicos con más me gusta</p>
+          </div>
+          <div className={styles.filterContainer}>
+            <select 
+              value={timePeriod} 
+              onChange={(e) => setTimePeriod(e.target.value)}
+              className={styles.timeFilter}
+              disabled={loading}
+            >
+              <option value="all">Todo el tiempo</option>
+              <option value="today">Hoy</option>
+              <option value="week">Esta semana</option>
+              <option value="month">Este mes</option>
+            </select>
+          </div>
+        </div>
       </header>
 
       {error && (
@@ -314,7 +363,12 @@ export default function TopView() {
       <div ref={sentinelRef} className={styles.sentinel} aria-hidden="true" />
 
       {!loading && !hasMore && items.length === 0 && (
-        <div className={styles.empty}>No hay imágenes públicas aún.</div>
+        <div className={styles.empty}>
+          {timePeriod === 'today' && 'No hay imágenes con likes de hoy.'}
+          {timePeriod === 'week' && 'No hay imágenes con likes de esta semana.'}
+          {timePeriod === 'month' && 'No hay imágenes con likes de este mes.'}
+          {timePeriod === 'all' && 'No hay imágenes públicas aún.'}
+        </div>
       )}
     </div>
   );

@@ -638,9 +638,35 @@ class PublicProcessingResultListView(generics.ListAPIView):
             return f"{settings.MEDIA_URL}{file_path}"
     
     def get_queryset(self):
-        queryset = ProcessingResult.active_objects.filter(is_public=True).annotate(
-            like_count=Count('likes')
-        )
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        queryset = ProcessingResult.active_objects.filter(is_public=True)
+        
+        # Filter by time period for image creation date
+        time_period = self.request.query_params.get('time_period', 'all')
+        
+        if time_period != 'all':
+            cutoff_date = None
+            if time_period == 'today':
+                cutoff_date = timezone.now() - timedelta(hours=24)
+            elif time_period == 'week':
+                cutoff_date = timezone.now() - timedelta(days=7)
+            elif time_period == 'month':
+                cutoff_date = timezone.now() - timedelta(days=30)
+            
+            if cutoff_date:
+                # Filter by image creation date, not likes date
+                queryset = queryset.filter(
+                    created_at__gte=cutoff_date
+                ).annotate(
+                    like_count=Count('likes')  # Count all likes for ranking
+                )
+            else:
+                queryset = queryset.annotate(like_count=Count('likes'))
+        else:
+            queryset = queryset.annotate(like_count=Count('likes'))
+        
         # Support ordering by like_count or created_at
         ordering = self.request.query_params.get('ordering')
         allowed = {'created_at', '-created_at', 'like_count', '-like_count'}
