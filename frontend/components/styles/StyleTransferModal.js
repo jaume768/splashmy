@@ -27,7 +27,7 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
   const [quality, setQuality] = useState('medium');
   const [size, setSize] = useState('1024x1024');
   const [jobId, setJobId] = useState(null);
-  const [isPublic, setIsPublic] = useState(false);
+  const [isPublic, setIsPublic] = useState(true);
 
   // Limpiar estado cuando se cierra el modal
   const resetModal = useCallback(() => {
@@ -42,7 +42,7 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
     setProcessingComplete(false);
     setProcessingResult(null);
     setDownloadingResult(false);
-    setIsPublic(false);
+    setIsPublic(true);
   }, []);
 
   // Manejar cierre del modal
