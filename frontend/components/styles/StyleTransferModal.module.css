@@ -511,6 +511,14 @@
   margin: 0;
 }
 
+.processingSubtext {
+  font-size: 14px;
+  font-weight: 400;
+  color: #64748b;
+  margin: 0;
+  opacity: 0.8;
+}
+
 .processingBar {
   width: 100%;
   height: 4px;

@@ -528,6 +528,9 @@ const StyleTransferModal = ({ isOpen, onClose, selectedStyle, onComplete }) => {
               <div className={styles.processingContent}>
                 <div className={styles.spinner}></div>
                 <p className={styles.processingText}>{processingStep}</p>
+                {processingStep === 'Aplicando estilo con IA...' && (
+                  <p className={styles.processingSubtext}>Este proceso puede tardar entre 1 o 2 minutos</p>
+                )}
                 <div className={styles.processingBar}>
                   <div className={styles.processingProgress}></div>
                 </div>
