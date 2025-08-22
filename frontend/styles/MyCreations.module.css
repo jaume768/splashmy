@@ -438,65 +438,100 @@
   margin: 0;
 }
 
-/* Minimalist controls */
-.modalControls {
+/* New modal actions layout */
+.modalActions {
   display: flex;
+  flex-direction: column;
   gap: var(--spacing-sm);
-  align-items: center;
+  align-items: stretch;
+  min-width: 200px;
 }
 
-/* Minimalist icon buttons */
+.primaryActions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.dangerActions {
+  display: flex;
+  justify-content: center;
+}
+
+/* Text-based action buttons */
 .actionButton {
-  width: 44px;
-  height: 44px;
-  background: var(--color-gray-light);
-  border-radius: 50%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+  min-height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  transition: all 0.2s ease;
-  border: none;
+  flex: 1;
 }
 
-.actionButton:hover {
+.downloadButton {
   background: var(--color-primary);
-  transform: scale(1.1);
+  color: white;
+}
+
+.downloadButton:hover:not(:disabled) {
+  background: var(--color-primary-dark, #2563eb);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.visibilityButton {
+  background: var(--color-secondary, #6366f1);
+  color: white;
+}
+
+.visibilityButton:hover:not(:disabled) {
+  background: var(--color-secondary-dark, #4f46e5);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.deleteButton {
+  background: #fee2e2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.deleteButton:hover:not(:disabled) {
+  background: var(--color-danger);
+  color: white;
+  border-color: var(--color-danger);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
 }
 
 .actionButton:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
 }
 
 @media (max-width: 768px) {
-  .actionButton {
-    width: 48px;
-    height: 48px;
-    font-size: 20px;
+  .modalActions {
+    width: 100%;
+    min-width: unset;
   }
-}
-
-/* Minimalist delete button */
-.deleteButton {
-  width: 44px;
-  height: 44px;
-  background: #fee2e2;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  transition: all 0.2s ease;
-  border: none;
-  color: #dc2626;
-}
-
-.deleteButton:hover {
-  background: var(--color-danger);
-  color: white;
-  transform: scale(1.1);
+  
+  .primaryActions {
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+  
+  .actionButton {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-sm);
+    min-height: 44px;
+  }
 }
 
 .deleteButton:disabled {

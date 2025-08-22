@@ -3,6 +3,7 @@ import styles from '../../../styles/ImagesView.module.css';
 import { getLikedProcessingResults, getProcessingResultDetail, toggleProcessingResultLike, downloadProcessingResult, toggleProcessingResultVisibility } from '../../../utils/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import ImageShimmer from '../../ui/ImageShimmer';
+import LazyImage from '../../ui/LazyImage';
 
 export default function LikedView() {
   const [items, setItems] = useState([]);
@@ -253,10 +254,9 @@ export default function LikedView() {
                       </svg>
                       <span className={styles.likeCount}>{item.like_count || 0}</span>
                     </button>
-                    <img
+                    <LazyImage
                       src={item.s3_url || item.signed_url}
                       alt={item.job_prompt ? `Imagen generada: ${item.job_prompt}` : 'Imagen generada'}
-                      loading="lazy"
                       className={styles.image}
                     />
                   </div>
@@ -287,10 +287,11 @@ export default function LikedView() {
                 </div>
                 <div className={styles.modalBody}>
                   <div className={styles.modalImageWrap}>
-                    <img
+                    <LazyImage
                       src={selectedItem.s3_url || selectedItem.signed_url}
                       alt={selectedItem.job_prompt ? `Imagen generada: ${selectedItem.job_prompt}` : 'Imagen generada'}
                       className={styles.modalImage}
+                      isModal={true}
                     />
                   </div>
                 </div>

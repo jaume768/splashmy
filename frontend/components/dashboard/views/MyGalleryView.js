@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../../contexts/AuthContext';
 import { getUserProcessingResults, downloadProcessingResult, toggleProcessingResultVisibility, deleteProcessingResult } from '../../../utils/api';
-import AuthenticatedImage from '../../ui/AuthenticatedImage';
+import LazyAuthenticatedImage from '../../ui/LazyAuthenticatedImage';
 import ImageShimmer from '../../ui/ImageShimmer';
 import styles from '../../../styles/MyCreations.module.css';
 
@@ -175,20 +175,12 @@ export default function MyGalleryView({ onExploreClick }) {
             {creations.map((creation) => (
               <div key={creation.id} className={styles.creationCard}>
                 <div className={styles.imageContainer} onClick={() => handleImageClick(creation)}>
-                  {creation.is_public ? (
-                    <img
-                      src={creation.s3_url}
-                      alt={`Creación ${creation.id}`}
-                      className={styles.creationImage}
-                    />
-                  ) : (
-                    <AuthenticatedImage
-                      src={creation.s3_url}
-                      alt={`Creación ${creation.id}`}
-                      className={styles.creationImage}
-                      isPrivate={true}
-                    />
-                  )}
+                  <LazyAuthenticatedImage
+                    src={creation.s3_url}
+                    alt={`Creación ${creation.id}`}
+                    className={styles.creationImage}
+                    isPrivate={!creation.is_public}
+                  />
                 </div>
               </div>
             ))}
@@ -204,16 +196,13 @@ export default function MyGalleryView({ onExploreClick }) {
             </button>
 
             <div className={styles.modalImageContainer}>
-              {selectedImage.is_public ? (
-                <img src={selectedImage.s3_url} alt={`Creación ${selectedImage.id}`} className={styles.fullImage} />
-              ) : (
-                <AuthenticatedImage
-                  src={selectedImage.s3_url}
-                  alt={`Creación ${selectedImage.id}`}
-                  className={styles.fullImage}
-                  isPrivate={true}
-                />
-              )}
+              <LazyAuthenticatedImage
+                src={selectedImage.s3_url}
+                alt={`Creación ${selectedImage.id}`}
+                className={styles.fullImage}
+                isPrivate={!selectedImage.is_public}
+                isModal={true}
+              />
             </div>
 
             <div className={styles.modalFooter}>
@@ -224,31 +213,35 @@ export default function MyGalleryView({ onExploreClick }) {
                 <span className={styles.dateInfo}>{formatDate(selectedImage.created_at)}</span>
               </div>
               
-              <div className={styles.modalControls}>
-                <button 
-                  onClick={() => handleDownload(selectedImage)} 
-                  className={styles.actionButton} 
-                  disabled={downloadLoading}
-                  title="Descargar"
-                >
-                  {downloadLoading ? '⏳' : '⬇️'}
-                </button>
-                <button 
-                  onClick={() => handleToggleVisibility(selectedImage)} 
-                  className={styles.actionButton} 
-                  disabled={visibilityLoading}
-                  title={selectedImage.is_public ? 'Hacer privada' : 'Hacer pública'}
-                >
-                  {visibilityLoading ? '⏳' : (selectedImage.is_public ? '🔓' : '🔒')}
-                </button>
-                <button 
-                  onClick={handleDeleteImage} 
-                  className={styles.deleteButton} 
-                  disabled={deleteLoading}
-                  title="Eliminar"
-                >
-                  {deleteLoading ? '⏳' : '🗑️'}
-                </button>
+              <div className={styles.modalActions}>
+                <div className={styles.primaryActions}>
+                  <button 
+                    onClick={() => handleDownload(selectedImage)} 
+                    className={`${styles.actionButton} ${styles.downloadButton}`}
+                    disabled={downloadLoading}
+                  >
+                    {downloadLoading ? 'Descargando...' : 'Descargar'}
+                  </button>
+                  <button 
+                    onClick={() => handleToggleVisibility(selectedImage)} 
+                    className={`${styles.actionButton} ${styles.visibilityButton}`}
+                    disabled={visibilityLoading}
+                  >
+                    {visibilityLoading 
+                      ? 'Cambiando...' 
+                      : (selectedImage.is_public ? 'Hacer Privada' : 'Hacer Pública')
+                    }
+                  </button>
+                </div>
+                <div className={styles.dangerActions}>
+                  <button 
+                    onClick={handleDeleteImage} 
+                    className={`${styles.actionButton} ${styles.deleteButton}`}
+                    disabled={deleteLoading}
+                  >
+                    {deleteLoading ? 'Eliminando...' : 'Eliminar'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

@@ -3,6 +3,7 @@ import styles from '../../../styles/ImagesView.module.css';
 import { getPublicProcessingResults, getProcessingResultDetail, toggleProcessingResultLike, downloadProcessingResult, toggleProcessingResultVisibility } from '../../../utils/api';
 import { useAuth } from '../../../contexts/AuthContext';
 import ImageShimmer from '../../ui/ImageShimmer';
+import LazyImage from '../../ui/LazyImage';
 
 export default function ImagesView() {
   const [items, setItems] = useState([]);
@@ -235,10 +236,9 @@ export default function ImagesView() {
                   </svg>
                   <span className={styles.likeCount}>{item.like_count || 0}</span>
                 </button>
-                <img
+                <LazyImage
                   src={item.s3_url || item.signed_url}
                   alt={item.job_prompt ? `Imagen generada: ${item.job_prompt}` : 'Imagen generada'}
-                  loading="lazy"
                   className={styles.image}
                 />
               </div>
@@ -269,11 +269,7 @@ export default function ImagesView() {
             </div>
             <div className={styles.modalBody}>
               <div className={styles.modalImageWrap}>
-                <img
-                  src={selectedItem.s3_url || selectedItem.signed_url}
-                  alt={selectedItem.job_prompt ? `Imagen generada: ${selectedItem.job_prompt}` : 'Imagen generada'}
-                  className={styles.modalImage}
-                />
+                <LazyImage src={selectedItem.s3_url || selectedItem.signed_url} alt={`Imagen ${selectedItem.id}`} className={styles.fullImage} isModal={true} />
               </div>
             </div>
             <div className={styles.modalFooter}>
