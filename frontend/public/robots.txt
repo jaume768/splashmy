@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /oauth/
+
+# Sitemap location
+Sitemap: https://fotomorfia.com/sitemap.xml

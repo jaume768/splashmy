@@ -1,4 +1,4 @@
-import Head from 'next/head';
+import SEOHead from '../components/SEOHead';
 import Link from 'next/link';
 import Header from '../components/home/Header';
 import Footer from '../components/home/Footer';
@@ -7,11 +7,12 @@ import styles from '../styles/Contact.module.css';
 export default function SobreNosotrosPage() {
   return (
     <>
-      <Head>
-        <title>Sobre Nosotros - Fotomorfia</title>
-        <meta name="description" content="Conoce a Fotomorfia: nuestra misión, visión y valores." />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
+      <SEOHead 
+        title="Sobre Nosotros - Fotomorfia"
+        description="Conoce a Fotomorfia: nuestra misión, visión y valores para transformar la creatividad con IA."
+        canonical="/sobre-nosotros"
+        keywords="Fotomorfia, sobre nosotros, misión, IA, transformación imágenes"
+      />
 
       <Header />
 

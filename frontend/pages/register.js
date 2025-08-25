@@ -1,4 +1,4 @@
-import Head from "next/head";
+import SEOHead from "../components/SEOHead";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
@@ -175,12 +175,11 @@ function RegisterPage() {
 
   return (
     <RequireGuest>
-      <Head>
-        <title>Registrarse - Fotomorfia</title>
-        <meta name="description" content="Crea tu cuenta en Fotomorfia y accede a las herramientas de IA" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+      <SEOHead 
+        title="Registrarse - Fotomorfia"
+        description="Crea tu cuenta en Fotomorfia y accede a las herramientas de IA"
+        noindex={true}
+      />
 
       <div className={`${styles.authContainer} ${compact ? styles.compact : ''}`}>
         <div className={styles.authCard}>

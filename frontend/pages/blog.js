@@ -1,4 +1,4 @@
-import Head from 'next/head';
+import SEOHead from '../components/SEOHead';
 import Link from 'next/link';
 import Header from '../components/home/Header';
 import Footer from '../components/home/Footer';
@@ -7,11 +7,11 @@ import styles from '../styles/Contact.module.css';
 export default function BlogPage() {
   return (
     <>
-      <Head>
-        <title>Blog - Fotomorfia</title>
-        <meta name="description" content="Nuestro blog estará disponible próximamente." />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
+      <SEOHead 
+        title="Blog - Fotomorfia"
+        description="Nuestro blog estará disponible próximamente con contenido sobre IA, diseño y transformación de imágenes."
+        canonical="/blog"
+      />
 
       <Header />
 

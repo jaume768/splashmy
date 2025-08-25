@@ -1,4 +1,4 @@
-import Head from 'next/head';
+import SEOHead from '@/components/SEOHead';
 import Link from 'next/link';
 import styles from '@/styles/Legal.module.css';
 
@@ -7,10 +7,11 @@ const UPDATED_AT = '14/08/2025';
 export default function PoliticaCookies() {
   return (
     <>
-      <Head>
-        <title>Política de Cookies | Fotomorfia</title>
-        <meta name="description" content="Política de cookies de Fotomorfia" />
-      </Head>
+      <SEOHead 
+        title="Política de Cookies | Fotomorfia"
+        description="Política de cookies de Fotomorfia - Información sobre el uso de cookies en nuestro sitio web"
+        canonical="/legal/politica-cookies"
+      />
 
       <div className={styles.header}>
         <div className="container">

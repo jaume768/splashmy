@@ -1,4 +1,4 @@
-import Head from "next/head";
+import SEOHead from "../components/SEOHead";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
@@ -105,12 +105,11 @@ function LoginPage() {
 
   return (
     <RequireGuest>
-      <Head>
-        <title>Iniciar Sesión - Fotomorfia</title>
-        <meta name="description" content="Inicia sesión en Fotomorfia para acceder a tus herramientas de IA" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+      <SEOHead 
+        title="Iniciar Sesión - Fotomorfia"
+        description="Inicia sesión en Fotomorfia para acceder a tu cuenta y transformar imágenes con IA"
+        noindex={true}
+      />
 
       <div className={styles.authContainer}>
         <div className={styles.authCard}>

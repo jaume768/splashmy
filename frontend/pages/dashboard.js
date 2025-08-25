@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import Head from 'next/head';
 import { useRouter } from 'next/router';
+import SEOHead from '../components/SEOHead';
 import StyleTransferModal from '../components/styles/StyleTransferModal';
 import Notification from '../components/ui/Notification';
 import { fetchStyleCategories } from '../utils/api';
@@ -160,11 +160,11 @@ const DashboardPage = () => {
 
   return (
     <>
-      <Head>
-        <title>Panel de estilos - Fotomorfia</title>
-        <meta name="description" content="Explora todos los estilos de imágenes AI disponibles en Fotomorfia" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
+      <SEOHead 
+        title="Panel de estilos - Fotomorfia"
+        description="Explora todos los estilos de imágenes AI disponibles en Fotomorfia"
+        noindex={true}
+      />
 
       <div className={styles.dashboard}>
         <DashboardHeader title={{

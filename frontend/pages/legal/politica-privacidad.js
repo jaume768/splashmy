@@ -1,4 +1,4 @@
-import Head from 'next/head';
+import SEOHead from '@/components/SEOHead';
 import styles from '@/styles/Legal.module.css';
 
 const UPDATED_AT = '14/08/2025';
@@ -6,10 +6,11 @@ const UPDATED_AT = '14/08/2025';
 export default function PoliticaPrivacidad() {
   return (
     <>
-      <Head>
-        <title>Política de Privacidad | Fotomorfia</title>
-        <meta name="description" content="Política de privacidad de Fotomorfia" />
-      </Head>
+      <SEOHead 
+        title="Política de Privacidad | Fotomorfia"
+        description="Política de privacidad de Fotomorfia - Información sobre el tratamiento de datos personales"
+        canonical="/legal/politica-privacidad"
+      />
 
       <div className={styles.header}>
         <div className="container">

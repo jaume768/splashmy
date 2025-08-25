@@ -1,4 +1,4 @@
-import Head from 'next/head';
+import SEOHead from '@/components/SEOHead';
 import Link from 'next/link';
 import styles from '@/styles/Legal.module.css';
 
@@ -7,10 +7,11 @@ const UPDATED_AT = '14/08/2025';
 export default function AvisoLegal() {
   return (
     <>
-      <Head>
-        <title>Aviso Legal | Fotomorfia</title>
-        <meta name="description" content="Aviso legal del sitio Fotomorfia" />
-      </Head>
+      <SEOHead 
+        title="Aviso Legal | Fotomorfia"
+        description="Aviso legal del sitio Fotomorfia - Información legal sobre el uso del servicio"
+        canonical="/legal/aviso-legal"
+      />
 
       <div className={styles.header}>
         <div className="container">

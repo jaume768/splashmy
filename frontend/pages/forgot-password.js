@@ -1,4 +1,4 @@
-import Head from "next/head";
+import SEOHead from "../components/SEOHead";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import styles from "../styles/components/auth/Login.module.css";
@@ -123,14 +123,11 @@ export default function ForgotPasswordPage() {
 
   return (
     <>
-      <Head>
-        <title>Restablecer Contraseña - Fotomorfia</title>
-        <meta
-          name="description"
-          content="Recupera el acceso a tu cuenta de Fotomorfia"
-        />
-      </Head>
-
+      <SEOHead 
+        title="Restablecer Contraseña - Fotomorfia"
+        description="Restablece tu contraseña de Fotomorfia"
+        noindex={true}
+      />
       <div className={styles.authContainer}>
         <div className={styles.authCard}>
           {/* Logo */}
